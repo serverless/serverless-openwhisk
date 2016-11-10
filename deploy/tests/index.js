@@ -1,7 +1,7 @@
 'use strict';
 
 const OpenWhiskDeploy = require('../index');
-const Serverless = require('../../../../Serverless');
+const Serverless = require('serverless');
 const expect = require('chai').expect;
 const BbPromise = require('bluebird');
 const sinon = require('sinon');

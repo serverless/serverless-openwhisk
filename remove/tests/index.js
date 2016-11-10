@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const BbPromise = require('bluebird');
 const sinon = require('sinon');
 const OpenWhiskRemove = require('../');
-const Serverless = require('../../../../Serverless');
+const Serverless = require('serverless');
 
 describe('OpenWhiskRemove', () => {
   const serverless = new Serverless();

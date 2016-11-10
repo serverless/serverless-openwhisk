@@ -7,7 +7,7 @@ require('chai').use(chaiAsPromised);
 
 const sinon = require('sinon');
 const OpenWhiskCompileTriggers = require('../index');
-const Serverless = require('../../../../../Serverless');
+const Serverless = require('serverless');
 
 describe('OpenWhiskCompileTriggers', () => {
   let serverless;

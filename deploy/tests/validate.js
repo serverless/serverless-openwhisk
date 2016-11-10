@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const AwsDeploy = require('../index');
-const Serverless = require('../../../../Serverless');
+const Serverless = require('serverless');
 
 describe('#validate()', () => {
   let serverless;

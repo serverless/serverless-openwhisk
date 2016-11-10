@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const OpenWhiskRemove = require('../index');
 const ClientFactory = require('../../util/client_factory');
-const Serverless = require('../../../../Serverless');
+const Serverless = require('serverless');
 const chaiAsPromised = require('chai-as-promised');
 
 require('chai').use(chaiAsPromised);

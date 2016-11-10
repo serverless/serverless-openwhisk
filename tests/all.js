@@ -1,9 +1,9 @@
 // OpenWhisk Plugins Tests
-require('../lib/compile/triggers/tests');
-require('../lib/compile/functions/tests');
-require('../lib/deploy/tests');
-require('../lib/deploy/tests/all');
-require('../lib/invoke/tests');
-require('../lib/remove/tests');
-require('../lib/remove/tests/all');
-require('../lib/util/tests');
+require('../compile/triggers/tests');
+require('../compile/functions/tests');
+require('../deploy/tests');
+require('../deploy/tests/all');
+require('../invoke/tests');
+require('../remove/tests');
+require('../remove/tests/all');
+require('../util/tests');

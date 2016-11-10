@@ -1,7 +1,7 @@
 'use strict';
 const expect = require('chai').expect;
 const OpenWhiskDeploy = require('../index');
-const Serverless = require('../../../../Serverless');
+const Serverless = require('serverless');
 const sinon = require('sinon');
 const chaiAsPromised = require('chai-as-promised');
 const ClientFactory = require('../../util/client_factory');

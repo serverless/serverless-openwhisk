@@ -6,7 +6,7 @@ const sinon = require('sinon');
 const path = require('path');
 const os = require('os');
 const OpenWhiskInvoke = require('../');
-const Serverless = require('../../../../Serverless');
+const Serverless = require('serverless');
 const BbPromise = require('bluebird');
 
 require('chai').use(chaiAsPromised);

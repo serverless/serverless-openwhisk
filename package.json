@@ -7,7 +7,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "test"
+    "test": "istanbul cover -x '**/*.test.js' node_modules/mocha/bin/_mocha tests/all -- -R spec --recursive",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -15,11 +16,9 @@
   },
   "keywords": [
     "serverless",
-    "serverless",
     "framework",
-    "IBM",
-    "OpenWhisk",
-    "IBM"
+    "openwhisk",
+    "ibm"
   ],
   "author": "",
   "license": "MIT",
@@ -27,7 +26,12 @@
     "url": "https://github.com/serverless/serverless-ibm-openwhisk/issues"
   },
   "homepage": "https://github.com/serverless/serverless-ibm-openwhisk#readme",
-  "dependencies":{},
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "chai-as-promised": "^6.0.0",
+    "fs-extra": "^1.0.0",
+    "openwhisk": "^2.1.6"
+  },
   "devDependencies": {
     "serverless": "^1.1.0",
     "chai": "^3.5.0",
