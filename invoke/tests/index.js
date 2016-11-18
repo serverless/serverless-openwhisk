@@ -76,6 +76,30 @@ describe('OpenWhiskInvoke', () => {
       };
     });
 
+    it('it should parse data parameter as JSON if provided', () => {
+      serverless.config.servicePath = path.join(os.tmpdir(), (new Date).getTime().toString());
+      const data = {
+        testProp: 'testValue',
+      };
+      openwhiskInvoke.options.data = '{"hello": "world"}';
+
+      return openwhiskInvoke.validate().then(() => {
+        expect(openwhiskInvoke.options.data).to.deep.equal({hello: "world"});
+        openwhiskInvoke.options.data = null;
+      });
+    });
+
+    it('it should throw if file is not parsed as JSON object', () => {
+      serverless.config.servicePath = path.join(os.tmpdir(), (new Date).getTime().toString());
+      const data = {
+        testProp: 'testValue',
+      };
+      openwhiskInvoke.options.data = '{"hello": "world"';
+      expect(() => openwhiskInvoke.validate()).to.throw(Error);
+      openwhiskInvoke.options.data = '1';
+      expect(() => openwhiskInvoke.validate()).to.throw(Error);
+    });
+
     it('it should parse file if file path is provided', () => {
       serverless.config.servicePath = path.join(os.tmpdir(), (new Date).getTime().toString());
       const data = {
@@ -92,7 +116,7 @@ describe('OpenWhiskInvoke', () => {
       });
     });
 
-    it('it should throw if file is not parsed as JSON', () => {
+    it('it should throw if file is not parsed as JSON object', () => {
       serverless.config.servicePath = path.join(os.tmpdir(), (new Date).getTime().toString());
       serverless.utils.writeFileSync(path
         .join(serverless.config.servicePath, 'data.txt'), 'testing');
@@ -104,6 +128,7 @@ describe('OpenWhiskInvoke', () => {
     it('it should throw if type parameter is not valid value', () => {
       openwhiskInvoke.options.type = 'random';
       openwhiskInvoke.options.path = null;
+      openwhiskInvoke.options.data = null;
       expect(() => openwhiskInvoke.validate()).to.throw('blocking or nonblocking');
     });
 

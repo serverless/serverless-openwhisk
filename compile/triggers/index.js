@@ -6,6 +6,7 @@ class OpenWhiskCompileTriggers {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options;
+    this.provider = this.serverless.getProvider('ibm');
 
     this.hooks = {
       'before:deploy:compileEvents': this.setup.bind(this),
@@ -47,7 +48,7 @@ class OpenWhiskCompileTriggers {
     const trigger = { triggerName: name, overwrite: true };
 
     trigger.namespace = params.namespace
-      || `${this.serverless.service.defaults.namespace}`;
+      || this.serverless.service.defaults.namespace;
 
     if (params.hasOwnProperty('overwrite')) {
       trigger.overwrite = params.overwrite;

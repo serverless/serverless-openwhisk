@@ -7,6 +7,7 @@ class OpenWhiskCompileFunctions {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options;
+    this.provider = this.serverless.getProvider('ibm');
 
     this.hooks = {
       'before:deploy:compileFunctions': this.setup.bind(this),

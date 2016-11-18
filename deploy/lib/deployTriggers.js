@@ -5,6 +5,7 @@ const ClientFactory = require('../../util/client_factory');
 
 module.exports = {
   deployTrigger(trigger) {
+    console.log(trigger)
     return ClientFactory.fromWskProps().then(ow =>
       ow.triggers.create(trigger).catch(err => {
         throw new this.serverless.classes.Error(

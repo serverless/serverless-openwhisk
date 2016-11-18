@@ -14,6 +14,7 @@ class OpenWhiskInvoke {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options || {};
+    this.provider = this.serverless.getProvider('ibm');
 
     this.hooks = {
       'invoke:invoke': () => BbPromise.bind(this)
@@ -39,12 +40,23 @@ class OpenWhiskInvoke {
       this.options.data = this.serverless.utils
         .readFileSync(path.join(this.serverless.config.servicePath, this.options.path));
 
-      if (this.options.data instanceof Buffer) {
+      if (this.options.data == null || typeof this.options.data !== 'object') {
         throw new this.serverless.classes.Error(
-          'The file path provided must point to a .json file.'
+          'The file path provided must point to a JSON file with a top-level JSON object definition.'
         );
       }
+    } else if (this.options.data) {
+      try {
+        this.options.data = JSON.parse(this.options.data)
+      } catch (e) {
+        throw new this.serverless.classes.Error(
+          'Error parsing data parameter as JSON.'
+        );
+      }
+      if (this.options.data == null || typeof this.options.data !== 'object') throw new this.serverless.classes.Error('Data parameter must be a JSON object')
     }
+
+    console.log("data=", this.options.data)
 
     this.validateParamOptions();
 
