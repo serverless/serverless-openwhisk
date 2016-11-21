@@ -56,8 +56,6 @@ class OpenWhiskInvoke {
       if (this.options.data == null || typeof this.options.data !== 'object') throw new this.serverless.classes.Error('Data parameter must be a JSON object')
     }
 
-    console.log("data=", this.options.data)
-
     this.validateParamOptions();
 
     return ClientFactory.fromWskProps().then(client => {

@@ -11,6 +11,7 @@ const CompileTriggers = require('./compile/triggers/index.js');
 const Deploy = require('./deploy/index.js');
 const Invoke = require('./invoke/index.js');
 const Remove = require('./remove/index.js');
+const Logs = require('./logs/index.js');
 
 class Index {
   constructor(serverless, options) {
@@ -22,6 +23,7 @@ class Index {
     this.serverless.pluginManager.addPlugin(Remove);
     this.serverless.pluginManager.addPlugin(Invoke);
     this.serverless.pluginManager.addPlugin(Deploy);
+    this.serverless.pluginManager.addPlugin(Logs);
   }
 }
 
