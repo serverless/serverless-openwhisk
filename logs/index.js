@@ -40,6 +40,10 @@ class OpenWhiskLogs {
       this.options.filter = new RegExp(this.options.filter, 'i');
     }
 
+    if (this.options.startTime) {
+      this.options.startTime = moment(this.options.startTime)
+    }
+
     return ClientFactory.fromWskProps().then(client => {
       this.client = client;
     });
@@ -91,6 +95,16 @@ class OpenWhiskLogs {
         log.logs = log.logs.filter(logLine => logLine.match(this.options.filter))
       })
     }
+    
+    // filter those logs based upon start time
+    if (this.options.startTime) {
+      filtered.forEach(log => {
+        log.logs = log.logs.filter(logLine => {
+          const timestamp = logLine.split(" ")[0]
+          return this.options.startTime.isBefore(moment(timestamp))
+        })
+      })
+    }
       
     return BbPromise.resolve(filtered);
   }
@@ -122,7 +136,7 @@ class OpenWhiskLogs {
   }
 
   formatLogLine (logLine) {
-    const items = logLine.split(' ')
+    const items = logLine.split(' ').filter(item => item !== '')
     const format = 'YYYY-MM-DD HH:mm:ss.SSS'
     const timestamp = chalk.green(moment(items[0]).format(format))
 

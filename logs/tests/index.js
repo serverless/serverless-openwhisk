@@ -8,7 +8,8 @@ const os = require('os');
 const OpenWhiskLogs = require('../');
 const Serverless = require('serverless');
 const BbPromise = require('bluebird');
-const chalk = require('chalk')
+const chalk = require('chalk');
+const moment = require('moment');
 
 require('chai').use(chaiAsPromised);
 
@@ -168,6 +169,16 @@ describe('OpenWhiskLogs', () => {
       return openwhiskLogs.filterFunctionLogs(logs).then(logs => {
         expect(logs.length).to.be.equal(3)
         logs.forEach(log => expect(log.name).to.be.equal('new-service_first'))
+      })
+    });
+
+    it('should filter out logs lines based upon contents', () => {
+      openwhiskLogs.options.startTime = moment('2001-01-01')
+      const logs = [{name: "new-service_first", logs: ["2001-01-02 matching line", "2001-01-01 another matching line", "2000-12-31 should not match"]}]
+      return openwhiskLogs.filterFunctionLogs(logs).then(logs => {
+        expect(logs.length).to.be.equal(1)
+        expect(logs[0].logs).to.be.deep.equal(["2001-01-02 matching line"])
+        delete openwhiskLogs.options.startTime
       })
     });
 
