@@ -2,6 +2,7 @@
 
 const BbPromise = require('bluebird');
 const chalk = require('chalk');
+const moment = require('moment');
 const path = require('path');
 const ClientFactory = require('../util/client_factory');
 
@@ -44,12 +45,9 @@ class OpenWhiskLogs {
 
     const options = {
       docs: true,
-      limit: 100
+      limit: 100,
+      namespace: '_'
     };
-
-    if (functionObject.namespace) {
-      options.namespace = functionObject.namespace;
-    }
 
     return this.client.activations.list(options)
       .catch(err => {
@@ -73,18 +71,35 @@ class OpenWhiskLogs {
       return BbPromise.resolve();
     }
 
-    // NEED TO FORMAT LOG WITH COLOURS AND STDOUT/STDERR
-    logs.forEach(log => {
-      log.logs.forEach(logLine => {
-        const items = logLine.split(' ')
-        const msg = `${log.activationId} ${items[0]} ${items.slice(2).join(' ')}`
-        this.consoleLog(msg)
+    logs.filter(log => log.logs.length)
+      .reverse()
+      .map((log, idx, arr) => {
+        this.consoleLog(this.formatActivationLine(log))
+        log.logs.map(this.formatLogLine).forEach(this.consoleLog)
+        if (idx != (arr.length - 1)) {
+          this.consoleLog('')
+        }
       })
-    })
     return BbPromise.resolve();
   }
 
-  // NEED TO ADD TAIL AND OTHER PARAMETERS.
+  formatActivationLine (activation) {
+    return `${chalk.blue('activation')} (${chalk.yellow(activation.activationId)}):`
+  }
+
+  formatLogLine (logLine) {
+    const items = logLine.split(' ')
+    const format = 'YYYY-MM-DD HH:mm:ss.SSS'
+    const timestamp = chalk.green(moment(items[0]).format(format))
+
+    let contents = items.slice(2).join(' ')
+    if (items[1] === 'stderr:') {
+      contents = chalk.red(contents)
+    }
+
+    return `${timestamp} ${contents}`
+  }
+
   consoleLog(msg) {
     console.log(msg); // eslint-disable-line no-console
   }

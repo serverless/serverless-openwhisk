@@ -22,13 +22,13 @@ describe('ClientFactory', () => {
 
     it('should instantiate openwhisk client from openwhisk authentication properties', () => {
       const mockObject = {
-        apihost: 'blah.blah.com', auth: 'another_user:another_pass', namespace: 'user@user.com',
+        apihost: 'blah.blah.com', auth: 'another_user:another_pass', namespace: 'user@user.com', ignore_certs: undefined
       };
 
       sandbox.stub(Credentials, 'getWskProps', () => Promise.resolve(mockObject));
       return ClientFactory.fromWskProps().then(client => {
         expect(client.actions.options).to.deep.equal({
-          api: mockObject.apihost, api_key: mockObject.auth, namespace: mockObject.namespace,
+          api: mockObject.apihost, api_key: mockObject.auth, namespace: mockObject.namespace, ignore_certs: undefined 
         });
       });
     });

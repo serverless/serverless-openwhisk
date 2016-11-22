@@ -6,4 +6,5 @@ require('../deploy/tests/all');
 require('../invoke/tests');
 require('../remove/tests');
 require('../remove/tests/all');
+require('../logs/tests');
 require('../util/tests');

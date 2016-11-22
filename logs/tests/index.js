@@ -8,6 +8,7 @@ const os = require('os');
 const OpenWhiskLogs = require('../');
 const Serverless = require('serverless');
 const BbPromise = require('bluebird');
+const chalk = require('chalk')
 
 require('chai').use(chaiAsPromised);
 
@@ -87,7 +88,7 @@ describe('OpenWhiskLogs', () => {
         expect(activationsStub.args[0][0]).to.be.deep.equal({
           docs: true,
           limit: 100,
-          namespace: 'sample'
+          namespace: '_'
         });
       });
     }
@@ -152,7 +153,7 @@ describe('OpenWhiskLogs', () => {
       });
     });
 
-    it('should return no logs message for zero activations', () => {
+    it('should return log messages for activations', () => {
       logStub = sinon.stub(openwhiskLogs, 'consoleLog')
       const activation = { activationId: 12345, logs: [
         "2016-11-21T11:08:05.980285407Z stdout: this is the message",
@@ -160,9 +161,10 @@ describe('OpenWhiskLogs', () => {
       ]}
 
       return openwhiskLogs.showFunctionLogs([activation]).then(() => {
-        expect(logStub.calledTwice).to.be.equal(true);
-        expect(logStub.args[0][0]).to.be.deep.equal('12345 2016-11-21T11:08:05.980285407Z this is the message');
-        expect(logStub.args[1][0]).to.be.deep.equal('12345 2016-11-21T11:08:05.980285407Z this is an error');
+        expect(logStub.calledThrice).to.be.equal(true);
+        expect(logStub.args[0][0]).to.be.deep.equal(`${chalk.blue('activation')} (${chalk.yellow(12345)}):`);
+        expect(logStub.args[1][0]).to.be.deep.equal(`${chalk.green('2016-11-21 11:08:05.980')} this is the message`);
+        expect(logStub.args[2][0]).to.be.deep.equal(`${chalk.green('2016-11-21 11:08:05.980')} ${chalk.red('this is an error')}`);
       });
     });
   });
