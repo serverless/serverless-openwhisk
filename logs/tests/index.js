@@ -171,6 +171,19 @@ describe('OpenWhiskLogs', () => {
       })
     });
 
+    it('should filter out logs lines based upon contents', () => {
+      openwhiskLogs.options.filter = new RegExp('matching', 'i')
+      const logs = [{name: "new-service_first", logs: ["matching line", "another matching line", "should not match"]}, {name: "new-service_first", logs: ["does not match"]}]
+      return openwhiskLogs.filterFunctionLogs(logs).then(logs => {
+        expect(logs.length).to.be.equal(2)
+        expect(logs[0].logs).to.be.deep.equal(["matching line", "another matching line"])
+        expect(logs[1].logs).to.be.deep.equal([])
+        delete openwhiskLogs.options.filter
+      })
+    });
+
+
+
     it('should filter already seen log messages', () => {
       openwhiskLogs.previous_activations = new Set([1, 2, 3, 4, 5])
       const logs = [{activationId: 1, name: "new-service_first"}, {activationId: 5, name: "new-service_first"}, {activationId: 6, name: "new-service_first"}]

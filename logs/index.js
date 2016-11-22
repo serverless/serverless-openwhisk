@@ -36,6 +36,10 @@ class OpenWhiskLogs {
 
     this.options.interval = this.options.interval || 1000;
 
+    if (this.options.filter) {
+      this.options.filter = new RegExp(this.options.filter, 'i');
+    }
+
     return ClientFactory.fromWskProps().then(client => {
       this.client = client;
     });
@@ -77,8 +81,18 @@ class OpenWhiskLogs {
     const functionObject = this.serverless.service.getFunction(this.options.function);
     const actionName = functionObject.name || `${this.serverless.service.service}_${this.options.function}`
 
-    return BbPromise.resolve(logs.filter(log => log.name === actionName
-      && !this.previous_activations.has(log.activationId)));
+    // skip activations for other actions or that we have seen before 
+    const filtered = logs.filter(log => log.name === actionName
+      && !this.previous_activations.has(log.activationId))
+
+    // allow regexp filtering of log messages
+    if (this.options.filter) {
+      filtered.forEach(log => {
+        log.logs = log.logs.filter(logLine => logLine.match(this.options.filter))
+      })
+    }
+      
+    return BbPromise.resolve(filtered);
   }
 
   showFunctionLogs (logs) {
