@@ -11,13 +11,12 @@ class OpenWhiskLogs {
     this.serverless = serverless;
     this.options = options || {};
     this.provider = this.serverless.getProvider('ibm');
+    this.previous_activations = new Set()
 
     this.hooks = {
       'logs:logs': () => BbPromise.bind(this)
         .then(this.validate)
-        .then(this.retrieveInvocationLogs)
-        .then(this.filterFunctionLogs)
-        .then(this.showFunctionLogs)
+        .then(this.functionLogs)
     };
   }
 
@@ -35,9 +34,25 @@ class OpenWhiskLogs {
       || (this.serverless.service.defaults && this.serverless.service.defaults.region)
       || 'us-east-1';
 
+    this.options.interval = this.options.interval || 1000;
+
     return ClientFactory.fromWskProps().then(client => {
       this.client = client;
     });
+  }
+
+  functionLogs () {
+    return BbPromise.bind(this)
+        .then(this.retrieveInvocationLogs)
+        .then(this.filterFunctionLogs)
+        .then(this.showFunctionLogs)
+        .then(() => {
+          if (this.options.tail) {
+            this.timeout = setTimeout(() => {
+              this.functionLogs()
+            }, this.options.interval)
+          }
+        })
   }
 
   retrieveInvocationLogs () {
@@ -62,11 +77,12 @@ class OpenWhiskLogs {
     const functionObject = this.serverless.service.getFunction(this.options.function);
     const actionName = functionObject.name || `${this.serverless.service.service}_${this.options.function}`
 
-    return BbPromise.resolve(logs.filter(log => log.name === actionName));
+    return BbPromise.resolve(logs.filter(log => log.name === actionName
+      && !this.previous_activations.has(log.activationId)));
   }
 
   showFunctionLogs (logs) {
-    if (!logs.length) {
+    if (!this.options.tail && !logs.length) {
       this.consoleLog(`There's no log data for function "${this.options.function}" available right now…`)
       return BbPromise.resolve();
     }
@@ -74,8 +90,12 @@ class OpenWhiskLogs {
     logs.filter(log => log.logs.length)
       .reverse()
       .map((log, idx, arr) => {
+        if (this.timeout && idx === 0) console.log('')
+
+        this.previous_activations.add(log.activationId)
         this.consoleLog(this.formatActivationLine(log))
         log.logs.map(this.formatLogLine).forEach(this.consoleLog)
+
         if (idx != (arr.length - 1)) {
           this.consoleLog('')
         }

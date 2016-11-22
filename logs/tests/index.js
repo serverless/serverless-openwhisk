@@ -58,8 +58,54 @@ describe('OpenWhiskLogs', () => {
     });
   });
 
+  describe('#functionLogs', () => {
+    let clock;
+    beforeEach(() => {
+      openwhiskLogs.serverless.service.functions = {
+        first: {
+          namespace: 'sample',
+          handler: true,
+        },
+      };
+
+      openwhiskLogs.serverless.service.service = 'new-service';
+      openwhiskLogs.options = {
+        function: 'first'
+      };
+
+      clock = sinon.useFakeTimers();
+    });
+
+    afterEach(() => {
+      clock.restore();
+    });
+
+    it('should not tail logs unless option is set', () => {
+      const retrieveInvocationLogsStub = sinon
+        .stub(openwhiskLogs, 'retrieveInvocationLogs').returns(BbPromise.resolve([]));
+
+      return openwhiskLogs.functionLogs().then(() => {
+        expect(clock.timers).to.be.equal(undefined)
+        openwhiskLogs.retrieveInvocationLogs.restore();
+      });
+    })
+
+    it('should support tailing logs', () => {
+      const retrieveInvocationLogsStub = sinon
+        .stub(openwhiskLogs, 'retrieveInvocationLogs').returns(BbPromise.resolve([]));
+      openwhiskLogs.options.tail = true
+      openwhiskLogs.options.interval = 100
+
+      return openwhiskLogs.functionLogs().then(() => {
+        expect(clock.timers['1'].createdAt).to.be.equal(0)
+        expect(clock.timers['1'].delay).to.be.equal(100)
+        openwhiskLogs.retrieveInvocationLogs.restore();
+      });
+    })
+  })
+
   describe('#retrieveLogs()', () => {
-    let activationsStub;
+    let activationsStub, clock;
     beforeEach(() => {
       openwhiskLogs.serverless.service.functions = {
         first: {
@@ -74,10 +120,12 @@ describe('OpenWhiskLogs', () => {
       };
 
       openwhiskLogs.client = { activations: { list: () => {} } };
+      clock = sinon.useFakeTimers();
     });
 
     afterEach(() => {
       activationsStub.restore();
+      clock.restore();
     });
 
     it('should invoke with correct params', () => {
@@ -122,6 +170,16 @@ describe('OpenWhiskLogs', () => {
         logs.forEach(log => expect(log.name).to.be.equal('new-service_first'))
       })
     });
+
+    it('should filter already seen log messages', () => {
+      openwhiskLogs.previous_activations = new Set([1, 2, 3, 4, 5])
+      const logs = [{activationId: 1, name: "new-service_first"}, {activationId: 5, name: "new-service_first"}, {activationId: 6, name: "new-service_first"}]
+      return openwhiskLogs.filterFunctionLogs(logs).then(logs => {
+        expect(logs.length).to.be.equal(1)
+        expect(logs[0].name).to.be.equal('new-service_first')
+        expect(logs[0].activationId).to.be.equal(6)
+      })
+    });
   });
 
   describe('#showFunctionLogs()', () => {
@@ -155,6 +213,7 @@ describe('OpenWhiskLogs', () => {
 
     it('should return log messages for activations', () => {
       logStub = sinon.stub(openwhiskLogs, 'consoleLog')
+      openwhiskLogs.previous_activations = new Set()
       const activation = { activationId: 12345, logs: [
         "2016-11-21T11:08:05.980285407Z stdout: this is the message",
         "2016-11-21T11:08:05.980285407Z stderr: this is an error"
@@ -165,6 +224,8 @@ describe('OpenWhiskLogs', () => {
         expect(logStub.args[0][0]).to.be.deep.equal(`${chalk.blue('activation')} (${chalk.yellow(12345)}):`);
         expect(logStub.args[1][0]).to.be.deep.equal(`${chalk.green('2016-11-21 11:08:05.980')} this is the message`);
         expect(logStub.args[2][0]).to.be.deep.equal(`${chalk.green('2016-11-21 11:08:05.980')} ${chalk.red('this is an error')}`);
+        expect(openwhiskLogs.previous_activations.size).to.be.equal(1)
+        expect(openwhiskLogs.previous_activations.has(12345)).to.be.equal(true)
       });
     });
   });
