@@ -2,6 +2,7 @@
 
 const fs = require('fs-extra');
 const BbPromise = require('bluebird');
+const JSZip = require('jszip');
 
 class OpenWhiskCompileFunctions {
   constructor(serverless, options) {
@@ -29,6 +30,17 @@ class OpenWhiskCompileFunctions {
     const handlerFile = this.convertHandlerToPath(functionHandler);
     const readFile = BbPromise.promisify(fs.readFile);
     return readFile(handlerFile, 'utf8');
+  }
+
+  generateActionPackage(functionHandler) {
+    const handlerFile = this.convertHandlerToPath(functionHandler);
+    const readFile = BbPromise.promisify(fs.readFile);
+    return readFile(this.serverless.service.package.artifact)
+      .then(zipBuffer => JSZip.loadAsync(zipBuffer))
+      .then(zip => {
+        zip.file("package.json", JSON.stringify({main: handlerFile}))
+        return zip.generateAsync({type:"nodebuffer"}).then(buf => buf.toString('base64'))
+      })
   }
 
   compileRules(functionName, nameSpace, rules) {
@@ -102,7 +114,7 @@ class OpenWhiskCompileFunctions {
   // Parameter values will be parsed from the user's YAML definition, either as a value from
   // the function handler definition or the service provider defaults.
   compileFunction(functionName, functionObject) {
-    return this.readFunctionSource(functionObject.handler).then(code => {
+    return this.generateActionPackage(functionObject.handler).then(code => {
       const FunctionName = this.calculateFunctionName(functionName, functionObject);
       const NameSpace = this.calculateFunctionNameSpace(functionName, functionObject);
       const MemorySize = this.calculateMemorySize(functionObject);

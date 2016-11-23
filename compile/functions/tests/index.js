@@ -9,6 +9,7 @@ const sinon = require('sinon');
 const fs = require('fs-extra');
 const OpenWhiskCompileFunctions = require('../index');
 const Serverless = require('serverless');
+const JSZip = require("jszip");
 
 describe('OpenWhiskCompileFunctions', () => {
   let serverless;
@@ -89,6 +90,29 @@ describe('OpenWhiskCompileFunctions', () => {
     });
   });
 
+
+  describe('#generateActionPackage()', () => {
+    it('should read service artifact and add package.json for handler', () => {
+      openwhiskCompileFunctions.serverless.service.package.artifact = '/path/to/zip_file.zip';
+      const zip = new JSZip();
+      zip.file("handler.js", "function main() { return {}; }");
+      zip.file("package.json", '{"main": "index.js"}')
+      return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
+        sandbox.stub(fs, 'readFile', (path, cb) => {
+          expect(path).to.equal('/path/to/zip_file.zip');
+          cb(null, zipped);
+        });
+        return openwhiskCompileFunctions.generateActionPackage('handler.main').then(data => {
+          return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
+            return zip.file("package.json").async("string").then(package_json => {
+              expect(package_json).to.be.equal('{"main":"handler.js"}')
+            })
+          })
+        })
+      });
+    })
+  })
+
   describe('#compileRules()', () => {
     it('should return rules object from events manifest definition', () => {
       const functionName = 'myFunction';
@@ -126,14 +150,14 @@ describe('OpenWhiskCompileFunctions', () => {
         overwrite: true,
         rules: {},
         action: {
-          exec: { kind: 'nodejs', code: fileContents },
+          exec: { kind: 'nodejs', code: new Buffer(fileContents) },
           limits: { timeout: 60 * 1000, memory: 256 },
           parameters: [],
         },
       };
-      sandbox.stub(openwhiskCompileFunctions, 'readFunctionSource', (functionHandler) => {
+      sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionHandler) => {
         expect(functionHandler).to.equal(handler);
-        return Promise.resolve(fileContents);
+        return Promise.resolve(new Buffer(fileContents));
       });
       openwhiskCompileFunctions.serverless.service.provider.namespace = 'namespace';
       return expect(openwhiskCompileFunctions.compileFunction('functionName', {
@@ -171,16 +195,16 @@ describe('OpenWhiskCompileFunctions', () => {
           },
         },
         action: {
-          exec: { kind: runtime, code: fileContents },
+          exec: { kind: runtime, code: new Buffer(fileContents) },
           limits: { timeout: timeout * 1000, memory: mem },
           parameters: [
             { key: 'foo', value: 'bar' },
           ],
         },
       };
-      sandbox.stub(openwhiskCompileFunctions, 'readFunctionSource', (functionHandler) => {
+      sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionHandler) => {
         expect(functionHandler).to.equal(handler);
-        return Promise.resolve(fileContents);
+        return Promise.resolve(new Buffer(fileContents));
       });
       openwhiskCompileFunctions.serverless.service.defaults.namespace = 'namespace';
       return expect(
@@ -213,15 +237,16 @@ describe('OpenWhiskCompileFunctions', () => {
         overwrite: false,
         rules: {},
         action: {
-          exec: { kind: runtime, code: fileContents },
+          exec: { kind: runtime, code: new Buffer(fileContents) },
           limits: { timeout: timeout * 1000, memory: mem },
           parameters: [],
         },
       };
-      sandbox.stub(openwhiskCompileFunctions, 'readFunctionSource', (functionHandler) => {
+      sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionHandler) => {
         expect(functionHandler).to.equal(handler);
-        return Promise.resolve(fileContents);
+        return Promise.resolve(new Buffer(fileContents));
       });
+
       openwhiskCompileFunctions.serverless.service.provider = {
         memory: mem, timeout, overwrite, namespace: 'namespace', runtime,
       };
