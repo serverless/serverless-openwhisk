@@ -4,6 +4,17 @@ const BbPromise = require('bluebird');
 const ClientFactory = require('../../util/client_factory');
 
 module.exports = {
+  disableRule(ruleName) {
+    const onSuccess = ow => ow.rules.disable({ ruleName });
+    const errMsgTemplate =
+      `Failed to disable rule (${ruleName}) due to error:`;
+    const onErr = err => BbPromise.reject(
+      new this.serverless.classes.Error(`${errMsgTemplate}: ${err.message}`)
+    );
+
+    return ClientFactory.fromWskProps().then(onSuccess).catch(onErr);
+  },
+
   removeRule(ruleName) {
     const onSuccess = ow => ow.rules.delete({ ruleName });
     const errMsgTemplate =
@@ -24,7 +35,8 @@ module.exports = {
       .map(f => f.map(i => Object.keys(i)[0]));
 
     return BbPromise.all(
-      [].concat.apply([], allRules).map(r => this.removeRule(r))
+      [].concat.apply([], allRules)
+        .map(r => this.disableRule(r).then(() => this.removeRule(r)))
     );
   },
 };

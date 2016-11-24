@@ -37,6 +37,7 @@ describe('OpenWhiskRemove', () => {
   describe('#removeRules()', () => {
     it('should call removeRule for each rule', () => {
       const stub = sandbox.stub(openwhiskRemove, 'removeRule', () => Promise.resolve());
+      const disableStub = sandbox.stub(openwhiskRemove, 'disableRule', () => Promise.resolve());
       const functions = {
         first: { events: [mockRuleObject] },
         second: { events: [mockRuleObject] },
@@ -49,9 +50,40 @@ describe('OpenWhiskRemove', () => {
       return openwhiskRemove.removeRules().then(() => {
         expect(stub.calledTwice).to.be.equal(true);
         expect(stub.calledWith('myRule')).to.be.equal(true);
+        expect(disableStub.calledTwice).to.be.equal(true);
+        expect(disableStub.calledWith('myRule')).to.be.equal(true);
+        expect(disableStub.calledBefore(stub)).to.be.equal(true);
       });
     });
   });
+
+  describe('#disableRule()', () => {
+    it('should disable rule in openwhisk', () => {
+      sandbox.stub(ClientFactory, 'fromWskProps', () => {
+        const stub = params => {
+          expect(params).to.be.deep.equal({
+            ruleName: 'myRule',
+          });
+          return Promise.resolve();
+        };
+
+        return Promise.resolve({ rules: { disable: stub } });
+      });
+      return expect(openwhiskRemove.disableRule('myRule'))
+        .to.eventually.be.resolved;
+    });
+
+    it('should reject when function handler fails to be disabled with error message', () => {
+      const err = { message: 'some reason' };
+      sandbox.stub(ClientFactory, 'fromWskProps', () => Promise.resolve(
+        { rules: { disable: () => Promise.reject(err) } }
+      ));
+      return expect(openwhiskRemove.disableRule('myRule'))
+        .to.eventually.be.rejectedWith(
+          new RegExp(`myRule.*${err.message}`)
+        );
+    });
+  })
 
   describe('#removeRule()', () => {
     it('should remove rule handler from openwhisk', () => {
