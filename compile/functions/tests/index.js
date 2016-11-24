@@ -102,7 +102,29 @@ describe('OpenWhiskCompileFunctions', () => {
           expect(path).to.equal('/path/to/zip_file.zip');
           cb(null, zipped);
         });
-        return openwhiskCompileFunctions.generateActionPackage('handler.main').then(data => {
+        return openwhiskCompileFunctions.generateActionPackage({handler: 'handler.main'}).then(data => {
+          return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
+            return zip.file("package.json").async("string").then(package_json => {
+              expect(package_json).to.be.equal('{"main":"handler.js"}')
+            })
+          })
+        })
+      });
+    })
+  
+    it('should handle service artifact for individual function handler', () => {
+      const functionObj = {handler: 'handler.main', artifact: '/path/to/zip_file.zip'}
+      openwhiskCompileFunctions.serverless.service.package.individually = true;
+
+      const zip = new JSZip();
+      zip.file("handler.js", "function main() { return {}; }");
+      zip.file("package.json", '{"main": "index.js"}')
+      return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
+        sandbox.stub(fs, 'readFile', (path, cb) => {
+          expect(path).to.equal('/path/to/zip_file.zip');
+          cb(null, zipped);
+        });
+        return openwhiskCompileFunctions.generateActionPackage(functionObj).then(data => {
           return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
             return zip.file("package.json").async("string").then(package_json => {
               expect(package_json).to.be.equal('{"main":"handler.js"}')
@@ -155,8 +177,8 @@ describe('OpenWhiskCompileFunctions', () => {
           parameters: [],
         },
       };
-      sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionHandler) => {
-        expect(functionHandler).to.equal(handler);
+      sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionObj) => {
+        expect(functionObj.handler).to.equal(handler);
         return Promise.resolve(new Buffer(fileContents));
       });
       openwhiskCompileFunctions.serverless.service.provider.namespace = 'namespace';
@@ -202,8 +224,8 @@ describe('OpenWhiskCompileFunctions', () => {
           ],
         },
       };
-      sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionHandler) => {
-        expect(functionHandler).to.equal(handler);
+      sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionObj) => {
+        expect(functionObj.handler).to.equal(handler);
         return Promise.resolve(new Buffer(fileContents));
       });
       openwhiskCompileFunctions.serverless.service.defaults.namespace = 'namespace';
@@ -242,8 +264,8 @@ describe('OpenWhiskCompileFunctions', () => {
           parameters: [],
         },
       };
-      sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionHandler) => {
-        expect(functionHandler).to.equal(handler);
+      sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionObj) => {
+        expect(functionObj.handler).to.equal(handler);
         return Promise.resolve(new Buffer(fileContents));
       });
 

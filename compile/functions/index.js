@@ -32,15 +32,24 @@ class OpenWhiskCompileFunctions {
     return readFile(handlerFile, 'utf8');
   }
 
-  generateActionPackage(functionHandler) {
-    const handlerFile = this.convertHandlerToPath(functionHandler);
+  getArtifactPath(functionObject) {
+    return this.serverless.service.package.individually ? 
+      functionObject.artifact : this.serverless.service.package.artifact;
+  }
+
+  getArtifactZip(functionObject) {
+    const artifactPath = this.getArtifactPath(functionObject)
     const readFile = BbPromise.promisify(fs.readFile);
-    return readFile(this.serverless.service.package.artifact)
-      .then(zipBuffer => JSZip.loadAsync(zipBuffer))
-      .then(zip => {
-        zip.file("package.json", JSON.stringify({main: handlerFile}))
-        return zip.generateAsync({type:"nodebuffer"}).then(buf => buf.toString('base64'))
-      })
+    return readFile(artifactPath).then(zipBuffer => JSZip.loadAsync(zipBuffer))
+  }
+
+  generateActionPackage(functionObject) {
+    const handlerFile = this.convertHandlerToPath(functionObject.handler);
+
+    return this.getArtifactZip(functionObject).then(zip => {
+      zip.file("package.json", JSON.stringify({main: handlerFile}))
+      return zip.generateAsync({type:"nodebuffer"})
+    }).then(buf => buf.toString('base64'))
   }
 
   compileRules(functionName, nameSpace, rules) {
@@ -114,7 +123,7 @@ class OpenWhiskCompileFunctions {
   // Parameter values will be parsed from the user's YAML definition, either as a value from
   // the function handler definition or the service provider defaults.
   compileFunction(functionName, functionObject) {
-    return this.generateActionPackage(functionObject.handler).then(code => {
+    return this.generateActionPackage(functionObject).then(code => {
       const FunctionName = this.calculateFunctionName(functionName, functionObject);
       const NameSpace = this.calculateFunctionNameSpace(functionName, functionObject);
       const MemorySize = this.calculateMemorySize(functionObject);
