@@ -5,7 +5,6 @@ const OpenWhiskDeploy = require('../index');
 const Serverless = require('serverless');
 const sinon = require('sinon');
 const chaiAsPromised = require('chai-as-promised');
-const ClientFactory = require('../../util/client_factory');
 
 require('chai').use(chaiAsPromised);
 
@@ -36,6 +35,7 @@ describe('deployFeeds', () => {
       apihost: 'openwhisk.org',
       auth: 'user:pass',
     };
+    openwhiskDeploy.provider = { client: () => {} }
   });
 
   afterEach(() => {
@@ -59,7 +59,7 @@ describe('deployFeeds', () => {
 
   describe('#deployFeed()', () => {
     it('should deploy feed to openwhisk', () => {
-      sandbox.stub(ClientFactory, 'fromWskProps', () => {
+      sandbox.stub(openwhiskDeploy.provider, 'client', () => {
         const create = params => {
           expect(params).to.be.deep.equal(mockFeedObject.feeds.myFeed);
           return Promise.resolve();
@@ -73,7 +73,7 @@ describe('deployFeeds', () => {
 
     it('should reject when function handler fails to deploy with error message', () => {
       const err = { message: 'some reason' };
-      sandbox.stub(ClientFactory, 'fromWskProps', () => {
+      sandbox.stub(openwhiskDeploy.provider, 'client', () => {
         const create = () => Promise.reject(err);
 
         return Promise.resolve({ feeds: { create } });

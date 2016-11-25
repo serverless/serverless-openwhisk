@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const chaiAsPromised = require('chai-as-promised');
 const OpenWhiskDeploy = require('../index');
-const Credentials = require('../../util/credentials');
+const Credentials = require('../../provider/credentials');
 const Serverless = require('serverless');
 
 require('chai').use(chaiAsPromised);

@@ -1,7 +1,6 @@
 'use strict';
 
 const BbPromise = require('bluebird');
-const ClientFactory = require('../../util/client_factory');
 
 module.exports = {
   findAllRules(functions) {
@@ -14,7 +13,7 @@ module.exports = {
   },
 
   deployRule(rule) {
-    return ClientFactory.fromWskProps().then(ow =>
+    return this.provider.client().then(ow =>
       ow.rules.create(rule).catch(err => {
         throw new this.serverless.classes.Error(
           `Failed to deploy rule (${rule.ruleName}) due to error: ${err.message}`

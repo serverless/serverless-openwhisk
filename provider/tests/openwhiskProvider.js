@@ -10,25 +10,32 @@ require('chai').use(chaiAsPromised);
 
 const OpenwhiskProvider = require('../openwhiskProvider');
 const Serverless = require('serverless');
-const Credentials = require('../../util/credentials');
+const Credentials = require('../credentials');
 
 describe('OpenwhiskProvider', () => {
   let openwhiskProvider;
   let serverless;
+  let sandbox;
+
   const options = {
     stage: 'dev',
     region: 'us-east-1',
   };
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     serverless = new Serverless(options);
     openwhiskProvider = new OpenwhiskProvider(serverless, options);
     openwhiskProvider.serverless.cli = new serverless.classes.CLI();
   });
 
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   describe('#getProviderName()', () => {
     it('should return the provider name', () => {
-      expect(OpenwhiskProvider.getProviderName()).to.equal('openwhisk');
+      expect(OpenwhiskProvider.getProviderName()).to.equal('ibm');
     });
   });
 
@@ -50,12 +57,11 @@ describe('OpenwhiskProvider', () => {
     it('should return pre-configured openwhisk client', () => {
       openwhiskProvider._client = null 
       const creds = {apihost: 'some_api', auth: 'user:pass', namespace: 'namespace'}
-      const stub = sinon.stub(Credentials, "getWskProps").returns(BbPromise.resolve(creds))
+      sandbox.stub(Credentials, "getWskProps").returns(BbPromise.resolve(creds))
       return openwhiskProvider.client().then(client => {
         expect(client.actions.options).to.be.deep.equal({api_key: creds.auth, ignore_certs: undefined, namespace: creds.namespace, api: creds.apihost})
         expect(typeof openwhiskProvider._client).to.not.equal('undefined');
       })
-      stub.restore()
     })
 
     it('should cache client instance', () => {

@@ -1,12 +1,11 @@
 'use strict';
 
 const BbPromise = require('bluebird');
-const ClientFactory = require('../../util/client_factory');
-const Credentials = require('../../util/credentials');
+const Credentials = require('../../provider/credentials.js');
 
 module.exports = {
   removeFeed(feed) {
-    return ClientFactory.fromWskProps().then(ow =>
+    return this.provider.client().then(ow =>
       ow.feeds.delete(feed).catch(err => {
         throw new this.serverless.classes.Error(
           `Failed to remove feed (${feed.feedName}) due to error: ${err.message}`

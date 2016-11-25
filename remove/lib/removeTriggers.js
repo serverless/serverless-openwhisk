@@ -1,7 +1,6 @@
 'use strict';
 
 const BbPromise = require('bluebird');
-const ClientFactory = require('../../util/client_factory');
 
 module.exports = {
   removeTriggerHandler(Trigger) {
@@ -12,7 +11,7 @@ module.exports = {
       new this.serverless.classes.Error(`${errMsgTemplate}: ${err.message}`)
     );
 
-    return ClientFactory.fromWskProps().then(onSuccess).catch(onErr);
+    return this.provider.client().then(onSuccess).catch(onErr);
   },
 
   removeTrigger(triggerName) {

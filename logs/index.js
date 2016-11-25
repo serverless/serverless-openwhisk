@@ -4,7 +4,6 @@ const BbPromise = require('bluebird');
 const chalk = require('chalk');
 const moment = require('moment');
 const path = require('path');
-const ClientFactory = require('../util/client_factory');
 
 class OpenWhiskLogs {
   constructor(serverless, options) {
@@ -44,7 +43,7 @@ class OpenWhiskLogs {
       this.options.startTime = moment(this.options.startTime)
     }
 
-    return ClientFactory.fromWskProps().then(client => {
+    return this.provider.client().then(client => {
       this.client = client;
     });
   }

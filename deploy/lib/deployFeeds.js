@@ -1,11 +1,10 @@
 'use strict';
 
 const BbPromise = require('bluebird');
-const ClientFactory = require('../../util/client_factory');
 
 module.exports = {
   deployFeed(feed) {
-    return ClientFactory.fromWskProps().then(ow =>
+    return this.provider.client().then(ow =>
       ow.feeds.create(feed).catch(err => {
         throw new this.serverless.classes.Error(
           `Failed to deploy feed (${feed.feedName}) due to error: ${err.message}`

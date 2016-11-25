@@ -3,7 +3,6 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const OpenWhiskRemove = require('../index');
-const ClientFactory = require('../../util/client_factory');
 const Serverless = require('serverless');
 const chaiAsPromised = require('chai-as-promised');
 
@@ -27,6 +26,7 @@ describe('OpenWhiskRemove', () => {
     openwhiskRemove = new OpenWhiskRemove(serverless, options);
     openwhiskRemove.serverless.cli = new serverless.classes.CLI();
     openwhiskRemove.serverless.service.service = 'helloworld';
+    openwhiskRemove.provider= {client: () => {}};
     process.env.OW_NAMESPACE = 'default';
 
     sandbox = sinon.sandbox.create();
@@ -87,7 +87,7 @@ describe('OpenWhiskRemove', () => {
 
   describe('#removeFeed()', () => {
     it('should remove feed from openwhisk', () => {
-      sandbox.stub(ClientFactory, 'fromWskProps', () => {
+      sandbox.stub(openwhiskRemove.provider, 'client', () => {
         const stub = params => {
           expect(params).to.be.deep.equal({
             feedName: 'some_feed',
@@ -106,7 +106,7 @@ describe('OpenWhiskRemove', () => {
 
     it('should reject when feed removal fails to be removed with error message', () => {
       const err = { message: 'some reason' };
-      sandbox.stub(ClientFactory, 'fromWskProps', () => Promise.resolve(
+      sandbox.stub(openwhiskRemove.provider, 'client', () => Promise.resolve(
         { feeds: { delete: () => Promise.reject(err) } }
       ));
       return expect(openwhiskRemove.removeFeed({ feedName: 'test' }))

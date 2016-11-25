@@ -3,7 +3,6 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const OpenWhiskRemove = require('../index');
-const ClientFactory = require('../../util/client_factory');
 const Serverless = require('serverless');
 const chaiAsPromised = require('chai-as-promised');
 
@@ -28,6 +27,7 @@ describe('OpenWhiskRemove', () => {
     openwhiskRemove = new OpenWhiskRemove(serverless, options);
     openwhiskRemove.serverless.cli = new serverless.classes.CLI();
     openwhiskRemove.serverless.service.service = 'helloworld';
+    openwhiskRemove.provider = {client: () => {}};
     sandbox = sinon.sandbox.create();
   });
 
@@ -63,7 +63,7 @@ describe('OpenWhiskRemove', () => {
 
   describe('#removeFunctionHandler()', () => {
     it('should remove function handler from openwhisk', () => {
-      sandbox.stub(ClientFactory, 'fromWskProps', () => {
+      sandbox.stub(openwhiskRemove.provider, 'client', () => {
         const stub = params => {
           expect(params).to.be.deep.equal({
             actionName: mockFunctionObject.actionName,
@@ -80,7 +80,7 @@ describe('OpenWhiskRemove', () => {
 
     it('should reject when function handler fails to be removed with error message', () => {
       const err = { message: 'some reason' };
-      sandbox.stub(ClientFactory, 'fromWskProps', () => Promise.resolve(
+      sandbox.stub(openwhiskRemove.provider, 'client', () => Promise.resolve(
         { actions: { delete: () => Promise.reject(err) } }
       ));
       return expect(openwhiskRemove.removeFunctionHandler(mockFunctionObject))

@@ -3,7 +3,6 @@
 const BbPromise = require('bluebird');
 const fs = require('fs');
 const CompileFunctions = require('../compile/functions/')
-const ClientFactory = require('../util/client_factory');
 
 class OpenWhiskDeployFunction {
   constructor(serverless, options) {
@@ -57,7 +56,7 @@ class OpenWhiskDeployFunction {
 
   deployFunction (data) {
     this.serverless.cli.log(`Deploying function: ${this.options.function}...`);
-    return ClientFactory.fromWskProps().then(ow =>
+    return this.provider.client().then(ow =>
       ow.actions.create(this.action).then(() => {
         this.serverless.cli.log(`Successfully deployed function: ${this.options.function}`);
       }).catch(err => {

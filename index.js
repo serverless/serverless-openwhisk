@@ -13,12 +13,14 @@ const Invoke = require('./invoke/index.js');
 const Remove = require('./remove/index.js');
 const Logs = require('./logs/index.js');
 const DeployFunction = require('./deployFunction/index.js');
+const OpenwhiskProvider = require('./provider/openwhiskProvider.js');
 
 class Index {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options;
 
+    this.serverless.pluginManager.addPlugin(OpenwhiskProvider);
     this.serverless.pluginManager.addPlugin(CompileFunctions);
     this.serverless.pluginManager.addPlugin(CompileTriggers);
     this.serverless.pluginManager.addPlugin(Remove);

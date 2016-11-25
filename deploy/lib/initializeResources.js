@@ -1,6 +1,6 @@
 'use strict';
 
-const Credentials = require('../../util/credentials');
+const Credentials = require('../../provider/credentials');
 
 // This class ensures that all the required authentication credentials
 // are available, either from the user's .wskprops file or environment

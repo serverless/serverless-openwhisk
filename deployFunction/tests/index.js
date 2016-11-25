@@ -8,7 +8,6 @@ const fs = require('fs');
 const OpenWhiskDeployFunction = require('../index');
 const Serverless = require('serverless');
 const BbPromise = require('bluebird');
-const ClientFactory = require('../../util/client_factory');
 
 require('chai').use(chaiAsPromised);
 
@@ -31,6 +30,7 @@ describe('OpenWhiskDeployFunction', () => {
       apihost: 'openwhisk.org',
       auth: 'user:pass',
     };
+    openwhiskDeployFunction.provider = {client: () => {}}
   });
 
   afterEach(() => {
@@ -105,7 +105,7 @@ describe('OpenWhiskDeployFunction', () => {
   describe('#deployFunction()', () => {
     it('should deploy function to openwhisk', () => {
       openwhiskDeployFunction.action = {actionName: "sample"}
-      sandbox.stub(ClientFactory, 'fromWskProps', () => {
+      sandbox.stub(openwhiskDeployFunction.provider, 'client', () => {
         const create = params => {
           expect(params).to.be.deep.equal(openwhiskDeployFunction.action);
           return Promise.resolve();
@@ -119,7 +119,7 @@ describe('OpenWhiskDeployFunction', () => {
 
     it('should reject when function handler fails to deploy with error message', () => {
       const err = { message: 'some reason' };
-      sandbox.stub(ClientFactory, 'fromWskProps', () => {
+      sandbox.stub(openwhiskDeployFunction.provider, 'client', () => {
         const create = () => Promise.reject(err);
 
         return Promise.resolve({ actions: { create } });

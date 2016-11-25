@@ -23,6 +23,8 @@ describe('OpenWhiskInvoke', () => {
   const openwhiskInvoke = new OpenWhiskInvoke(serverless, options);
 
   beforeEach(() => {
+
+    openwhiskInvoke.provider = {client: () => Promise.resolve({})}
     sandbox = sinon.sandbox.create();
   });
 

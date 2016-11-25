@@ -3,7 +3,6 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const OpenWhiskRemove = require('../index');
-const ClientFactory = require('../../util/client_factory');
 const Serverless = require('serverless');
 const chaiAsPromised = require('chai-as-promised');
 
@@ -27,6 +26,7 @@ describe('OpenWhiskRemove', () => {
     openwhiskRemove = new OpenWhiskRemove(serverless, options);
     openwhiskRemove.serverless.cli = new serverless.classes.CLI();
     openwhiskRemove.serverless.service.service = 'helloworld';
+    openwhiskRemove.provider = {client: () => {}};
     sandbox = sinon.sandbox.create();
   });
 
@@ -59,7 +59,7 @@ describe('OpenWhiskRemove', () => {
 
   describe('#disableRule()', () => {
     it('should disable rule in openwhisk', () => {
-      sandbox.stub(ClientFactory, 'fromWskProps', () => {
+      sandbox.stub(openwhiskRemove.provider, 'client', () => {
         const stub = params => {
           expect(params).to.be.deep.equal({
             ruleName: 'myRule',
@@ -75,7 +75,7 @@ describe('OpenWhiskRemove', () => {
 
     it('should reject when function handler fails to be disabled with error message', () => {
       const err = { message: 'some reason' };
-      sandbox.stub(ClientFactory, 'fromWskProps', () => Promise.resolve(
+      sandbox.stub(openwhiskRemove.provider, 'client', () => Promise.resolve(
         { rules: { disable: () => Promise.reject(err) } }
       ));
       return expect(openwhiskRemove.disableRule('myRule'))
@@ -87,7 +87,7 @@ describe('OpenWhiskRemove', () => {
 
   describe('#removeRule()', () => {
     it('should remove rule handler from openwhisk', () => {
-      sandbox.stub(ClientFactory, 'fromWskProps', () => {
+      sandbox.stub(openwhiskRemove.provider, 'client', () => {
         const stub = params => {
           expect(params).to.be.deep.equal({
             ruleName: 'myRule',
@@ -103,7 +103,7 @@ describe('OpenWhiskRemove', () => {
 
     it('should reject when function handler fails to be removed with error message', () => {
       const err = { message: 'some reason' };
-      sandbox.stub(ClientFactory, 'fromWskProps', () => Promise.resolve(
+      sandbox.stub(openwhiskRemove.provider, 'client', () => Promise.resolve(
         { rules: { delete: () => Promise.reject(err) } }
       ));
       return expect(openwhiskRemove.removeRule('myRule'))

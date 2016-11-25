@@ -3,7 +3,6 @@
 const BbPromise = require('bluebird');
 const chalk = require('chalk');
 const path = require('path');
-const ClientFactory = require('../util/client_factory');
 
 const CmdLineParamsOptions = {
   type: ['blocking', 'nonblocking'],
@@ -58,7 +57,7 @@ class OpenWhiskInvoke {
 
     this.validateParamOptions();
 
-    return ClientFactory.fromWskProps().then(client => {
+    return this.provider.client().then(client => {
       this.client = client;
     });
   }

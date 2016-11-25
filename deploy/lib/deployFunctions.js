@@ -1,11 +1,10 @@
 'use strict';
 
 const BbPromise = require('bluebird');
-const ClientFactory = require('../../util/client_factory');
 
 module.exports = {
   deployFunctionHandler(functionHandler) {
-    return ClientFactory.fromWskProps().then(ow =>
+    return this.provider.client().then(ow =>
       ow.actions.create(functionHandler).catch(err => {
         throw new this.serverless.classes.Error(
           `Failed to deploy function (${functionHandler.actionName}) due to error: ${err.message}`

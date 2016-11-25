@@ -1,9 +1,9 @@
 const BbPromise = require('bluebird');
 const openwhisk = require('openwhisk')
-const Credentials = require('../util/credentials');
+const Credentials = require('./credentials');
 
 const constants = {
-  providerName: 'openwhisk',
+  providerName: 'ibm',
 };
 
 const credentials = ['apihost', 'auth', 'namespace'];
