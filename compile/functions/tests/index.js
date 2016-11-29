@@ -135,32 +135,6 @@ describe('OpenWhiskCompileFunctions', () => {
     })
   })
 
-  describe('#compileRules()', () => {
-    it('should return rules object from events manifest definition', () => {
-      const functionName = 'myFunction';
-      const nameSpace = 'myNamespace';
-      const params = [{ myRule: 'myTrigger' }, { anotherRule: 'anotherTrigger' }];
-      const result = {
-        myRule: {
-          ruleName: 'myRule',
-          action: 'myFunction',
-          trigger: 'myTrigger',
-          namespace: 'myNamespace',
-          overwrite: true,
-        },
-        anotherRule: {
-          ruleName: 'anotherRule',
-          action: 'myFunction',
-          trigger: 'anotherTrigger',
-          namespace: 'myNamespace',
-          overwrite: true,
-        },
-      };
-      expect(openwhiskCompileFunctions.compileRules(functionName, nameSpace, params))
-        .to.deep.equal(result);
-    });
-  });
-
   describe('#compileFunction()', () => {
     it('should return default function instance for handler', () => {
       const fileContents = 'some file contents';
@@ -170,7 +144,6 @@ describe('OpenWhiskCompileFunctions', () => {
         actionName: 'serviceName_functionName',
         namespace: 'namespace',
         overwrite: true,
-        rules: {},
         action: {
           exec: { kind: 'nodejs', code: new Buffer(fileContents) },
           limits: { timeout: 60 * 1000, memory: 256 },
@@ -196,9 +169,6 @@ describe('OpenWhiskCompileFunctions', () => {
       const timeout = 10;
       const runtime = 'runtime';
       const overwrite = false;
-      const rules = [
-        { rule_name: 'trigger_name' },
-      ];
       const parameters = {
         foo: 'bar',
       };
@@ -207,15 +177,6 @@ describe('OpenWhiskCompileFunctions', () => {
         actionName: name,
         namespace: 'testing_namespace',
         overwrite: false,
-        rules: {
-          rule_name: {
-            action: name,
-            namespace: 'testing_namespace',
-            ruleName: 'rule_name',
-            trigger: 'trigger_name',
-            overwrite: true,
-          },
-        },
         action: {
           exec: { kind: runtime, code: new Buffer(fileContents) },
           limits: { timeout: timeout * 1000, memory: mem },
@@ -236,7 +197,6 @@ describe('OpenWhiskCompileFunctions', () => {
           timeout,
           memory: mem,
           overwrite,
-          events: rules,
           runtime,
           handler,
           parameters,
@@ -257,7 +217,6 @@ describe('OpenWhiskCompileFunctions', () => {
         actionName: name,
         namespace: 'testing_namespace',
         overwrite: false,
-        rules: {},
         action: {
           exec: { kind: runtime, code: new Buffer(fileContents) },
           limits: { timeout: timeout * 1000, memory: mem },

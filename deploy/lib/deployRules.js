@@ -3,18 +3,9 @@
 const BbPromise = require('bluebird');
 
 module.exports = {
-  findAllRules(functions) {
-    const allRules = Object.keys(functions).reduce((list, f) => {
-      const functionRules = functions[f].rules;
-      Object.keys(functionRules).forEach(r => list.push(functionRules[r]));
-      return list;
-    }, []);
-    return allRules;
-  },
-
   deployRule(rule) {
     return this.provider.client().then(ow =>
-      ow.rules.create(rule).catch(err => {
+      this.disableRule(rule).then(rule => ow.rules.create(rule)).catch(err => {
         throw new this.serverless.classes.Error(
           `Failed to deploy rule (${rule.ruleName}) due to error: ${err.message}`
         );
@@ -22,9 +13,17 @@ module.exports = {
     );
   },
 
+  disableRule(rule) {
+    return new Promise((resolve, reject) => {
+      this.provider.client().then(ow =>
+          ow.rules.disable(rule).then(() => resolve(rule)).catch(() => resolve(rule))
+      );
+    })
+  },
+
   deployRules() {
     this.serverless.cli.log('Deploying Rules...');
-    const actions = this.serverless.service.actions;
-    return BbPromise.all(this.findAllRules(actions).map(r => this.deployRule(r)));
+    const rules = this.serverless.service.rules;
+    return BbPromise.all(Object.keys(rules).map(t => this.deployRule(rules[t])));
   },
 };

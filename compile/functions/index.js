@@ -52,20 +52,6 @@ class OpenWhiskCompileFunctions {
     }).then(buf => buf.toString('base64'))
   }
 
-  compileRules(functionName, nameSpace, rules) {
-    return rules.reduce((prev, rule) => {
-      const ruleName = Object.keys(rule)[0];
-      prev[ruleName] = { // eslint-disable-line no-param-reassign
-        ruleName,
-        action: functionName,
-        namespace: nameSpace,
-        trigger: rule[ruleName],
-        overwrite: true,
-      };
-      return prev;
-    }, {});
-  }
-
   calculateFunctionName(functionName, functionObject) {
     return functionObject.name || `${this.serverless.service.service}_${functionName}`;
   }
@@ -105,7 +91,6 @@ class OpenWhiskCompileFunctions {
       actionName: params.FunctionName,
       namespace: params.NameSpace,
       overwrite: params.Overwrite,
-      rules: params.Rules,
       action: {
         exec: { kind: params.Runtime, code: params.code },
         limits: { timeout: params.Timeout * 1000, memory: params.MemorySize },
@@ -131,16 +116,12 @@ class OpenWhiskCompileFunctions {
       const Runtime = this.calculateRuntime(functionObject);
       const Overwrite = this.calculateOverwrite(functionObject);
 
-      // optional rules parameter
-      const Rules = this.compileRules(FunctionName, NameSpace, functionObject.events || []);
-
       // optional action parameters
       const Parameters = Object.keys(functionObject.parameters || {})
         .map(key => ({ key, value: functionObject.parameters[key] }));
 
       return this.compileFunctionAction(
-        { FunctionName, NameSpace, Overwrite, Rules,
-          Runtime, code, Timeout, MemorySize, Parameters }
+        { FunctionName, NameSpace, Overwrite, Runtime, code, Timeout, MemorySize, Parameters }
       );
     });
   }

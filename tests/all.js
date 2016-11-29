@@ -1,5 +1,6 @@
 // OpenWhisk Plugins Tests
 require('../compile/triggers/tests');
+require('../compile/rules/tests');
 require('../compile/functions/tests');
 require('../deploy/tests');
 require('../deploy/tests/all');

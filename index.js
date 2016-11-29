@@ -8,6 +8,7 @@ whole provider implementation.
 
 const CompileFunctions = require('./compile/functions/index.js');
 const CompileTriggers = require('./compile/triggers/index.js');
+const CompileRules = require('./compile/rules/index.js');
 const Deploy = require('./deploy/index.js');
 const Invoke = require('./invoke/index.js');
 const Remove = require('./remove/index.js');
@@ -22,6 +23,7 @@ class Index {
 
     this.serverless.pluginManager.addPlugin(OpenwhiskProvider);
     this.serverless.pluginManager.addPlugin(CompileFunctions);
+    this.serverless.pluginManager.addPlugin(CompileRules);
     this.serverless.pluginManager.addPlugin(CompileTriggers);
     this.serverless.pluginManager.addPlugin(Remove);
     this.serverless.pluginManager.addPlugin(Invoke);

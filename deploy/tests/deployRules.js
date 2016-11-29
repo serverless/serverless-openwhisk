@@ -52,7 +52,7 @@ describe('deployRules', () => {
           return Promise.resolve();
         };
 
-        return Promise.resolve({ rules: { create } });
+        return Promise.resolve({ rules: { create, disable: create } });
       });
       return expect(openwhiskDeploy.deployRule(mockRuleObject.rules.myRule))
         .to.eventually.be.resolved;
@@ -63,7 +63,7 @@ describe('deployRules', () => {
       sandbox.stub(openwhiskDeploy.provider, 'client', () => {
         const create = () => Promise.reject(err);
 
-        return Promise.resolve({ rules: { create } });
+        return Promise.resolve({ rules: { create, disable: create } });
       });
       return expect(openwhiskDeploy.deployRule(mockRuleObject.rules.myRule))
         .to.eventually.be.rejectedWith(
@@ -72,4 +72,3 @@ describe('deployRules', () => {
     });
   });
 });
-

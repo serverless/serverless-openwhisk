@@ -4,7 +4,6 @@ const BbPromise = require('bluebird');
 
 module.exports = {
   deployTrigger(trigger) {
-    console.log(trigger)
     return this.provider.client().then(ow =>
       ow.triggers.create(trigger).catch(err => {
         throw new this.serverless.classes.Error(

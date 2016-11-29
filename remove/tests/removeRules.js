@@ -38,20 +38,17 @@ describe('OpenWhiskRemove', () => {
     it('should call removeRule for each rule', () => {
       const stub = sandbox.stub(openwhiskRemove, 'removeRule', () => Promise.resolve());
       const disableStub = sandbox.stub(openwhiskRemove, 'disableRule', () => Promise.resolve());
-      const functions = {
-        first: { events: [mockRuleObject] },
-        second: { events: [mockRuleObject] },
-      };
       sandbox.stub(
-        openwhiskRemove.serverless.service, 'getAllFunctions', () => Object.keys(functions)
+        openwhiskRemove, 'getRules', () => ["first", "second"]
       );
-      sandbox.stub(openwhiskRemove.serverless.service, 'getFunction', f => functions[f]);
 
       return openwhiskRemove.removeRules().then(() => {
         expect(stub.calledTwice).to.be.equal(true);
-        expect(stub.calledWith('myRule')).to.be.equal(true);
+        expect(stub.calledWith('first')).to.be.equal(true);
+        expect(stub.calledWith('second')).to.be.equal(true);
         expect(disableStub.calledTwice).to.be.equal(true);
-        expect(disableStub.calledWith('myRule')).to.be.equal(true);
+        expect(disableStub.calledWith('first')).to.be.equal(true);
+        expect(disableStub.calledWith('second')).to.be.equal(true);
         expect(disableStub.calledBefore(stub)).to.be.equal(true);
       });
     });
