@@ -5,3 +5,4 @@ require('./removeFunctions');
 require('./removeTriggers');
 require('./removeRules');
 require('./removeFeeds');
+require('./setupResources');

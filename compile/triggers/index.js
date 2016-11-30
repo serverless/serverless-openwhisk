@@ -9,7 +9,9 @@ class OpenWhiskCompileTriggers {
     this.provider = this.serverless.getProvider('ibm');
 
     this.hooks = {
-      'before:deploy:compileEvents': this.setup.bind(this),
+      'before:deploy:compileEvents': () => BbPromise.bind(this)
+        .then(this.setup)
+        .then(this.mergeEventTriggers),
       'deploy:compileEvents': this.compileTriggers.bind(this),
     };
   }
@@ -18,6 +20,40 @@ class OpenWhiskCompileTriggers {
     // This object will be used to store the Trigger resources, passed directly to
     // the OpenWhisk SDK during the deploy process.
     this.serverless.service.triggers = {};
+  }
+
+  mergeEventTriggers() {
+    const triggers = this.getEventTriggers();
+    if (!triggers.length) return;
+
+    if (!this.serverless.service.resources) {
+      this.serverless.service.resources = {};
+    }
+
+    if (!this.serverless.service.resources.triggers) {
+      this.serverless.service.resources.triggers = {};
+    }
+
+    const manifestTriggers = this.serverless.service.resources.triggers || {};
+
+    triggers.forEach(trigger => {
+      manifestTriggers[trigger] = manifestTriggers[trigger] || {}
+    })
+  }
+
+  getEventTriggers() {
+    const eventTriggers = new Set();
+
+    this.serverless.service.getAllFunctions()
+      .map(name => this.serverless.service.getFunction(name))
+      .filter(func => func.events)
+      .forEach(func => func.events.forEach(event => {
+        if (event.trigger) {
+          eventTriggers.add(event.trigger.name || event.trigger)
+        }
+      }));
+
+    return [...eventTriggers];
   }
 
   // Trigger identifiers are composed of a namespace and a name.

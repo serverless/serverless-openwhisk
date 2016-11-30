@@ -36,11 +36,9 @@ describe('OpenWhiskRemove', () => {
 
   describe('#removeRules()', () => {
     it('should call removeRule for each rule', () => {
+      openwhiskRemove.serverless.service.rules = ["first", "second"]
       const stub = sandbox.stub(openwhiskRemove, 'removeRule', () => Promise.resolve());
       const disableStub = sandbox.stub(openwhiskRemove, 'disableRule', () => Promise.resolve());
-      sandbox.stub(
-        openwhiskRemove, 'getRules', () => ["first", "second"]
-      );
 
       return openwhiskRemove.removeRules().then(() => {
         expect(stub.calledTwice).to.be.equal(true);

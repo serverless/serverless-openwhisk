@@ -37,6 +37,47 @@ describe('OpenWhiskCompileTriggers', () => {
     sandbox.restore();
   });
 
+  describe('#getEventTriggers()', () => {
+    it('should return all names for simple triggers registered on functions', () => {
+      const service = openwhiskCompileTriggers.serverless.service;
+      sandbox.stub(service, 'getAllFunctions', () => ["first", "second", "third"]);
+      const handler = name => ({events: [{trigger: "blah"}, {trigger: "foo"}]})
+      sandbox.stub(service, 'getFunction', name => handler(name));
+
+      expect(openwhiskCompileTriggers.getEventTriggers()).to.deep.equal(["blah", "foo"])
+    })
+
+    it('should return all names for complex triggers registered on functions', () => {
+      const service = openwhiskCompileTriggers.serverless.service;
+      sandbox.stub(service, 'getAllFunctions', () => ["first", "second", "third"]);
+      const handler = name => ({events: [{trigger: {name: "blah"}}, {trigger: {name: "foo"}}]})
+      sandbox.stub(service, 'getFunction', name => handler(name));
+
+      expect(openwhiskCompileTriggers.getEventTriggers()).to.deep.equal(["blah", "foo"])
+    })
+  })
+
+  describe('#mergeEventTriggers()', () => {
+    it('should set up non-existant triggers', () => {
+      openwhiskCompileTriggers.serverless.service.resources = {};
+
+      const output = {first: {}, second: {}, third: {}};
+      sandbox.stub(openwhiskCompileTriggers, 'getEventTriggers', () => ["first", "second", "third"]);
+      openwhiskCompileTriggers.mergeEventTriggers();
+      expect(openwhiskCompileTriggers.serverless.service.resources.triggers).to.deep.equal(output)
+    });
+
+    it('should ignore existing triggers', () => {
+      const triggers = {first: 1, second: 2, third: 3};
+      openwhiskCompileTriggers.serverless.service.resources = { triggers };
+
+      sandbox.stub(openwhiskCompileTriggers, 'getEventTriggers', () => ["first", "second", "third"]);
+      openwhiskCompileTriggers.mergeEventTriggers();
+      expect(openwhiskCompileTriggers.serverless.service.resources.triggers).to.deep.equal(triggers)
+    })
+
+  })
+
   describe('#compileTriggers()', () => {
     it('should throw an error if the resource section is not available', () => {
       openwhiskCompileTriggers.serverless.service.triggers = null;

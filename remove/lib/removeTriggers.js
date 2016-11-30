@@ -36,5 +36,5 @@ module.exports = {
     return BbPromise.all(
       Object.keys(resources.triggers).map(t => this.removeTrigger(t))
     );
-  },
+  }
 };
