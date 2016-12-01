@@ -48,7 +48,7 @@ describe('OpenWhiskCompileRules', () => {
     it('should return empty rules if functions has no triggers', () =>
       expect(openwhiskCompileRules.compileRules().then(() => {
         expect(openwhiskCompileRules.serverless.service.rules).to.deep.equal({});
-      })).to.eventually.resolved
+      })).to.eventually.be.fulfilled
     );
 
     it('should call compileFunctionRule and update rules for each function with events', () => {
@@ -67,7 +67,7 @@ describe('OpenWhiskCompileRules', () => {
           'ruleName': {ruleName: 'ruleName'}
         });
         expect(stub.calledThrice).to.be.equal(true);
-      })).to.eventually.be.resolved;
+      })).to.eventually.be.fulfilled;
     });
   });
 

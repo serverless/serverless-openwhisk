@@ -114,7 +114,7 @@ describe('OpenWhiskDeployFunction', () => {
         return Promise.resolve({ actions: { create } });
       });
       return expect(openwhiskDeployFunction.deployFunction())
-        .to.eventually.be.resolved;
+        .to.eventually.be.fulfilled;
     });
 
     it('should reject when function handler fails to deploy with error message', () => {

@@ -56,7 +56,7 @@ describe('deployTriggers', () => {
         return Promise.resolve({ triggers: { create } });
       });
       return expect(openwhiskDeploy.deployTrigger(mockTriggerObject.triggers.myTrigger))
-        .to.eventually.be.resolved;
+        .to.eventually.be.fulfilled;
     });
 
     it('should reject when function handler fails to deploy with error message', () => {

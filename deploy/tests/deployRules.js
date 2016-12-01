@@ -55,7 +55,7 @@ describe('deployRules', () => {
         return Promise.resolve({ rules: { create, disable: create } });
       });
       return expect(openwhiskDeploy.deployRule(mockRuleObject.rules.myRule))
-        .to.eventually.be.resolved;
+        .to.eventually.be.fulfilled;
     });
 
     it('should reject when function handler fails to deploy with error message', () => {

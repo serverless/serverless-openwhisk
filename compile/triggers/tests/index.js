@@ -86,7 +86,7 @@ describe('OpenWhiskCompileTriggers', () => {
     });
 
     it('should return empty triggers if manifest has no triggers', () =>
-      expect(openwhiskCompileTriggers.compileTriggers()).to.eventually.resolved
+      expect(openwhiskCompileTriggers.compileTriggers()).to.eventually.fulfilled
     );
 
     it('should call compileTrigger for each trigger definition', () => {
@@ -99,7 +99,7 @@ describe('OpenWhiskCompileTriggers', () => {
         Object.keys(triggers).forEach(
           key => expect(stub.calledWith(key, triggers[key])).to.be.equal(true)
         );
-      })).to.eventually.be.resolved;
+      })).to.eventually.be.fulfilled;
     });
 
     it('should update trigger definitions from manifest values', () => {
@@ -114,7 +114,7 @@ describe('OpenWhiskCompileTriggers', () => {
       return expect(openwhiskCompileTriggers.compileTriggers().then(() =>
         expect(openwhiskCompileTriggers.serverless.service.triggers)
           .to.deep.equal({ sample: expected })
-      )).to.eventually.be.resolved;
+      )).to.eventually.be.fulfilled;
     });
   });
 

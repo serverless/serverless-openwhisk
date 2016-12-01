@@ -76,18 +76,20 @@ describe('OpenWhiskRemove', () => {
         return Promise.resolve({ triggers: { delete: stub } });
       });
       return expect(openwhiskRemove.removeTriggerHandler(mockTriggerObject))
-        .to.eventually.be.resolved;
+        .to.eventually.be.fulfilled;
     });
 
-    it('should reject when function handler fails to be removed with error message', () => {
+    it('should resolve even when function handler fails to be removed', () => {
       const err = { message: 'some reason' };
       sandbox.stub(openwhiskRemove.provider, 'client', () => Promise.resolve(
         { triggers: { delete: () => Promise.reject(err) } }
       ));
-      return expect(openwhiskRemove.removeTriggerHandler(mockTriggerObject))
-        .to.eventually.be.rejectedWith(
-          new RegExp(`${mockTriggerObject.triggerName}.*${err.message}`)
-        );
+      const log = sandbox.stub(openwhiskRemove.serverless.cli, "log");
+      const result = openwhiskRemove.removeTriggerHandler(mockTriggerObject).then(() => {
+        expect(log.called).to.be.equal(true);
+        expect(log.args[0][0].match(/Failed to delete event trigger \(someTrigger\)/)).to.be.ok;
+      })
+      return expect(result).to.eventually.be.fulfilled;
     });
   });
 });

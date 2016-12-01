@@ -68,7 +68,7 @@ describe('deployFeeds', () => {
         return Promise.resolve({ feeds: { create } });
       });
       return expect(openwhiskDeploy.deployFeed(mockFeedObject.feeds.myFeed))
-        .to.eventually.be.resolved;
+        .to.eventually.be.fulfilled;
     });
 
     it('should reject when function handler fails to deploy with error message', () => {

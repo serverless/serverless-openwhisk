@@ -99,9 +99,9 @@ describe('OpenWhiskRemove', () => {
 
         return Promise.resolve({ feeds: { delete: stub } });
       });
-      return expect(openwhiskRemove.removeRule(
+      return expect(openwhiskRemove.removeFeed(
         { feedName: 'some_feed', namespace: 'test', trigger: 'myTrigger' }
-      )).to.eventually.be.resolved;
+      )).to.eventually.be.fulfilled;
     });
 
     it('should reject when feed removal fails to be removed with error message', () => {
@@ -109,10 +109,13 @@ describe('OpenWhiskRemove', () => {
       sandbox.stub(openwhiskRemove.provider, 'client', () => Promise.resolve(
         { feeds: { delete: () => Promise.reject(err) } }
       ));
-      return expect(openwhiskRemove.removeFeed({ feedName: 'test' }))
-        .to.eventually.be.rejectedWith(
-          new RegExp(`test.*${err.message}`)
-        );
+
+      const log = sandbox.stub(openwhiskRemove.serverless.cli, "log");
+      const result = openwhiskRemove.removeFeed({feedName: 'test'}).then(() => {
+        expect(log.called).to.be.equal(true);
+        expect(log.args[0][0].match(/Failed to remove feed \(test\)/)).to.be.ok;
+      })
+      return expect(result).to.eventually.be.fulfilled;
     });
   });
 });

@@ -4,14 +4,10 @@ const BbPromise = require('bluebird');
 
 module.exports = {
   removeFunctionHandler(functionHandler) {
-    const onSucess = ow => ow.actions.delete(functionHandler);
+    const onProvider = ow => ow.actions.delete(functionHandler);
     const errMsgTemplate =
       `Failed to delete function service (${functionHandler.actionName}) due to error:`;
-    const onErr = err => BbPromise.reject(
-      new this.serverless.classes.Error(`${errMsgTemplate}: ${err.message}`)
-    );
-
-    return this.provider.client().then(onSucess).catch(onErr);
+    return this.handleOperationFailure(onProvider, errMsgTemplate);
   },
 
   removeFunction(functionName) {

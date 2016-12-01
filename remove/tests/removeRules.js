@@ -65,18 +65,21 @@ describe('OpenWhiskRemove', () => {
         return Promise.resolve({ rules: { disable: stub } });
       });
       return expect(openwhiskRemove.disableRule('myRule'))
-        .to.eventually.be.resolved;
+        .to.eventually.be.fulfilled;
     });
 
-    it('should reject when function handler fails to be disabled with error message', () => {
+    it('should resolve even if function handler fails to be disabled', () => {
       const err = { message: 'some reason' };
       sandbox.stub(openwhiskRemove.provider, 'client', () => Promise.resolve(
         { rules: { disable: () => Promise.reject(err) } }
       ));
-      return expect(openwhiskRemove.disableRule('myRule'))
-        .to.eventually.be.rejectedWith(
-          new RegExp(`myRule.*${err.message}`)
-        );
+      const log = sandbox.stub(openwhiskRemove.serverless.cli, "log");
+      const result = openwhiskRemove.disableRule('myRule').then(() => {
+        expect(log.called).to.be.equal(true);
+        expect(log.args[0][0].match(/Failed to disable rule \(myRule\)/)).to.be.ok;
+      })
+      return expect(result)
+        .to.eventually.be.fulfilled;
     });
   })
 
@@ -93,18 +96,21 @@ describe('OpenWhiskRemove', () => {
         return Promise.resolve({ rules: { delete: stub } });
       });
       return expect(openwhiskRemove.removeRule('myRule'))
-        .to.eventually.be.resolved;
+        .to.eventually.be.fulfilled;
     });
 
-    it('should reject when function handler fails to be removed with error message', () => {
+    it('should resolve even if function handler fails to be removed', () => {
       const err = { message: 'some reason' };
       sandbox.stub(openwhiskRemove.provider, 'client', () => Promise.resolve(
         { rules: { delete: () => Promise.reject(err) } }
       ));
-      return expect(openwhiskRemove.removeRule('myRule'))
-        .to.eventually.be.rejectedWith(
-          new RegExp(`myRule.*${err.message}`)
-        );
+      const log = sandbox.stub(openwhiskRemove.serverless.cli, "log");
+      const result = openwhiskRemove.removeRule('myRule').then(() => {
+        expect(log.called).to.be.equal(true);
+        expect(log.args[0][0].match(/Failed to delete rule \(myRule\)/)).to.be.ok;
+      })
+      return expect(result)
+        .to.eventually.be.fulfilled;
     });
   });
 });

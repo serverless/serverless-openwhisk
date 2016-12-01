@@ -4,14 +4,11 @@ const BbPromise = require('bluebird');
 const Credentials = require('../../provider/credentials.js');
 
 module.exports = {
-  removeFeed(feed) {
-    return this.provider.client().then(ow =>
-      ow.feeds.delete(feed).catch(err => {
-        throw new this.serverless.classes.Error(
-          `Failed to remove feed (${feed.feedName}) due to error: ${err.message}`
-        );
-      })
-    );
+  removeFeed (feed) {
+    const onProvider = ow => ow.feeds.delete(feed);
+    const errMsgTemplate =
+      `Failed to remove feed (${feed.feedName}) due to error:`
+    return this.handleOperationFailure(onProvider, errMsgTemplate);
   },
 
   removeTriggerFeed(triggerName, params) {

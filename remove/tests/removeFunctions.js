@@ -75,18 +75,21 @@ describe('OpenWhiskRemove', () => {
         return Promise.resolve({ actions: { delete: stub } });
       });
       return expect(openwhiskRemove.removeFunctionHandler(mockFunctionObject))
-        .to.eventually.be.resolved;
+        .to.eventually.be.fulfilled;
     });
 
-    it('should reject when function handler fails to be removed with error message', () => {
+    it('should still resolve when function handler fails to be removed', () => {
       const err = { message: 'some reason' };
       sandbox.stub(openwhiskRemove.provider, 'client', () => Promise.resolve(
         { actions: { delete: () => Promise.reject(err) } }
       ));
-      return expect(openwhiskRemove.removeFunctionHandler(mockFunctionObject))
-        .to.eventually.be.rejectedWith(
-          new RegExp(`${mockFunctionObject.actionName}.*${err.message}`)
-        );
+
+      const log = sandbox.stub(openwhiskRemove.serverless.cli, "log");
+      const result = openwhiskRemove.removeFunctionHandler(mockFunctionObject).then(() => {
+        expect(log.called).to.be.equal(true);
+        expect(log.args[0][0].match(/Failed to delete function service \(serviceName_functionName\)/)).to.be.ok;
+      })
+      return expect(result).to.eventually.be.fulfilled;
     });
   });
 });

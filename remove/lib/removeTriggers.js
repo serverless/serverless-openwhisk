@@ -4,14 +4,10 @@ const BbPromise = require('bluebird');
 
 module.exports = {
   removeTriggerHandler(Trigger) {
-    const onSuccess = ow => ow.triggers.delete(Trigger);
-    const errMsgTemplate =
+    const onProvider = ow => ow.triggers.delete(Trigger);
+    const errMsgTemplate = 
       `Failed to delete event trigger (${Trigger.triggerName}) due to error:`;
-    const onErr = err => BbPromise.reject(
-      new this.serverless.classes.Error(`${errMsgTemplate}: ${err.message}`)
-    );
-
-    return this.provider.client().then(onSuccess).catch(onErr);
+    return this.handleOperationFailure(onProvider, errMsgTemplate);
   },
 
   removeTrigger(triggerName) {
