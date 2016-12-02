@@ -10,3 +10,4 @@ require('../provider/tests');
 require('../remove/tests');
 require('../remove/tests/all');
 require('../logs/tests');
+require('../info/tests');
