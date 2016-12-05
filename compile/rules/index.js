@@ -18,10 +18,23 @@ class OpenWhiskCompileRules {
     // This object will be used to store the Rule resources, passed directly to
     // the OpenWhisk SDK during the deploy process.
     this.serverless.service.rules = {};
+
+    if (!this.serverless.service.defaults) { 
+      this.serverless.service.defaults = {};
+    }
+
+    // Actions and Triggers referenced by Rules must used fully qualified identifiers (including namespace).
+    if (!this.serverless.service.defaults.namespace) {
+      return this.provider.props().then(props => {
+        this.serverless.service.defaults.namespace = props.namespace;
+      });
+    }
   }
 
   calculateFunctionName(functionName, functionObject) {
-    return functionObject.name || `${this.serverless.service.service}_${functionName}`;
+    const namespace = this.calculateFunctionNameSpace(functionObject);
+    const name = functionObject.name || `${this.serverless.service.service}_${functionName}`;
+    return `/${namespace}/${name}`
   }
 
   calculateFunctionNameSpace(functionObject) {
@@ -29,6 +42,18 @@ class OpenWhiskCompileRules {
       || this.serverless.service.provider.namespace
       || this.serverless.service.defaults.namespace;
   }
+
+  calculateTriggerName(triggerName) {
+    let namespace = this.serverless.service.provider.namespace
+      || this.serverless.service.defaults.namespace;
+
+    const resources = this.serverless.service.resources;
+    if (resources.triggers && resources.triggers[triggerName]) {
+      namespace = resources.triggers[triggerName].namespace || namespace;
+    }
+
+    return `/${namespace}/${triggerName}`;
+ }
 
   generateDefaultRuleName(functionName, triggerName) {
       return `${this.serverless.service.service}_${triggerName}_to_${functionName}`
@@ -49,7 +74,7 @@ class OpenWhiskCompileRules {
     const defaultRuleName = this.generateDefaultRuleName(funcName, trigger);
 
     if (typeof trigger === 'string') {
-      return { ruleName: defaultRuleName, overwrite: true, trigger, action, namespace };
+      return { ruleName: defaultRuleName, overwrite: true, trigger: this.calculateTriggerName(trigger), action, namespace };
     }
     
     if (!trigger.hasOwnProperty('rule')) {
@@ -69,7 +94,7 @@ class OpenWhiskCompileRules {
       overwrite = trigger.overwrite;
     }
 
-    return { ruleName, overwrite, trigger: trigger.name, action, namespace };
+    return { ruleName, overwrite, trigger: this.calculateTriggerName(trigger.name), action, namespace };
   }
 
   compileFunctionRules(functionName, functionObject) {

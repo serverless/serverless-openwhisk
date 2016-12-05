@@ -106,8 +106,8 @@ describe('OpenWhiskCompileRules', () => {
       const trigger = "some-trigger"
       const testing = {
         ruleName: 'my-service_some-trigger_to_action-name', 
-        action: 'my-service_action-name',
-        trigger: 'some-trigger',
+        action: '/sample_ns/my-service_action-name',
+        trigger: '/sample_ns/some-trigger',
         namespace: 'sample_ns', 
         overwrite: true
       };
@@ -122,8 +122,8 @@ describe('OpenWhiskCompileRules', () => {
       const trigger = {name: "custom_trigger_name", rule: "custom_rule_name", overwrite: false}
       const testing = {
         ruleName: 'custom_rule_name', 
-        action: 'my-service_action-name',
-        trigger: 'custom_trigger_name',
+        action: '/custom_ns/my-service_action-name',
+        trigger: '/sample_ns/custom_trigger_name',
         namespace: 'custom_ns',
         overwrite: false 
       };
