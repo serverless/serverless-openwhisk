@@ -11,16 +11,24 @@ class OpenWhiskCompileFunctions {
     this.provider = this.serverless.getProvider('ibm');
 
     this.hooks = {
+      'before:deploy:createDeploymentArtifacts': this.excludes.bind(this),
       'before:deploy:compileFunctions': this.setup.bind(this),
       'deploy:compileFunctions': this.compileFunctions.bind(this),
     };
+  }
+
+  // Ensure we don't bundle provider plugin with service artifact.
+  excludes() {
+    const exclude = this.serverless.service.package.exclude || [];
+    exclude.push("node_modules/serverless-ibm-openwhisk/**");
+    this.serverless.service.package.exclude = exclude;
   }
 
   setup() {
     // This object will be used to store the Action resources, passed directly to
     // the OpenWhisk SDK during the deploy process.
     this.serverless.service.actions = {};
-  }
+   }
 
   convertHandlerToPath(functionHandler) {
     return functionHandler.replace(/\..*$/, '.js');
