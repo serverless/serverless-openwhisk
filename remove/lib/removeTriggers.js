@@ -22,15 +22,20 @@ module.exports = {
   },
 
   removeTriggers() {
-    this.serverless.cli.log('Removing Triggers...');
     const resources = this.serverless.service.resources;
 
     if (!resources || !resources.triggers) {
       return BbPromise.resolve();
     }
 
+    const triggers = Object.keys(resources.triggers)
+
+    if (triggers.length) {
+      this.serverless.cli.log('Removing Triggers...');
+    }
+
     return BbPromise.all(
-      Object.keys(resources.triggers).map(t => this.removeTrigger(t))
+      triggers.map(t => this.removeTrigger(t))
     );
   }
 };

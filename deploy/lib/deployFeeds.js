@@ -14,13 +14,19 @@ module.exports = {
   },
 
   deployFeeds() {
-    this.serverless.cli.log('Binding Feeds To Triggers...');
-    const triggers = this.serverless.service.triggers;
-    return BbPromise.all(
-      Object.keys(triggers)
-        .map(t => triggers[t].feed)
-        .filter(f => f)
+    const feeds = this.getFeeds()
+
+    if (feeds.length) {
+      this.serverless.cli.log('Binding Feeds To Triggers...');
+    }
+
+    return BbPromise.all(feeds
         .map(feed => this.deployFeed(feed))
     );
   },
+
+  getFeeds() {
+    const triggers = this.serverless.service.triggers;
+    return Object.keys(triggers).map(t => triggers[t].feed).filter(f => f);
+  }
 };

@@ -14,12 +14,21 @@ module.exports = {
   },
 
   deployTriggers() {
-    this.serverless.cli.log('Deploying Triggers...');
-    const triggers = this.serverless.service.triggers;
+    const triggers = this.getTriggers();
+
+    if(triggers.length) {
+      this.serverless.cli.log('Deploying Triggers...');
+    }
+
     return BbPromise.all(
-      Object.keys(triggers)
-        .map(t => Object.assign({}, triggers[t], { feed: undefined }))
-        .map(t => this.deployTrigger(t))
+      triggers.map(t => this.deployTrigger(t))
     );
   },
+
+  getTriggers() {
+    const triggers = this.serverless.service.triggers;
+    const trigger = { feed: undefined };
+    return Object.keys(triggers)
+      .map(t => Object.assign({}, triggers[t], trigger));
+  }
 };

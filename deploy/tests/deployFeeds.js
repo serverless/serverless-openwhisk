@@ -55,6 +55,14 @@ describe('deployFeeds', () => {
         expect(stub.calledWith(triggerWithFeed.feed)).to.be.equal(true);
       });
     });
+    it('should not log anything for empty feeds', () => {
+      openwhiskDeploy.serverless.service.triggers = {};
+      const log = sandbox.stub(openwhiskDeploy.serverless.cli, 'log');
+      return openwhiskDeploy.deployFeeds().then(() => {
+        console.log(log.called)
+        expect(log.called).to.be.equal(false);
+      });
+    })
   });
 
   describe('#deployFeed()', () => {

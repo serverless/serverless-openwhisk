@@ -19,7 +19,9 @@ module.exports = {
   }, 
 
   removeRules() {
-    this.serverless.cli.log('Removing Rules...');
+    if (this.serverless.service.rules.length) {
+      this.serverless.cli.log('Removing Rules...');
+    }
 
     return BbPromise.all(
       this.serverless.service.rules.map(r => this.disableRule(r).then(() => this.removeRule(r)))

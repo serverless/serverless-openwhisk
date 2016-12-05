@@ -22,8 +22,15 @@ module.exports = {
   },
 
   deployRules() {
-    this.serverless.cli.log('Deploying Rules...');
-    const rules = this.serverless.service.rules;
-    return BbPromise.all(Object.keys(rules).map(t => this.deployRule(rules[t])));
+    const rules = this.getRules();
+    if (rules.length) {
+      this.serverless.cli.log('Deploying Rules...');
+    }
+    return BbPromise.all(rules.map(r => this.deployRule(r)));
   },
+
+  getRules() {
+    const rules = this.serverless.service.rules;
+    return Object.keys(this.serverless.service.rules).map(r => rules[r]);
+  }
 };

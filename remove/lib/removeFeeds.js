@@ -26,8 +26,6 @@ module.exports = {
   },
 
   removeFeeds() {
-    this.serverless.cli.log('Removing Feeds...');
-
     const resources = this.serverless.service.resources;
 
     if (!resources || !resources.triggers) {
@@ -35,11 +33,14 @@ module.exports = {
     }
 
     const triggers = resources.triggers;
+    const feeds = Object.keys(triggers).filter(t => triggers[t].feed)
+
+    if (feeds.length) {
+      this.serverless.cli.log('Removing Feeds...');
+    }
 
     return BbPromise.all(
-      Object.keys(triggers)
-        .filter(t => triggers[t].feed)
-        .map(t => this.removeTriggerFeed(t, triggers[t]))
+      feeds.map(t => this.removeTriggerFeed(t, triggers[t]))
     );
   },
 };
