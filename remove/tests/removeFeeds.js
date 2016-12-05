@@ -26,7 +26,7 @@ describe('OpenWhiskRemove', () => {
     openwhiskRemove = new OpenWhiskRemove(serverless, options);
     openwhiskRemove.serverless.cli = new serverless.classes.CLI();
     openwhiskRemove.serverless.service.service = 'helloworld';
-    openwhiskRemove.provider= {client: () => {}};
+    openwhiskRemove.provider = {props: () => {}, client: () => {}};
     process.env.OW_NAMESPACE = 'default';
 
     sandbox = sinon.sandbox.create();
@@ -59,6 +59,7 @@ describe('OpenWhiskRemove', () => {
   describe('#removeTriggerFeed()', () => {
     it('should call removeFeed with correct feed parameters', () => {
       const stub = sandbox.stub(openwhiskRemove, 'removeFeed', () => Promise.resolve());
+      sandbox.stub(openwhiskRemove.provider, 'props', () => Promise.resolve({namespace: 'default'}));
 
       const trigger = { feed: '/whisk.system/alarms/alarm', feed_parameters: { a: 1 } };
       const feed
@@ -71,6 +72,7 @@ describe('OpenWhiskRemove', () => {
     });
 
     it('should call removeFeed with custom trigger namespace', () => {
+      sandbox.stub(openwhiskRemove.provider, 'props', () => Promise.resolve({}));
       const stub = sandbox.stub(openwhiskRemove, 'removeFeed', () => Promise.resolve());
 
       const trigger

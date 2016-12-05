@@ -2,7 +2,6 @@
 
 const BbPromise = require('bluebird');
 const chalk = require('chalk');
-const Credentials = require('../provider/credentials')
 
 class OpenWhiskInfo {
   constructor(serverless, options) {
@@ -22,46 +21,52 @@ class OpenWhiskInfo {
       throw new this.serverless.classes.Error('This command can only be run inside a service.');
     }
 
-    return this.provider.client().then(client => {
+    return this.provider.props().then(props => {
+      this.props = props;
+      return this.provider.client();
+    }).then(client => {
       this.client = client;
-    });
+    })
   }
 
   info () {
     this.consoleLog(`${chalk.yellow.underline('Service Information')}`);
-    this.showServiceInfo();
-    this.showActionsInfo();
-    this.showTriggersInfo();
-    this.showRulesInfo();
-    return BbPromise.resolve();
+
+    return BbPromise.bind(this)
+      .then(this.showServiceInfo)
+      .then(this.showActionsInfo)
+      .then(this.showTriggersInfo)
+      .then(this.showRulesInfo);
   }
 
   showServiceInfo () {
-    const props = Credentials.getWskProps();
-    this.consoleLog(`platform: ${props.apihost}`);
-    this.consoleLog(`namespace: ${props.namespace}`);
-    this.consoleLog(`service: ${this.serverless.service.service}`);
+    this.consoleLog(`platform:\t${this.props.apihost}`);
+    this.consoleLog(`namespace:\t${this.props.namespace}`);
+    this.consoleLog(`service:\t${this.serverless.service.service}\n`);
   }
 
   showActionsInfo () {
     this.consoleLog(`${chalk.yellow('actions:')}`);
     return this.client.actions.list().then(actions => {
+      if (!actions.length) return console.log('**no actions deployed**\n');
       const names = actions.map(action => action.name).join('    ');
-      this.consoleLog(names)
+      this.consoleLog(names + '\n')
     })
   }
 
   showTriggersInfo () {
     this.consoleLog(`${chalk.yellow('triggers:')}`);
     return this.client.triggers.list().then(triggers => {
+      if (!triggers.length) return console.log('**no triggers deployed**\n');
       const names = triggers.map(trigger => trigger.name).join('    ');
-      this.consoleLog(names)
+      this.consoleLog(names + '\n')
     })
   }
 
   showRulesInfo () {
     this.consoleLog(`${chalk.yellow('rules:')}`);
     return this.client.rules.list().then(rules => {
+      if (!rules.length) return console.log('**no rules deployed**');
       const names = rules.map(rule => rule.name).join('    ');
       this.consoleLog(names)
     })

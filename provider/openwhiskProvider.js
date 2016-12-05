@@ -23,9 +23,18 @@ class OpenwhiskProvider {
   client() {
     if (this._client) return BbPromise.resolve(this._client)
 
-    return Credentials.getWskProps().then(this.hasValidCreds).then(wskProps => {
+    return this.props().then(this.hasValidCreds).then(wskProps => {
       this._client = openwhisk({ api: wskProps.apihost, api_key: wskProps.auth, namespace: wskProps.namespace });
       return this._client
+    })
+  }
+
+  props() {
+    if (this._props) return BbPromise.resolve(this._props)
+
+    return Credentials.getWskProps().then(wskProps => {
+      this._props = wskProps;
+      return this._props;
     })
   }
 

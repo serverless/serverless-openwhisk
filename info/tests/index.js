@@ -75,16 +75,16 @@ describe('OpenWhiskInfo', () => {
   describe('#showServiceInfo()', () => {
     it('should show service, platform and call display functions', () => {
       const log = sandbox.stub(openwhiskInfo, 'consoleLog')
-      sandbox.stub(Credentials, 'getWskProps').returns({
+      openwhiskInfo.props = {
         apihost: 'some_end_point',
         namespace: 'custom_ns'
-      })
+      };
 
       openwhiskInfo.showServiceInfo()
       expect(log.calledThrice).to.be.equal(true);
-      expect(log.args[0][0].match(/platform: some_end_point/)).to.be.ok;
-      expect(log.args[1][0].match(/namespace: custom_ns/)).to.be.ok;
-      expect(log.args[2][0].match(/service: my_service/)).to.be.ok;
+      expect(log.args[0][0].match(/platform:\tsome_end_point/)).to.be.ok;
+      expect(log.args[1][0].match(/namespace:\tcustom_ns/)).to.be.ok;
+      expect(log.args[2][0].match(/service:\tmy_service/)).to.be.ok;
     });
   });
 

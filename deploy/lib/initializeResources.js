@@ -1,7 +1,5 @@
 'use strict';
 
-const Credentials = require('../../provider/credentials');
-
 // This class ensures that all the required authentication credentials
 // are available, either from the user's .wskprops file or environment
 // parameters.
@@ -12,7 +10,7 @@ module.exports = {
     const ParamNames = ['auth', 'apihost', 'namespace'];
     const Defaults = this.serverless.service.defaults;
 
-    return Credentials.getWskProps()
+    return this.provider.props()
       .then(props => {
         Object.assign(Defaults, props);
         ParamNames.forEach(key => {

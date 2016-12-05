@@ -57,7 +57,7 @@ describe('OpenwhiskProvider', () => {
     it('should return pre-configured openwhisk client', () => {
       openwhiskProvider._client = null 
       const creds = {apihost: 'some_api', auth: 'user:pass', namespace: 'namespace'}
-      sandbox.stub(Credentials, "getWskProps").returns(BbPromise.resolve(creds))
+      sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
       return openwhiskProvider.client().then(client => {
         expect(client.actions.options).to.be.deep.equal({api_key: creds.auth, ignore_certs: undefined, namespace: creds.namespace, api: creds.apihost})
         expect(typeof openwhiskProvider._client).to.not.equal('undefined');
@@ -71,6 +71,32 @@ describe('OpenwhiskProvider', () => {
       })
     })
   })
+
+  describe('#props()', () => {
+    it('should return promise that resolves with provider credentials', () => {
+      openwhiskProvider._props = null 
+      const creds = {apihost: 'some_api', auth: 'user:pass', namespace: 'namespace'}
+      sandbox.stub(Credentials, "getWskProps").returns(BbPromise.resolve(creds))
+      return openwhiskProvider.props().then(props => {
+        expect(props).to.be.deep.equal({auth: creds.auth, namespace: creds.namespace, apihost: creds.apihost})
+        expect(typeof openwhiskProvider._props).to.not.equal('undefined');
+      })
+    });
+
+    it('should return cached provider credentials', () => {
+      openwhiskProvider._props = {} 
+      const stub = sandbox.stub(Credentials, "getWskProps")
+      return openwhiskProvider.props().then(props => {
+        expect(props).to.be.equal(openwhiskProvider._props)
+        expect(stub.called).to.be.equal(false)
+      })
+    });
+
+    it('should reject promise when getWskProps rejects', () => {
+      sandbox.stub(Credentials, "getWskProps").returns(BbPromise.reject())
+      return expect(openwhiskProvider.props()).to.eventually.be.rejected;
+    });
+  });
 
   describe('#hasValidCreds()', () => {
     it('should throw error when parameter (AUTH) is missing', () => {

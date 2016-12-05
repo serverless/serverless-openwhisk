@@ -4,7 +4,6 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const chaiAsPromised = require('chai-as-promised');
 const OpenWhiskDeploy = require('../index');
-const Credentials = require('../../provider/credentials');
 const Serverless = require('serverless');
 
 require('chai').use(chaiAsPromised);
@@ -23,6 +22,7 @@ describe('#initializeResources()', () => {
     };
     openwhiskDeploy = new OpenWhiskDeploy(serverless, options);
     openwhiskDeploy.serverless.service.defaults = {};
+    openwhiskDeploy.provider = {props: () => {}};
 
     serverless.cli = { log: () => {} };
   });
@@ -36,7 +36,7 @@ describe('#initializeResources()', () => {
       apihost: 'blah.blah.com', auth: 'another_user:another_pass', namespace: 'user@user.com',
     };
 
-    sandbox.stub(Credentials, 'getWskProps', () => Promise.resolve(mockObject));
+    sandbox.stub(openwhiskDeploy.provider, 'props', () => Promise.resolve(mockObject));
     return openwhiskDeploy.initializeResources().then(() => {
       expect(openwhiskDeploy.serverless.service.defaults).to.deep.equal(mockObject);
     });
@@ -47,7 +47,7 @@ describe('#initializeResources()', () => {
       apihost: 'blah.blah.com', namespace: 'user@user.com',
     };
 
-    sandbox.stub(Credentials, 'getWskProps', () => Promise.resolve(mockObject));
+    sandbox.stub(openwhiskDeploy.provider, 'props', () => Promise.resolve(mockObject));
     return expect(openwhiskDeploy.initializeResources()).to.be.rejectedWith(/OW_AUTH/);
   });
 
@@ -56,7 +56,7 @@ describe('#initializeResources()', () => {
       auth: 'user:pass', namespace: 'user@user.com',
     };
 
-    sandbox.stub(Credentials, 'getWskProps', () => Promise.resolve(mockObject));
+    sandbox.stub(openwhiskDeploy.provider, 'props', () => Promise.resolve(mockObject));
     return expect(openwhiskDeploy.initializeResources()).to.be.rejectedWith(/OW_APIHOST/);
   });
 
@@ -65,7 +65,7 @@ describe('#initializeResources()', () => {
       auth: 'user:pass', apihost: 'blah.blah.com',
     };
 
-    sandbox.stub(Credentials, 'getWskProps', () => Promise.resolve(mockObject));
+    sandbox.stub(openwhiskDeploy.provider, 'props', () => Promise.resolve(mockObject));
     return expect(openwhiskDeploy.initializeResources()).to.be.rejectedWith(/OW_NAMESPACE/);
   });
 });

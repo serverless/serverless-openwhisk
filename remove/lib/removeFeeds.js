@@ -1,7 +1,6 @@
 'use strict';
 
 const BbPromise = require('bluebird');
-const Credentials = require('../../provider/credentials.js');
 
 module.exports = {
   removeFeed (feed) {
@@ -12,7 +11,7 @@ module.exports = {
   },
 
   removeTriggerFeed(triggerName, params) {
-    return Credentials.getWskProps().then(props => {
+    return this.provider.props().then(props => {
       const triggerNamespace = params.namespace
         || `${props.namespace}`;
 
