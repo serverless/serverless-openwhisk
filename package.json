@@ -1,5 +1,5 @@
 {
-  "name": "serverless-ibm-openwhisk",
+  "name": "serverless-openwhisk",
   "version": "0.0.0",
   "description": "OpenWhisk support for the Serverless Framework",
   "main": "index.js",
@@ -12,20 +12,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/serverless/serverless-ibm-openwhisk.git"
+    "url": "git+https://github.com/serverless/serverless-openwhisk.git"
   },
   "keywords": [
     "serverless",
     "framework",
-    "openwhisk",
-    "ibm"
+    "openwhisk"
   ],
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/serverless/serverless-ibm-openwhisk/issues"
+    "url": "https://github.com/serverless/serverless-openwhisk/issues"
   },
-  "homepage": "https://github.com/serverless/serverless-ibm-openwhisk#readme",
+  "homepage": "https://github.com/serverless/serverless-openwhisk#readme",
   "dependencies": {
     "bluebird": "^3.4.6",
     "chalk": "^1.1.3",
