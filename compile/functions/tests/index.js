@@ -138,14 +138,14 @@ describe('OpenWhiskCompileFunctions', () => {
   describe('#compileFunction()', () => {
     it('should return default function instance for handler', () => {
       const fileContents = 'some file contents';
-      const handler = 'handler.function';
+      const handler = 'handler.some_func';
 
       const newFunction = {
         actionName: 'serviceName_functionName',
         namespace: 'namespace',
         overwrite: true,
         action: {
-          exec: { kind: 'nodejs', code: new Buffer(fileContents) },
+          exec: { main: 'some_func', kind: 'nodejs', code: new Buffer(fileContents) },
           limits: { timeout: 60 * 1000, memory: 256 },
           parameters: [],
         },
@@ -162,7 +162,7 @@ describe('OpenWhiskCompileFunctions', () => {
 
     it('should allow manifest parameters to override defaults', () => {
       const fileContents = 'some file contents';
-      const handler = 'handler.function';
+      const handler = 'handler.some_function';
       const name = 'serviceName_functionName';
       const namespace = 'testing_namespace';
       const mem = 100;
@@ -178,7 +178,7 @@ describe('OpenWhiskCompileFunctions', () => {
         namespace: 'testing_namespace',
         overwrite: false,
         action: {
-          exec: { kind: runtime, code: new Buffer(fileContents) },
+          exec: { main: 'some_function', kind: runtime, code: new Buffer(fileContents) },
           limits: { timeout: timeout * 1000, memory: mem },
           parameters: [
             { key: 'foo', value: 'bar' },
@@ -205,7 +205,7 @@ describe('OpenWhiskCompileFunctions', () => {
 
     it('should allow provider default parameters to override defaults', () => {
       const fileContents = 'some file contents';
-      const handler = 'handler.function';
+      const handler = 'handler.some_function';
       const name = 'serviceName_functionName';
       const namespace = 'testing_namespace';
       const mem = 100;
@@ -218,7 +218,7 @@ describe('OpenWhiskCompileFunctions', () => {
         namespace: 'testing_namespace',
         overwrite: false,
         action: {
-          exec: { kind: runtime, code: new Buffer(fileContents) },
+          exec: { main: 'some_function', kind: runtime, code: new Buffer(fileContents) },
           limits: { timeout: timeout * 1000, memory: mem },
           parameters: [],
         },

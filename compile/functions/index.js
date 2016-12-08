@@ -60,6 +60,10 @@ class OpenWhiskCompileFunctions {
     }).then(buf => buf.toString('base64'))
   }
 
+  calculateFunctionMain(functionObject) {
+    return functionObject.handler.split('.')[1]
+  }
+
   calculateFunctionName(functionName, functionObject) {
     return functionObject.name || `${this.serverless.service.service}_${functionName}`;
   }
@@ -100,7 +104,7 @@ class OpenWhiskCompileFunctions {
       namespace: params.NameSpace,
       overwrite: params.Overwrite,
       action: {
-        exec: { kind: params.Runtime, code: params.code },
+        exec: { main: params.Main, kind: params.Runtime, code: params.code },
         limits: { timeout: params.Timeout * 1000, memory: params.MemorySize },
         parameters: params.Parameters,
       },
@@ -123,13 +127,14 @@ class OpenWhiskCompileFunctions {
       const Timeout = this.calculateTimeout(functionObject);
       const Runtime = this.calculateRuntime(functionObject);
       const Overwrite = this.calculateOverwrite(functionObject);
+      const Main = this.calculateFunctionMain(functionObject);
 
       // optional action parameters
       const Parameters = Object.keys(functionObject.parameters || {})
         .map(key => ({ key, value: functionObject.parameters[key] }));
 
       return this.compileFunctionAction(
-        { FunctionName, NameSpace, Overwrite, Runtime, code, Timeout, MemorySize, Parameters }
+        { FunctionName, NameSpace, Main, Overwrite, Runtime, code, Timeout, MemorySize, Parameters }
       );
     });
   }
