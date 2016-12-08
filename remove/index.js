@@ -13,7 +13,7 @@ class OpenWhiskRemove {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options || {};
-    this.provider = this.serverless.getProvider('ibm');
+    this.provider = this.serverless.getProvider('openwhisk');
 
     Object.assign(this, validate, setupResources, removeFunctions, removeTriggers, removeRules, removeFeeds, util);
 

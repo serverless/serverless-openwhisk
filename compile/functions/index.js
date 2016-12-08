@@ -8,7 +8,7 @@ class OpenWhiskCompileFunctions {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options;
-    this.provider = this.serverless.getProvider('ibm');
+    this.provider = this.serverless.getProvider('openwhisk');
 
     this.hooks = {
       'before:deploy:createDeploymentArtifacts': this.excludes.bind(this),
@@ -20,7 +20,7 @@ class OpenWhiskCompileFunctions {
   // Ensure we don't bundle provider plugin with service artifact.
   excludes() {
     const exclude = this.serverless.service.package.exclude || [];
-    exclude.push("node_modules/serverless-ibm-openwhisk/**");
+    exclude.push("node_modules/serverless-openwhisk/**");
     this.serverless.service.package.exclude = exclude;
   }
 
@@ -83,7 +83,7 @@ class OpenWhiskCompileFunctions {
   }
 
   calculateRuntime(functionObject) {
-    return functionObject.runtime || this.serverless.service.provider.runtime || 'nodejs';
+    return functionObject.runtime || this.serverless.service.provider.runtime || 'nodejs:default';
   }
 
   calculateOverwrite(functionObject) {

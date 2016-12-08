@@ -3,7 +3,7 @@ const openwhisk = require('openwhisk')
 const Credentials = require('./credentials');
 
 const constants = {
-  providerName: 'ibm',
+  providerName: 'openwhisk',
 };
 
 const credentials = ['apihost', 'auth', 'namespace'];

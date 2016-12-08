@@ -145,7 +145,7 @@ describe('OpenWhiskCompileFunctions', () => {
         namespace: 'namespace',
         overwrite: true,
         action: {
-          exec: { main: 'some_func', kind: 'nodejs', code: new Buffer(fileContents) },
+          exec: { main: 'some_func', kind: 'nodejs:default', code: new Buffer(fileContents) },
           limits: { timeout: 60 * 1000, memory: 256 },
           parameters: [],
         },

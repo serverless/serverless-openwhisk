@@ -8,7 +8,7 @@ class OpenWhiskDeployFunction {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options || {};
-    this.provider = this.serverless.getProvider('ibm');
+    this.provider = this.serverless.getProvider('openwhisk');
 
     // Temporary hack until we have a better way to access existing plugins.
     const is_package_plugin = plugin => plugin.hasOwnProperty('packageFunction')

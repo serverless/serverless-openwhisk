@@ -6,7 +6,7 @@ class OpenWhiskCompileRules {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options;
-    this.provider = this.serverless.getProvider('ibm');
+    this.provider = this.serverless.getProvider('openwhisk');
 
     this.hooks = {
       'before:deploy:compileEvents': this.setup.bind(this),

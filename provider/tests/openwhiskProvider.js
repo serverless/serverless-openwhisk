@@ -35,7 +35,7 @@ describe('OpenwhiskProvider', () => {
 
   describe('#getProviderName()', () => {
     it('should return the provider name', () => {
-      expect(OpenwhiskProvider.getProviderName()).to.equal('ibm');
+      expect(OpenwhiskProvider.getProviderName()).to.equal('openwhisk');
     });
   });
 

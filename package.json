@@ -1,7 +1,7 @@
 {
   "name": "serverless-ibm-openwhisk",
   "version": "0.0.0",
-  "description": "IBM OpenWhisk support for the Serverless Framework",
+  "description": "OpenWhisk support for the Serverless Framework",
   "main": "index.js",
   "directories": {
     "test": "tests"
