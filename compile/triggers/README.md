@@ -9,8 +9,29 @@ definitions.
 
 It loops over all triggers which are defined in `serverless.yaml`.
 
-Inside the resources loop it creates corresponding OpenWhisk Triggers definition based on the settings
-(e.g. trigger properties or service provider defaults) which are provided in the `serverless.yaml` file.
+### Implicit Trigger Definition
+
+Triggers referenced from function event configuration don't have to be
+explicitly defined in the `resources` section. The plugin will set up these
+resources for creation without any further configuration.
+
+```yaml
+# serverless.yaml
+functions:
+    index:
+        handler: users.main
+        events:
+            - triggers: 
+                trigger: "myTriggerName"
+```
+
+This function handler includes a reference to a trigger that will be created
+during deployment.
+
+### Explicit Trigger Definition
+
+Specifying triggers in the `resources` section allows users to override default
+parameters used when creating triggers implicitly.
 
 The trigger will be identified by the `triggers` property identifier, using the
 namespace from service provider defaults (unless set manually using the

@@ -32,11 +32,11 @@ functions:
     index:
         handler: users.main
         events:
-            myRuleName: myTriggerName
+            - triggers: 
+                trigger: "myTriggerName"
 ```
 
-This definition will create a new Rule, called `myRuleName`, which binds the
-configured Action to the Trigger, called `myTriggerName`.
+This definition will create a new Rule, which binds the configured Action to the
+Trigger.
 
-Triggers can be defined within the `serverless.yaml` file, see the documentation
-in the [`compileTriggers` plugin](../triggers). 
+More documentation on the Rules configuration can be found in the [`compileRules` plugin](../rules). 
