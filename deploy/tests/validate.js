@@ -1,18 +1,18 @@
 'use strict';
 
 const expect = require('chai').expect;
-const AwsDeploy = require('../index');
-const Serverless = require('serverless');
+const OpenWhiskDeploy = require('../index');
 
 describe('#validate()', () => {
   let serverless;
   let openwhiskDeploy;
 
   beforeEach(() => {
-    serverless = new Serverless();
-    openwhiskDeploy = new AwsDeploy(serverless);
+    const CLI = function () { this.log = function () {};};
+    serverless = {classes: {Error, CLI}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: () => {}};
+    openwhiskDeploy = new OpenWhiskDeploy(serverless);
 
-    openwhiskDeploy.serverless.config.servicePath = true;
+    openwhiskDeploy.serverless.config = { servicePath: true };
 
     openwhiskDeploy.serverless.service.environment = {
       vars: {},

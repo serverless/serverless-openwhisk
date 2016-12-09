@@ -8,7 +8,6 @@ require('chai').use(chaiAsPromised);
 
 const sinon = require('sinon');
 const OpenWhiskCompileRules = require('../index');
-const Serverless = require('serverless');
 
 describe('OpenWhiskCompileRules', () => {
   let serverless;
@@ -16,8 +15,8 @@ describe('OpenWhiskCompileRules', () => {
   let openwhiskCompileRules;
 
   beforeEach(() => {
-    serverless = new Serverless();
     sandbox = sinon.sandbox.create();
+    serverless = {classes: {Error}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
     const options = {
       stage: 'dev',
       region: 'us-east-1',
@@ -58,9 +57,7 @@ describe('OpenWhiskCompileRules', () => {
       sandbox.stub(openwhiskCompileRules.serverless.service, 'getAllFunctions', () => ["first", "second", "third"]);
 
       const handler = name => ({events: {}})
-      sandbox.stub(
-        openwhiskCompileRules.serverless.service, 'getFunction', name => handler(name)
-      );
+      openwhiskCompileRules.serverless.service.getFunction = handler;
 
       return expect(openwhiskCompileRules.compileRules().then(() => {
         expect(openwhiskCompileRules.serverless.service.rules).to.deep.equal({
@@ -101,7 +98,7 @@ describe('OpenWhiskCompileRules', () => {
   describe('#compileRule()', () => {
     it('should define rules from trigger string', () => {
       openwhiskCompileRules.serverless.service.service = 'my-service' 
-      openwhiskCompileRules.serverless.service.provider.namespace = "sample_ns"
+      openwhiskCompileRules.serverless.service.provider = {namespace: "sample_ns"};
       const funcObj = {}
       const trigger = "some-trigger"
       const testing = {
@@ -117,7 +114,7 @@ describe('OpenWhiskCompileRules', () => {
 
     it('should define rules from trigger object', () => {
       openwhiskCompileRules.serverless.service.service = 'my-service' 
-      openwhiskCompileRules.serverless.service.provider.namespace = "sample_ns"
+      openwhiskCompileRules.serverless.service.provider = {namespace: "sample_ns"};
       const funcObj = { namespace: 'custom_ns' }
       const trigger = {name: "custom_trigger_name", rule: "custom_rule_name", overwrite: false}
       const testing = {

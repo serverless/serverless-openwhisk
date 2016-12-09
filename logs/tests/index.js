@@ -6,7 +6,6 @@ const sinon = require('sinon');
 const path = require('path');
 const os = require('os');
 const OpenWhiskLogs = require('../');
-const Serverless = require('serverless');
 const BbPromise = require('bluebird');
 const chalk = require('chalk');
 const moment = require('moment');
@@ -16,7 +15,8 @@ require('chai').use(chaiAsPromised);
 describe('OpenWhiskLogs', () => {
   let sandbox;
 
-  const serverless = new Serverless();
+  const CLI = function () { this.log = function () {};};
+  const serverless = {config: () => {}, pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => ({}), provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
   const options = {
     stage: 'dev',
     region: 'us-east-1',

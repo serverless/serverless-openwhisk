@@ -9,7 +9,6 @@ const BbPromise = require('bluebird');
 require('chai').use(chaiAsPromised);
 
 const OpenwhiskProvider = require('../openwhiskProvider');
-const Serverless = require('serverless');
 const Credentials = require('../credentials');
 
 describe('OpenwhiskProvider', () => {
@@ -24,7 +23,8 @@ describe('OpenwhiskProvider', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    serverless = new Serverless(options);
+    const CLI = function () { this.log = function () {};};
+    const serverless = {setProvider: () => {}, config: () => {}, pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => ({}), provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
     openwhiskProvider = new OpenwhiskProvider(serverless, options);
     openwhiskProvider.serverless.cli = new serverless.classes.CLI();
   });

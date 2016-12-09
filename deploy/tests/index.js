@@ -1,13 +1,13 @@
 'use strict';
 
 const OpenWhiskDeploy = require('../index');
-const Serverless = require('serverless');
 const expect = require('chai').expect;
 const BbPromise = require('bluebird');
 const sinon = require('sinon');
 
 describe('OpenWhiskDeploy', () => {
-  const serverless = new Serverless();
+  const CLI = function () { this.log = function () {};};
+  const serverless = {classes: {Error, CLI}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
   const options = {
     stage: 'dev',
     region: 'us-east-1',

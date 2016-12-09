@@ -6,15 +6,17 @@ const sinon = require('sinon');
 const path = require('path');
 const os = require('os');
 const OpenWhiskInvoke = require('../');
-const Serverless = require('serverless');
 const BbPromise = require('bluebird');
+const fs = require('fs-extra');
 
 require('chai').use(chaiAsPromised);
 
 describe('OpenWhiskInvoke', () => {
   let sandbox;
 
-  const serverless = new Serverless();
+  const CLI = function () { this.log = function () {};};
+  const serverless = {config: () => {}, pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => {}, provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
+
   const options = {
     stage: 'dev',
     region: 'us-east-1',
@@ -23,7 +25,6 @@ describe('OpenWhiskInvoke', () => {
   const openwhiskInvoke = new OpenWhiskInvoke(serverless, options);
 
   beforeEach(() => {
-
     openwhiskInvoke.provider = {client: () => Promise.resolve({})}
     sandbox = sinon.sandbox.create();
   });
@@ -76,6 +77,7 @@ describe('OpenWhiskInvoke', () => {
           handler: true,
         },
       };
+      serverless.service.getFunction = name => serverless.service.functions[name];
     });
 
     it('it should parse data parameter as JSON if provided', () => {
@@ -107,8 +109,7 @@ describe('OpenWhiskInvoke', () => {
       const data = {
         testProp: 'testValue',
       };
-      serverless.utils.writeFileSync(path
-        .join(serverless.config.servicePath, 'data.json'), JSON.stringify(data));
+      openwhiskInvoke.serverless.utils = {fileExistsSync: () => true, readFileSync: () => data};
       openwhiskInvoke.options.path = 'data.json';
 
       return openwhiskInvoke.validate().then(() => {
@@ -120,8 +121,7 @@ describe('OpenWhiskInvoke', () => {
 
     it('it should throw if file is not parsed as JSON object', () => {
       serverless.config.servicePath = path.join(os.tmpdir(), (new Date).getTime().toString());
-      serverless.utils.writeFileSync(path
-        .join(serverless.config.servicePath, 'data.txt'), 'testing');
+      openwhiskInvoke.serverless.utils = {fileExistsSync: () => true, readFileSync: () => 'testing'};
       openwhiskInvoke.options.path = 'data.txt';
 
       expect(() => openwhiskInvoke.validate()).to.throw(Error);

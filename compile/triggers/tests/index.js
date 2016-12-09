@@ -7,7 +7,6 @@ require('chai').use(chaiAsPromised);
 
 const sinon = require('sinon');
 const OpenWhiskCompileTriggers = require('../index');
-const Serverless = require('serverless');
 
 describe('OpenWhiskCompileTriggers', () => {
   let serverless;
@@ -15,8 +14,8 @@ describe('OpenWhiskCompileTriggers', () => {
   let openwhiskCompileTriggers;
 
   beforeEach(() => {
-    serverless = new Serverless();
     sandbox = sinon.sandbox.create();
+    serverless = {classes: {Error}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
     const options = {
       stage: 'dev',
       region: 'us-east-1',
@@ -40,18 +39,18 @@ describe('OpenWhiskCompileTriggers', () => {
   describe('#getEventTriggers()', () => {
     it('should return all names for simple triggers registered on functions', () => {
       const service = openwhiskCompileTriggers.serverless.service;
-      sandbox.stub(service, 'getAllFunctions', () => ["first", "second", "third"]);
+      service.getAllFunctions = () => ["first", "second", "third"];
       const handler = name => ({events: [{trigger: "blah"}, {trigger: "foo"}]})
-      sandbox.stub(service, 'getFunction', name => handler(name));
+      service.getFunction = handler;
 
       expect(openwhiskCompileTriggers.getEventTriggers()).to.deep.equal(["blah", "foo"])
     })
 
     it('should return all names for complex triggers registered on functions', () => {
       const service = openwhiskCompileTriggers.serverless.service;
-      sandbox.stub(service, 'getAllFunctions', () => ["first", "second", "third"]);
+      service.getAllFunctions = () => ["first", "second", "third"];
       const handler = name => ({events: [{trigger: {name: "blah"}}, {trigger: {name: "foo"}}]})
-      sandbox.stub(service, 'getFunction', name => handler(name));
+      service.getFunction = handler;
 
       expect(openwhiskCompileTriggers.getEventTriggers()).to.deep.equal(["blah", "foo"])
     })

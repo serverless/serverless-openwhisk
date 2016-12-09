@@ -8,7 +8,6 @@ require('chai').use(chaiAsPromised);
 const sinon = require('sinon');
 const fs = require('fs-extra');
 const OpenWhiskCompileFunctions = require('../index');
-const Serverless = require('serverless');
 const JSZip = require("jszip");
 
 describe('OpenWhiskCompileFunctions', () => {
@@ -34,12 +33,12 @@ describe('OpenWhiskCompileFunctions', () => {
   };
 
   beforeEach(() => {
-    serverless = new Serverless();
     sandbox = sinon.sandbox.create();
     const options = {
       stage: 'dev',
       region: 'us-east-1',
     };
+    serverless = {classes: {Error}, service: {}, getProvider: sandbox.spy()};
     openwhiskCompileFunctions = new OpenWhiskCompileFunctions(serverless, options);
     serverless.service.service = 'serviceName';
     serverless.service.defaults = {
@@ -93,7 +92,7 @@ describe('OpenWhiskCompileFunctions', () => {
 
   describe('#generateActionPackage()', () => {
     it('should read service artifact and add package.json for handler', () => {
-      openwhiskCompileFunctions.serverless.service.package.artifact = '/path/to/zip_file.zip';
+      openwhiskCompileFunctions.serverless.service.package = {artifact: '/path/to/zip_file.zip'};
       const zip = new JSZip();
       zip.file("handler.js", "function main() { return {}; }");
       zip.file("package.json", '{"main": "index.js"}')
@@ -114,7 +113,7 @@ describe('OpenWhiskCompileFunctions', () => {
   
     it('should handle service artifact for individual function handler', () => {
       const functionObj = {handler: 'handler.main', artifact: '/path/to/zip_file.zip'}
-      openwhiskCompileFunctions.serverless.service.package.individually = true;
+      openwhiskCompileFunctions.serverless.service.package = {individually: true};
 
       const zip = new JSZip();
       zip.file("handler.js", "function main() { return {}; }");
@@ -248,26 +247,20 @@ describe('OpenWhiskCompileFunctions', () => {
     });
 
     it('should throw an error if function definition is missing a handler', () => {
-      sandbox.stub(
-        openwhiskCompileFunctions.serverless.service, 'getAllFunctions', () => ['service_name']
-      );
+      openwhiskCompileFunctions.serverless.service.getAllFunctions = () => ['service_name'];
 
-      const f = {};
-
-      sandbox.stub(openwhiskCompileFunctions.serverless.service, 'getFunction', () => f);
+      openwhiskCompileFunctions.serverless.service.getFunction = () => ({});
 
       expect(() => openwhiskCompileFunctions.compileFunctions())
         .to.throw(Error, /Missing "handler"/);
     });
 
     it('should throw an error if unable to read function handler file', () => {
-      sandbox.stub(
-        openwhiskCompileFunctions.serverless.service, 'getAllFunctions', () => ['service_name']
-      );
+      openwhiskCompileFunctions.serverless.service.getAllFunctions = () => ['service_name'];
 
       const missing = { handler: 'missing.handler' };
 
-      sandbox.stub(openwhiskCompileFunctions.serverless.service, 'getFunction', () => missing);
+      openwhiskCompileFunctions.serverless.service.getFunction = () => missing;
 
       sandbox.stub(openwhiskCompileFunctions, 'compileFunction', () => Promise.reject());
       return expect(openwhiskCompileFunctions.compileFunctions()).to.be.rejected;
@@ -278,11 +271,8 @@ describe('OpenWhiskCompileFunctions', () => {
       const handler = function (name) {
         return { handler: `${name}.handler` };
       };
-      sandbox.stub(openwhiskCompileFunctions.serverless.service, 'getAllFunctions', () => keys);
-
-      sandbox.stub(
-        openwhiskCompileFunctions.serverless.service, 'getFunction', name => handler(name)
-      );
+      openwhiskCompileFunctions.serverless.service.getAllFunctions = () => keys;
+      openwhiskCompileFunctions.serverless.service.getFunction = name => handler(name);
 
       const mock = openwhiskResourcesMockObject;
       sandbox.stub(

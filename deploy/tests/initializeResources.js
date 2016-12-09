@@ -4,7 +4,6 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const chaiAsPromised = require('chai-as-promised');
 const OpenWhiskDeploy = require('../index');
-const Serverless = require('serverless');
 
 require('chai').use(chaiAsPromised);
 
@@ -14,8 +13,9 @@ describe('#initializeResources()', () => {
   let openwhiskDeploy;
 
   beforeEach(() => {
-    serverless = new Serverless();
     sandbox = sinon.sandbox.create();
+    const CLI = function () { this.log = function () {};};
+    serverless = {classes: {Error, CLI}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
     const options = {
       stage: 'dev',
       region: 'us-east-1',

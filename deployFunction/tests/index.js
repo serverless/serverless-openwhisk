@@ -6,7 +6,6 @@ const sinon = require('sinon');
 const path = require('path');
 const fs = require('fs');
 const OpenWhiskDeployFunction = require('../index');
-const Serverless = require('serverless');
 const BbPromise = require('bluebird');
 
 require('chai').use(chaiAsPromised);
@@ -18,7 +17,8 @@ describe('OpenWhiskDeployFunction', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    serverless = new Serverless();
+    const CLI = function () { this.log = function () {};};
+    serverless = {pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => {}, provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
     const options = {
       stage: 'dev',
       region: 'us-east-1',

@@ -3,14 +3,14 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const OpenWhiskRemove = require('../index');
-const Serverless = require('serverless');
 const chaiAsPromised = require('chai-as-promised');
 
 require('chai').use(chaiAsPromised);
 
 describe('OpenWhiskRemove', () => {
-  const serverless = new Serverless();
 
+  const CLI = function () { this.log = function () {};};
+  const serverless = {setProvider: () => {}, config: () => {}, pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => ({}), provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
   let openwhiskRemove;
   let sandbox;
 
