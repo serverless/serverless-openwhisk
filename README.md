@@ -66,8 +66,6 @@ $ serverless invoke --function my_function --data '{"name": "OpenWhisk"}'
 }
 ```
 
-
-
 ## Writing Functions
 
 Here's an `index.js` file containing an example handler function.
@@ -171,7 +169,24 @@ functions:
     runtime: 'nodejs:default'
 ```
 
+## Writing Sequences
 
+OpenWhisk supports a special type of serverless function called [sequences](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#creating-action-sequences).
+
+These functions are defined from a list of other serverless functions. Upon invocation, the platform executes each function in series. Request parameters are passed into the first function in the list. Each subsequent function call is passed the output from the previous step as input parameters. The last function's return value is returned as the response result.
+
+Here's an example of the configuration to define a sequence function, composed of three other functions.
+
+```yaml
+functions:
+  my_function:
+    sequence:
+      - parse_input
+      - do_some_algorithm
+      - construct_output
+```
+
+*Sequence functions do not have a handler file defined. If you want to refer to functions not defined in the serverless project, use the fully qualified identifier e.g. /namespace/package/action_name*
 
 ## Connecting Events
 
