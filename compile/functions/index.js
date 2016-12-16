@@ -104,11 +104,39 @@ class OpenWhiskCompileFunctions {
       namespace: params.NameSpace,
       overwrite: params.Overwrite,
       action: {
-        exec: { main: params.Main, kind: params.Runtime, code: params.code },
+        exec: params.Exec,
         limits: { timeout: params.Timeout * 1000, memory: params.MemorySize },
         parameters: params.Parameters,
       },
     };
+  }
+
+  compileExec(functionObject) {
+    if (functionObject.sequence) {
+      return this.compileSequenceExec(functionObject);
+    }
+
+    return this.compileFunctionExec(functionObject);
+  }
+
+  compileSequenceExec(functionObject) {
+    // sequence action names must be fully qualified.
+    // use default namespace if this is missing.
+    const components = functionObject.sequence.map(name => {
+      if (name.startsWith('/')) {
+        return name
+      }
+      const func = this.serverless.service.getFunction(name)
+      return `/_/${func.name}`
+    })
+
+    return BbPromise.resolve({ kind: 'sequence', components })
+  }
+
+  compileFunctionExec(functionObject) {
+    const main = this.calculateFunctionMain(functionObject);
+    const kind = this.calculateRuntime(functionObject);
+    return this.generateActionPackage(functionObject).then(code => ({ main, kind, code }));
   }
 
   // This method takes the function handler definition, parsed from the user's YAML file,
@@ -120,21 +148,19 @@ class OpenWhiskCompileFunctions {
   // Parameter values will be parsed from the user's YAML definition, either as a value from
   // the function handler definition or the service provider defaults.
   compileFunction(functionName, functionObject) {
-    return this.generateActionPackage(functionObject).then(code => {
+    return this.compileExec(functionObject).then(Exec => {
       const FunctionName = this.calculateFunctionName(functionName, functionObject);
       const NameSpace = this.calculateFunctionNameSpace(functionName, functionObject);
       const MemorySize = this.calculateMemorySize(functionObject);
       const Timeout = this.calculateTimeout(functionObject);
-      const Runtime = this.calculateRuntime(functionObject);
       const Overwrite = this.calculateOverwrite(functionObject);
-      const Main = this.calculateFunctionMain(functionObject);
 
       // optional action parameters
       const Parameters = Object.keys(functionObject.parameters || {})
         .map(key => ({ key, value: functionObject.parameters[key] }));
 
       return this.compileFunctionAction(
-        { FunctionName, NameSpace, Main, Overwrite, Runtime, code, Timeout, MemorySize, Parameters }
+        { FunctionName, NameSpace, Overwrite, Exec, Timeout, MemorySize, Parameters }
       );
     });
   }
@@ -150,9 +176,14 @@ class OpenWhiskCompileFunctions {
     const functionPromises = this.serverless.service.getAllFunctions().map((functionName) => {
       const functionObject = this.serverless.service.getFunction(functionName);
 
-      if (!functionObject.handler) {
+      if (!functionObject.handler && !functionObject.sequence) {
         throw new this.serverless.classes
-          .Error(`Missing "handler" property in function ${functionName}`);
+          .Error(`Missing "handler" or "sequence" property in function ${functionName}`);
+      }
+
+      if (functionObject.handler && functionObject.sequence) {
+        throw new this.serverless.classes
+          .Error(`Found both "handler" and "sequence" properties in function ${functionName}, please choose one.`);
       }
 
       const functions = this.serverless.service.actions;

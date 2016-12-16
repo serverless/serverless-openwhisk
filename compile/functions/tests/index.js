@@ -135,6 +135,25 @@ describe('OpenWhiskCompileFunctions', () => {
   })
 
   describe('#compileFunction()', () => {
+    it('should return sequence definition for sequence function', () => {
+      const newFunction = {
+        actionName: 'serviceName_functionName',
+        namespace: 'namespace',
+        overwrite: true,
+        action: {
+          exec: { kind: 'sequence', components: ["/_/one", "/a/two", "/a/b/three"] },
+          limits: { timeout: 60 * 1000, memory: 256 },
+          parameters: []
+        },
+      };
+     
+      openwhiskCompileFunctions.serverless.service.getFunction = () => ({name: 'one'});
+      openwhiskCompileFunctions.serverless.service.provider.namespace = 'namespace';
+      return expect(openwhiskCompileFunctions.compileFunction('functionName', {
+        sequence: ["one", "/a/two", "/a/b/three"]
+      })).to.eventually.deep.equal(newFunction);
+    });
+
     it('should return default function instance for handler', () => {
       const fileContents = 'some file contents';
       const handler = 'handler.some_func';
@@ -246,13 +265,23 @@ describe('OpenWhiskCompileFunctions', () => {
         .to.throw(Error, /Missing Resources section/);
     });
 
-    it('should throw an error if function definition is missing a handler', () => {
+    it('should throw an error if function definition has handler and sequence', () => {
+      const f = { sequence: true, handler: true };
+      openwhiskCompileFunctions.serverless.service.getAllFunctions = () => ['service_name'];
+
+      openwhiskCompileFunctions.serverless.service.getFunction = () => f;
+
+      expect(() => openwhiskCompileFunctions.compileFunctions())
+        .to.throw(Error, /both "handler" and "sequence" properties/);
+    });
+
+    it('should throw an error if function definition is missing a handler or sequence', () => {
       openwhiskCompileFunctions.serverless.service.getAllFunctions = () => ['service_name'];
 
       openwhiskCompileFunctions.serverless.service.getFunction = () => ({});
 
       expect(() => openwhiskCompileFunctions.compileFunctions())
-        .to.throw(Error, /Missing "handler"/);
+        .to.throw(Error, /Missing "handler" or "sequence"/);
     });
 
     it('should throw an error if unable to read function handler file', () => {

@@ -6,7 +6,7 @@ const constants = {
   providerName: 'openwhisk',
 };
 
-const credentials = ['apihost', 'auth', 'namespace'];
+const credentials = ['apihost', 'auth'];
 
 class OpenwhiskProvider {
   static getProviderName() {

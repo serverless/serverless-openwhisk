@@ -27,6 +27,7 @@ class OpenWhiskDeploy {
 
       'deploy:deploy': () => BbPromise.bind(this)
         .then(this.deployFunctions)
+        .then(this.deploySequences)
         .then(this.deployTriggers)
         .then(this.deployFeeds)
         .then(this.deployRules)

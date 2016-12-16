@@ -13,11 +13,32 @@ module.exports = {
     );
   },
 
+  deploySequences() {
+    const sequences = this.filterActions(true)
+
+    if (sequences.length) {
+      this.serverless.cli.log('Deploying Sequences...');
+    }
+
+    return this.deployActions(sequences);
+  },
+
   deployFunctions() {
     this.serverless.cli.log('Deploying Functions...');
+    return this.deployActions(this.filterActions())
+  },
+
+  deployActions(names) {
     const actions = this.serverless.service.actions;
     return BbPromise.all(
-      Object.keys(actions).map(a => this.deployFunctionHandler(actions[a]))
+      names.map(a => this.deployFunctionHandler(actions[a]))
     );
+  },
+
+  filterActions(sequence) {
+    const actions = this.serverless.service.actions;
+    const kind = action => action.action.exec.kind
+    const match = action => (kind(action) === 'sequence') === !!sequence
+    return Object.keys(actions).filter(a => match(actions[a]))
   },
 };

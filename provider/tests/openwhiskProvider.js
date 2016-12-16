@@ -114,13 +114,5 @@ describe('OpenwhiskProvider', () => {
 
       return expect(() => openwhiskProvider.hasValidCreds(mockObject)).to.throw(/APIHOST/);
     });
-
-    it('should throw error when parameter (NAMESPACE) is missing', () => {
-      const mockObject = {
-        auth: 'user:pass', apihost: 'blah.blah.com',
-      };
-
-      return expect(() => openwhiskProvider.hasValidCreds(mockObject)).to.throw(/NAMESPACE/);
-    });
   })
 }) 
