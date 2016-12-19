@@ -39,10 +39,13 @@ describe('OpenWhiskDeploy', () => {
         .stub(openwhiskDeploy, 'deployTriggers').returns(BbPromise.resolve());
       const deployFeedsStub = sinon
         .stub(openwhiskDeploy, 'deployFeeds').returns(BbPromise.resolve());
+      const deployRoutesStub = sinon
+        .stub(openwhiskDeploy, 'deployRoutes').returns(BbPromise.resolve());
 
       return openwhiskDeploy.hooks['deploy:deploy']().then(() => {
         expect(deployFunctionsStub.calledOnce).to.be.equal(true);
         expect(deploySequencesStub.calledOnce).to.be.equal(true);
+        expect(deployRoutesStub.calledOnce).to.be.equal(true);
         expect(deployRulesStub.calledOnce).to.be.equal(true);
         expect(deployTriggersStub.calledOnce).to.be.equal(true);
         expect(deployFeedsStub.calledOnce).to.be.equal(true);

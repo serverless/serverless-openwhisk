@@ -6,6 +6,7 @@ const removeFunctions = require('./lib/removeFunctions');
 const removeTriggers = require('./lib/removeTriggers');
 const removeRules = require('./lib/removeRules');
 const removeFeeds = require('./lib/removeFeeds');
+const removeRoutes = require('./lib/removeRoutes');
 const setupResources = require('./lib/setupResources');
 const util = require('./lib/util');
 
@@ -15,12 +16,13 @@ class OpenWhiskRemove {
     this.options = options || {};
     this.provider = this.serverless.getProvider('openwhisk');
 
-    Object.assign(this, validate, setupResources, removeFunctions, removeTriggers, removeRules, removeFeeds, util);
+    Object.assign(this, validate, setupResources, removeFunctions, removeTriggers, removeRules, removeFeeds, removeRoutes, util);
 
     this.hooks = {
       'remove:remove': () => BbPromise.bind(this)
           .then(this.validate)
           .then(this.setupResources)
+          .then(this.removeRoutes)
           .then(this.removeRules)
           .then(this.removeFunctions)
           .then(this.removeTriggers)

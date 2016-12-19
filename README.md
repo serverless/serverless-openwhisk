@@ -1,3 +1,5 @@
+
+
 # Serverless OpenWhisk Plugin
 
 This plugin enables support for the [OpenWhisk platform](http://openwhisk.org/) within the Serverless Framework.
@@ -170,6 +172,45 @@ functions:
     timeout: 60 // 0.1 to 600 (seconds)
     runtime: 'nodejs:default'
 ```
+
+
+
+## Connecting HTTP Endpoints
+
+Functions can be bound to public URL endpoints using the [API Gateway service](https://github.com/openwhisk/openwhisk/blob/master/docs/apigateway.md). HTTP requests to configured endpoints will invoke functions on-demand. Requests parameters are passed as function arguments. Function return values are serialised as the JSON response body.
+
+HTTP endpoints for functions can be configured through the `serverless.yaml` file.
+
+```yaml
+functions:
+  my_function:
+    handler: index.main
+    events:
+      - http: GET /api/greeting
+```
+
+API Gateway hosts serving the API endpoints will be shown during deployment.
+
+```shell
+$ serverless deploy
+...
+API Gateway Host: https://xxx-gws.api-gw.mybluemix.net
+```
+
+Calling the configured API endpoints will execute the deployed functions.
+
+````shell
+$ http get https://xxx-gws.api-gw.mybluemix.net/api/greeting?user="James Thomas"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 19 Dec 2016 15:47:53 GMT
+
+{
+    "message": "Hello James Thomas!"
+}
+````
+
+_**IMPORTANT: [API Gateway support](https://github.com/openwhisk/openwhisk/blob/master/docs/apigateway.md) is currently experimental and may be subject to breaking changes.**_
 
 
 

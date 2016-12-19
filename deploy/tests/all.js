@@ -6,4 +6,5 @@ require('./deployFunctions');
 require('./deployRules');
 require('./deployTriggers');
 require('./deployFeeds');
+require('./deployApiGw');
 require('./index');

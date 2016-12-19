@@ -28,6 +28,7 @@ describe('OpenWhiskRemove', () => {
       sinon.stub(openwhiskRemove, 'removeFunctions').returns(BbPromise.resolve());
       sinon.stub(openwhiskRemove, 'removeTriggers').returns(BbPromise.resolve());
       sinon.stub(openwhiskRemove, 'removeRules').returns(BbPromise.resolve());
+      sinon.stub(openwhiskRemove, 'removeRoutes').returns(BbPromise.resolve());
 
       return openwhiskRemove.hooks['remove:remove']()
         .then(() => {
@@ -35,6 +36,7 @@ describe('OpenWhiskRemove', () => {
 
           openwhiskRemove.validate.restore();
           openwhiskRemove.removeFunctions.restore();
+          openwhiskRemove.removeRoutes.restore();
           openwhiskRemove.removeTriggers.restore();
           openwhiskRemove.removeRules.restore();
         });

@@ -6,6 +6,7 @@ const deployFunctions = require('./lib/deployFunctions');
 const deployRules = require('./lib/deployRules');
 const deployTriggers = require('./lib/deployTriggers');
 const deployFeeds = require('./lib/deployFeeds');
+const deployApiGw = require('./lib/deployApiGw');
 
 class OpenWhiskDeploy {
   constructor(serverless, options) {
@@ -17,6 +18,7 @@ class OpenWhiskDeploy {
       this,
       initializeResources,
       deployFunctions,
+      deployApiGw,
       deployRules,
       deployTriggers,
       deployFeeds
@@ -28,6 +30,7 @@ class OpenWhiskDeploy {
       'deploy:deploy': () => BbPromise.bind(this)
         .then(this.deployFunctions)
         .then(this.deploySequences)
+        .then(this.deployRoutes)
         .then(this.deployTriggers)
         .then(this.deployFeeds)
         .then(this.deployRules)
