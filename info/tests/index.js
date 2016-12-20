@@ -25,7 +25,7 @@ describe('OpenWhiskInfo', () => {
     function: 'first'
   };
   const openwhiskInfo = new OpenWhiskInfo(serverless, options);
-  openwhiskInfo.client = { rules: { list: () => {} }, triggers: { list: () => {} }, actions: { list: () => {} } };
+  openwhiskInfo.client = { routes: { list: () => {} }, rules: { list: () => {} }, triggers: { list: () => {} }, actions: { list: () => {} } };
   serverless.service.service = "my_service";
 
   beforeEach(() => {
@@ -62,12 +62,14 @@ describe('OpenWhiskInfo', () => {
       const action = sandbox.stub(openwhiskInfo, 'showActionsInfo')
       const triggers = sandbox.stub(openwhiskInfo, 'showTriggersInfo')
       const rules = sandbox.stub(openwhiskInfo, 'showRulesInfo')
+      const routes = sandbox.stub(openwhiskInfo, 'showRoutesInfo')
 
       return openwhiskInfo.info().then(() => {
         expect(service.calledOnce).to.be.equal(true);
         expect(action.calledOnce).to.be.equal(true);
         expect(triggers.calledOnce).to.be.equal(true);
         expect(rules.calledOnce).to.be.equal(true);
+        expect(routes.calledOnce).to.be.equal(true);
         expect(log.args[0][0].match(/Service Information/)).to.be.ok;
       });
     });
@@ -134,4 +136,43 @@ describe('OpenWhiskInfo', () => {
     })
   })
 
+  describe('#showRoutesInfo()', () => {
+    it('should show routes returned', () => {
+      const endpoint = {
+        "x-ibm-op-ext": {
+          "actionName": "my_service-dev-hello"
+        }
+      }
+      const apis = [{
+        value: {
+          apidoc: {
+            paths: {
+              "/api/hello": { get: endpoint },
+              "/api/foobar": { post: endpoint }
+            }
+          }
+        }
+      }, {
+        value: {
+          apidoc: {
+            paths: {
+              "/api/foo/1": { get: endpoint },
+              "/api/bar/2": { post: endpoint }
+            }
+          }
+        }
+      }] 
+
+      const log = sandbox.stub(openwhiskInfo, 'consoleLog')
+      sandbox.stub(openwhiskInfo.client.routes, 'list').returns(BbPromise.resolve({ apis }));
+
+      return expect(openwhiskInfo.showRoutesInfo().then(() => {
+        expect(log.args[0][0].match(/endpoints:/)).to.be.ok;
+        expect(log.args[2][0].match(/\/api\/hello GET -> my_service-dev-hello/)).to.be.ok;
+        expect(log.args[2][0].match(/\/api\/foobar POST -> my_service-dev-hello/)).to.be.ok;
+        expect(log.args[4][0].match(/\/api\/foo\/1 GET -> my_service-dev-hello/)).to.be.ok;
+        expect(log.args[4][0].match(/\/api\/bar\/2 POST -> my_service-dev-hello/)).to.be.ok;
+      }));
+    })
+  })
 });

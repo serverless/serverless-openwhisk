@@ -25,12 +25,16 @@ module.exports = {
   deployRoutes() {
     const apigw = this.serverless.service.apigw;
 
-    if (apigw.length) {
-      this.serverless.cli.log('Deploying API Gateway definitions...');
+    if (!apigw.length) {
+      return BbPromise.resolve();
     }
 
-    return this.unbindAllRoutes().then(() =>
-      BbPromise.all(apigw.map(r => this.deployRoute(r)))
-    )
+    this.serverless.cli.log('Deploying API Gateway definitions...');
+    return this.unbindAllRoutes().then(() => {
+      const requests = apigw.map(r => this.deployRoute(r))
+      return BbPromise.all(requests).then(results => {
+        this.serverless.cli.log(`Configured API endpoint: ${results[0].gwApiUrl}`);
+      })
+    })
   }
 };

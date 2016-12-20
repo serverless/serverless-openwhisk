@@ -36,12 +36,13 @@ class OpenWhiskInfo {
       .then(this.showServiceInfo)
       .then(this.showActionsInfo)
       .then(this.showTriggersInfo)
-      .then(this.showRulesInfo);
+      .then(this.showRulesInfo)
+      .then(this.showRoutesInfo);
   }
 
   showServiceInfo () {
     this.consoleLog(`platform:\t${this.props.apihost}`);
-    this.consoleLog(`namespace:\t${this.props.namespace}`);
+    this.consoleLog(`namespace:\t${this.props.namespace || '_'}`);
     this.consoleLog(`service:\t${this.serverless.service.service}\n`);
   }
 
@@ -66,10 +67,38 @@ class OpenWhiskInfo {
   showRulesInfo () {
     this.consoleLog(`${chalk.yellow('rules:')}`);
     return this.client.rules.list().then(rules => {
-      if (!rules.length) return console.log('**no rules deployed**');
+      if (!rules.length) return console.log('**no rules deployed**\n');
       const names = rules.map(rule => rule.name).join('    ');
-      this.consoleLog(names)
+      this.consoleLog(names + '\n')
     })
+  }
+
+  showRoutesInfo () {
+    this.consoleLog(`${chalk.yellow('endpoints:')}`);
+    return this.client.routes.list().then(routes => {
+      if (!routes.apis.length) return console.log('**no routes deployed**');
+      const action_routes = routes.apis
+        .map(api => {
+          this.consoleLog(`${chalk.yellow(api.value.gwApiUrl)}`);
+          const pathRoutes = this.getPathsInfo(api.value.apidoc.paths)
+            .join('    ')
+            this.consoleLog(pathRoutes)
+        })
+    })
+  }
+
+  getPathInfo (path, methods) {
+    return Object.keys(methods).map(
+      method => `${path} ${method.toUpperCase()} -> ${methods[method]['x-ibm-op-ext'].actionName}`
+    ).reduce(this.reduceArrs)
+  }
+
+  getPathsInfo (paths) {
+    return Object.keys(paths).map(path => this.getPathInfo(path, paths[path]))
+  }
+
+  reduceArrs (a, b) {
+    return a.concat(b)
   }
 
   consoleLog (message) {
