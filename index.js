@@ -12,6 +12,7 @@ const CompileRules = require('./compile/rules/index.js');
 const CompileHttpEvents = require('./compile/apigw/index.js');
 const Deploy = require('./deploy/index.js');
 const Invoke = require('./invoke/index.js');
+const InvokeLocal = require('./invokeLocal/index.js');
 const Remove = require('./remove/index.js');
 const Logs = require('./logs/index.js');
 const Info = require('./info/index.js');
@@ -30,6 +31,7 @@ class Index {
     this.serverless.pluginManager.addPlugin(CompileTriggers);
     this.serverless.pluginManager.addPlugin(Remove);
     this.serverless.pluginManager.addPlugin(Invoke);
+    this.serverless.pluginManager.addPlugin(InvokeLocal);
     this.serverless.pluginManager.addPlugin(Deploy);
     this.serverless.pluginManager.addPlugin(Logs);
     this.serverless.pluginManager.addPlugin(Info);

@@ -7,6 +7,7 @@ require('../deploy/tests');
 require('../deploy/tests/all');
 require('../deployFunction/tests');
 require('../invoke/tests');
+require('../invokeLocal/tests');
 require('../provider/tests');
 require('../remove/tests');
 require('../remove/tests/all');
