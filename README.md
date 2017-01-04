@@ -301,6 +301,7 @@ The following serverless commands are currently implemented for the OpenWhisk pr
 
 - `deploy` - [Deploy functions, triggers and rules for service](https://serverless.com/framework/docs/providers/aws/cli-reference/deploy/).
 - `invoke`- [Invoke deployed serverless function and show result](https://serverless.com/framework/docs/providers/aws/cli-reference/invoke/).
+- `invokeLocal`- [Invoke serverless functions locally and show result](https://serverless.com/framework/docs/providers/aws/cli-reference/invoke#invoke-local).
 - `remove` - [Remove functions, triggers and rules for service](https://serverless.com/framework/docs/providers/aws/cli-reference/remove/).
 - `logs` - [Display activation logs for deployed function](https://serverless.com/framework/docs/providers/aws/cli-reference/logs/). 
 - `info` - [Display details on deployed functions, triggers and rules](https://serverless.com/framework/docs/providers/aws/cli-reference/info/).

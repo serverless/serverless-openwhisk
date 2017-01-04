@@ -26,7 +26,7 @@ class OpenWhiskCompileRules {
     // Actions and Triggers referenced by Rules must used fully qualified identifiers (including namespace).
     if (!this.serverless.service.defaults.namespace) {
       return this.provider.props().then(props => {
-        this.serverless.service.defaults.namespace = props.namespace;
+        this.serverless.service.defaults.namespace = props.namespace || '_';
       });
     }
   }

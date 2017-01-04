@@ -30,14 +30,42 @@ describe('OpenWhiskCompileRules', () => {
     };
 
     serverless.cli = { log: () => {} };
-    openwhiskCompileRules.setup();
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
+  describe('#setup()', () => {
+    it('should not call provider props if namespace in defaults', () => {
+      openwhiskCompileRules.serverless.getProvider = () => ({props: sinon.assert.fail});
+      openwhiskCompileRules.setup();
+    })
+
+    it('should use provider props if namespace available', () => {
+      openwhiskCompileRules.serverless.service.defaults.namespace = null;
+      const props = () => BbPromise.resolve({namespace: 'sample_ns'})
+      openwhiskCompileRules.provider = { props };
+      return openwhiskCompileRules.setup().then(() => {
+        expect(openwhiskCompileRules.serverless.service.defaults.namespace).to.equal("sample_ns")
+      });
+    })
+
+    it('should use default namespace if provider namespace missing', () => {
+      openwhiskCompileRules.serverless.service.defaults.namespace = null;
+      const props = () => BbPromise.resolve({})
+      openwhiskCompileRules.provider = { props };
+      return openwhiskCompileRules.setup().then(() => {
+        expect(openwhiskCompileRules.serverless.service.defaults.namespace).to.equal("_")
+      });
+    })
+  });
+
   describe('#compileRules()', () => {
+    beforeEach(() => {
+      openwhiskCompileRules.setup();
+    });
+
     it('should throw an error if the resource section is not available', () => {
       openwhiskCompileRules.serverless.service.rules = null;
       expect(() => openwhiskCompileRules.compileRules())
@@ -69,6 +97,10 @@ describe('OpenWhiskCompileRules', () => {
   });
 
   describe('#compileFunctionRules()', () => {
+    beforeEach(() => {
+      openwhiskCompileRules.setup();
+    });
+
     it('should not call compileRule when events parameter is missing', () => {
       const stub = sinon.stub(openwhiskCompileRules, 'compileRule')
       const rules = openwhiskCompileRules.compileFunctionRules('name', {})
@@ -96,6 +128,10 @@ describe('OpenWhiskCompileRules', () => {
   });
 
   describe('#compileRule()', () => {
+    beforeEach(() => {
+      openwhiskCompileRules.setup();
+    });
+
     it('should define rules from trigger string', () => {
       openwhiskCompileRules.serverless.service.service = 'my-service' 
       openwhiskCompileRules.serverless.service.provider = {namespace: "sample_ns"};
