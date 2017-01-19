@@ -31,8 +31,6 @@ function getWskProps() {
       return params;
     }, {});
 
-    wskProps.apihost = `https://${wskProps.apihost}/api/v1/`;
-
     return wskProps;
   });
 }

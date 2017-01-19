@@ -59,7 +59,7 @@ describe('OpenwhiskProvider', () => {
       const creds = {apihost: 'some_api', auth: 'user:pass', namespace: 'namespace'}
       sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
       return openwhiskProvider.client().then(client => {
-        expect(client.actions.options).to.be.deep.equal({api_key: creds.auth, ignore_certs: undefined, namespace: creds.namespace, api: creds.apihost})
+        expect(client.actions.options).to.be.deep.equal({api_key: creds.auth, ignore_certs: undefined, namespace: creds.namespace, api: `https://${creds.apihost}/api/v1/`})
         expect(typeof openwhiskProvider._client).to.not.equal('undefined');
       })
     })
@@ -104,7 +104,7 @@ describe('OpenwhiskProvider', () => {
         apihost: 'blah.blah.com', namespace: 'user@user.com',
       };
 
-      return expect(() => openwhiskProvider.hasValidCreds(mockObject)).to.throw(/AUTH/);
+      return expect(() => openwhiskProvider.hasValidCreds(mockObject)).to.throw(/OW_AUTH/);
     });
 
     it('should throw error when parameter (APIHOST) is missing', () => {
@@ -112,7 +112,7 @@ describe('OpenwhiskProvider', () => {
         auth: 'user:pass', namespace: 'user@user.com',
       };
 
-      return expect(() => openwhiskProvider.hasValidCreds(mockObject)).to.throw(/APIHOST/);
+      return expect(() => openwhiskProvider.hasValidCreds(mockObject)).to.throw(/OW_APIHOST/);
     });
   })
 }) 

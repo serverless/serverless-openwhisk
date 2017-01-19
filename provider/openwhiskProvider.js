@@ -24,7 +24,7 @@ class OpenwhiskProvider {
     if (this._client) return BbPromise.resolve(this._client)
 
     return this.props().then(this.hasValidCreds).then(wskProps => {
-      this._client = openwhisk({ api: wskProps.apihost, api_key: wskProps.auth, namespace: wskProps.namespace });
+      this._client = openwhisk({ apihost: wskProps.apihost, api_key: wskProps.auth, namespace: wskProps.namespace });
       return this._client
     })
   }
@@ -41,7 +41,7 @@ class OpenwhiskProvider {
   hasValidCreds(creds) {
     credentials.forEach(prop => {
       if (!creds[prop]) {
-        throw new Error(`Missing mandatory openwhisk configuration property: ${prop.toUpperCase()}.` +
+        throw new Error(`Missing mandatory openwhisk configuration property: OW_${prop.toUpperCase()}.` +
           ' Check .wskprops file or set environment variable?');
       }
     });
