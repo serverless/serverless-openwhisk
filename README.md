@@ -24,11 +24,22 @@ Account credentials for OpenWhisk can be provided through a configuration file o
 - *OW_APIHOST* - Platform endpoint, e.g. `openwhisk.ng.bluemix.net`
 - *OW_AUTH* - Authentication key, e.g. `xxxxxx:yyyyy`
 
-### Install boilerplate
+### Download boilerplate
 
-Download the [boilerplate repository](https://github.com/jthomas/serverless-openwhisk-boilerplate) and run `npm install` to install the project dependencies.
+Retrieve the [boilerplate repository](https://github.com/jthomas/serverless-openwhisk-boilerplate) from Github.
 
-https://github.com/jthomas/serverless-openwhisk-boilerplate
+```
+$ git clone https://github.com/jthomas/serverless-openwhisk-boilerplate
+```
+
+### Install Project Dependencies
+
+*Due to an [outstanding issue](https://github.com/serverless/serverless/issues/2895) with provider plugins, the [OpenWhisk provider](https://github.com/serverless/serverless-openwhisk) must be installed as a global module.*
+
+```
+$ sudo npm install --global serverless-openwhisk
+$ npm install
+```
 
 ### Deploy Service
 
