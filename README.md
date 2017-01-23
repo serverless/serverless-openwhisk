@@ -30,6 +30,7 @@ Retrieve the [boilerplate repository](https://github.com/jthomas/serverless-open
 
 ```
 $ git clone https://github.com/jthomas/serverless-openwhisk-boilerplate
+$ cd serverless-openwhisk-boilerplate
 ```
 
 ### Install Project Dependencies
@@ -37,7 +38,7 @@ $ git clone https://github.com/jthomas/serverless-openwhisk-boilerplate
 *Due to an [outstanding issue](https://github.com/serverless/serverless/issues/2895) with provider plugins, the [OpenWhisk provider](https://github.com/serverless/serverless-openwhisk) must be installed as a global module.*
 
 ```
-$ sudo npm install --global serverless-openwhisk
+$ sudo npm install --global serverless serverless-openwhisk
 $ npm install
 ```
 
