@@ -18,6 +18,7 @@ const Logs = require('./logs/index.js');
 const Info = require('./info/index.js');
 const DeployFunction = require('./deployFunction/index.js');
 const OpenwhiskProvider = require('./provider/openwhiskProvider.js');
+const ConfigCredentials = require('./configCredentials/index.js')
 
 class Index {
   constructor(serverless, options) {
@@ -36,6 +37,7 @@ class Index {
     this.serverless.pluginManager.addPlugin(Logs);
     this.serverless.pluginManager.addPlugin(Info);
     this.serverless.pluginManager.addPlugin(DeployFunction);
+    this.serverless.pluginManager.addPlugin(ConfigCredentials);
   }
 }
 
