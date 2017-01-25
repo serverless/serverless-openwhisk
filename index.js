@@ -10,6 +10,7 @@ const CompileFunctions = require('./compile/functions/index.js');
 const CompileTriggers = require('./compile/triggers/index.js');
 const CompileRules = require('./compile/rules/index.js');
 const CompileHttpEvents = require('./compile/apigw/index.js');
+const CompileSchedule = require('./compile/schedule/index.js');
 const Deploy = require('./deploy/index.js');
 const Invoke = require('./invoke/index.js');
 const InvokeLocal = require('./invokeLocal/index.js');
@@ -30,6 +31,7 @@ class Index {
     this.serverless.pluginManager.addPlugin(CompileHttpEvents);
     this.serverless.pluginManager.addPlugin(CompileRules);
     this.serverless.pluginManager.addPlugin(CompileTriggers);
+    this.serverless.pluginManager.addPlugin(CompileSchedule);
     this.serverless.pluginManager.addPlugin(Remove);
     this.serverless.pluginManager.addPlugin(Invoke);
     this.serverless.pluginManager.addPlugin(InvokeLocal);

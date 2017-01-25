@@ -54,15 +54,15 @@ describe('OpenWhiskRemove', () => {
   describe('#initializeTriggers()', () => {
     it('should set up triggers without configured rules', () => {
       openwhiskRemove.serverless.service.resources.triggers =  null
-      const stub = sandbox.stub(openwhiskRemove, "getEventTriggers").returns([])
+      sandbox.stub(openwhiskRemove, "getEventTriggers").returns([])
       openwhiskRemove.initializeTriggers();
       expect(openwhiskRemove.serverless.service.resources.triggers).to.deep.equal({});
     });
     it('should set up triggers', () => {
-      openwhiskRemove.serverless.service.resources.triggers = {third: {}};
-      const stub = sandbox.stub(openwhiskRemove, "getEventTriggers").returns(["first", "second"])
+      openwhiskRemove.serverless.service.resources.triggers = {existing: {}};
+      sandbox.stub(openwhiskRemove, "getEventTriggers").returns(["first", "second"])
       openwhiskRemove.initializeTriggers();
-      expect(openwhiskRemove.serverless.service.resources.triggers).to.deep.equal({first: {}, second: {}, third: {}});
+      expect(openwhiskRemove.serverless.service.resources.triggers).to.deep.equal({existing: {}, first: {}, second: {}});
     });
   });
 });

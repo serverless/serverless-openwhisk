@@ -12,7 +12,7 @@ module.exports = {
       this.serverless.service.resources.triggers = {};
     }
 
-    const triggers = this.getEventTriggers();
+    const triggers = this.getEventTriggers()
     const manifestTriggers = this.serverless.service.resources.triggers || {};
 
     triggers.forEach(trigger => {
@@ -21,20 +21,25 @@ module.exports = {
   },
 
   getEventTriggers() {
-    const eventTriggers = new Set();
+    const triggers = new Set();
 
     this.serverless.service.getAllFunctions()
-      .map(name => this.serverless.service.getFunction(name))
-      .filter(func => func.events)
-      .forEach(func => func.events.forEach(event => {
-        if (event.trigger) {
-          eventTriggers.add(event.trigger.name || event.trigger)
-        }
-      }));
+      .forEach(name => {
+        const func = this.serverless.service.getFunction(name);
+        const events = func.events || []
+        events.forEach(event => {
+          if (event.schedule) {
+            triggers.add(event.schedule.name || 
+              `${this.serverless.service.service}_${name}_schedule_trigger`)
+          } else if (event.trigger) {
+            eventTriggers.add(event.trigger.name || event.trigger)
+          }
+        })
+      })
 
-    return [...eventTriggers];
+    return [...triggers];
   },
-
+  
   initializeRules() {
     const allFunctions = this.serverless.service.getAllFunctions()
 
@@ -55,12 +60,22 @@ module.exports = {
     return trigger.rule || defaultRuleName;
   },
 
+  getScheduleRuleName(funcName, funcObj, schedule) {
+    return schedule.rule || `${this.serverless.service.service}_${funcName}_schedule_rule`
+  },
+
   getRuleNames(functionName, functionObject) {
     if (!functionObject.events) return []
 
-    return functionObject.events
+    const triggerRules = functionObject.events
       .filter(e => e.trigger)
       .map(e => this.getRuleName(functionName, functionObject, e.trigger))
+
+    const scheduleRules = functionObject.events
+      .filter(e => e.schedule)
+      .map(e => this.getScheduleRuleName(functionName, functionObject, e.schedule))
+
+    return triggerRules.concat(scheduleRules)
   },
 
   generateDefaultRuleName(functionName, triggerName) {
