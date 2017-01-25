@@ -41,7 +41,6 @@ functions:
         events:
             - schedule:
               rate: cron(* * * * *)
-              enabled: false
               trigger: custom_trigger_name
               rule: custom_rule_name
               max: 10000 // maximum event fires, defaults to 1000

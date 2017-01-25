@@ -238,7 +238,39 @@ Date: Mon, 19 Dec 2016 15:47:53 GMT
 
 _**IMPORTANT: [API Gateway support](https://github.com/openwhisk/openwhisk/blob/master/docs/apigateway.md) is currently experimental and may be subject to breaking changes.**_
 
+## Scheduled Invocations
 
+Functions can be set up to fire automatically using the [alarm package](https://github.com/openwhisk/openwhisk/blob/master/docs/catalog.md#using-the-alarm-package). This allows you to invoke functions with preset parameters at specific times (*12:00 each day*) or according to a schedule (*every ten minutes*).
+
+Scheduled invocation for functions can be configured through the `serverless.yaml` file.
+
+The `schedule` event configuration is controlled by a string, based on the UNIX crontab syntax, in the format `cron(X X X X X)`. This can either be passed in as a native string or through the `rate` parameter.
+
+```yaml
+functions:
+  my_function:
+    handler: index.main
+    events: 
+      - schedule: cron(* * * * *) // fires each minute.
+```
+
+This above example generates a new trigger (``${service}_crawl_schedule_trigger`) and rule (`${service}_crawl_schedule_rule`) during deployment.
+
+Other `schedule` event parameters can be manually configured, e.g trigger or rule names.
+
+```yaml
+functions:
+  aggregate:
+    handler: statistics.handler
+    events:
+      - schedule:
+          rate: cron(0 * * * *) // call once an hour
+          trigger: triggerName
+          rule: ruleName
+          max: 10000 // max invocations, default: 1000, max: 10000
+          params: // event params for invocation
+            hello: world
+```
 
 ## Connecting Events
 
