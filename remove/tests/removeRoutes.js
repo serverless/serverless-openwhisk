@@ -36,22 +36,61 @@ describe('OpenWhiskRemove', () => {
   });
 
   describe('#removeRoutes()', () => {
-    it('should remove service api gw routes from openwhisk', () => {
-      sandbox.stub(openwhiskRemove.provider, 'client', () => {
-        const stub = params => {
-          expect(params).to.be.deep.equal({
-            basepath: '/my-service',
-          });
-          return Promise.resolve();
-        };
+    it('should not remove routes when http events not defined.', () => {
+      const fnDefs = {
+        none: {
+        },
+        has_event: {
+          events: [{trigger: true}, {schedule: true}]
+        }
+      } 
+      openwhiskRemove.serverless.service.getAllFunctions = () => Object.keys(fnDefs)
+      openwhiskRemove.serverless.service.getFunction = (name) => fnDefs[name]
+ 
+      const stub = sinon.stub().returns(Promise.resolve())
 
+      sandbox.stub(openwhiskRemove.provider, 'client', () => {
         return Promise.resolve({ routes: { delete: stub } });
       });
-      return expect(openwhiskRemove.removeRoutes())
-        .to.eventually.be.fulfilled;
+
+      return openwhiskRemove.removeRoutes().then(() => {
+        expect(stub.called).to.be.equal(false);
+      })
+    });
+
+    it('should remove service api gw routes from openwhisk', () => {
+      const fnDefs = {
+        has_event: {
+          events: [{http: true}]
+        }
+      } 
+      openwhiskRemove.serverless.service.getAllFunctions = () => Object.keys(fnDefs)
+      openwhiskRemove.serverless.service.getFunction = (name) => fnDefs[name]
+ 
+      const stub = sinon.stub().returns(Promise.resolve())
+      sandbox.stub(openwhiskRemove.provider, 'client', () => {
+        return Promise.resolve({ routes: { delete: stub } });
+      });
+
+      const result = openwhiskRemove.removeRoutes().then(() => {
+        expect(stub.called).to.be.equal(true);
+        expect(stub.args[0][0]).to.be.deep.equal({
+          basepath: '/helloworld'
+        });
+      })
+      return expect(result).to.eventually.be.fulfilled;
     });
 
     it('should still resolve when api gw routes fail to be removed', () => {
+      const fnDefs = {
+        has_event: {
+          events: [{http: true}]
+        }
+      } 
+      openwhiskRemove.serverless.service.getAllFunctions = () => Object.keys(fnDefs)
+      openwhiskRemove.serverless.service.getFunction = (name) => fnDefs[name]
+
+
       const err = { message: 'some reason' };
       sandbox.stub(openwhiskRemove.provider, 'client', () => Promise.resolve(
         { routes: { delete: () => Promise.reject(err) } }
