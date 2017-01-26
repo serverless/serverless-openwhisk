@@ -254,7 +254,7 @@ functions:
       - schedule: cron(* * * * *) // fires each minute.
 ```
 
-This above example generates a new trigger (``${service}_crawl_schedule_trigger`) and rule (`${service}_crawl_schedule_rule`) during deployment.
+This above example generates a new trigger (`${service}_crawl_schedule_trigger`) and rule (`${service}_crawl_schedule_rule`) during deployment.
 
 Other `schedule` event parameters can be manually configured, e.g trigger or rule names.
 
