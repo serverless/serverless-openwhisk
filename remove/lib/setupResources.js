@@ -32,7 +32,7 @@ module.exports = {
             triggers.add(event.schedule.name || 
               `${this.serverless.service.service}_${name}_schedule_trigger`)
           } else if (event.trigger) {
-            eventTriggers.add(event.trigger.name || event.trigger)
+            triggers.add(event.trigger.name || event.trigger)
           }
         })
       })
