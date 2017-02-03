@@ -145,6 +145,7 @@ describe('OpenWhiskInfo', () => {
       }
       const apis = [{
         value: {
+          gwApiUrl: 'https://api-gateway.com/service_name',
           apidoc: {
             paths: {
               "/api/hello": { get: endpoint },
@@ -154,6 +155,7 @@ describe('OpenWhiskInfo', () => {
         }
       }, {
         value: {
+          gwApiUrl: 'https://api-gateway.com/service_name',
           apidoc: {
             paths: {
               "/api/foo/1": { get: endpoint },
@@ -168,10 +170,10 @@ describe('OpenWhiskInfo', () => {
 
       return expect(openwhiskInfo.showRoutesInfo().then(() => {
         expect(log.args[0][0].match(/endpoints:/)).to.be.ok;
-        expect(log.args[2][0].match(/\/api\/hello GET -> my_service-dev-hello/)).to.be.ok;
-        expect(log.args[2][0].match(/\/api\/foobar POST -> my_service-dev-hello/)).to.be.ok;
-        expect(log.args[4][0].match(/\/api\/foo\/1 GET -> my_service-dev-hello/)).to.be.ok;
-        expect(log.args[4][0].match(/\/api\/bar\/2 POST -> my_service-dev-hello/)).to.be.ok;
+        expect(log.args[1][0].match(/GET https:\/\/api-gateway.com\/service_name\/api\/hello/)).to.be.ok;
+        expect(log.args[2][0].match(/POST https:\/\/api-gateway.com\/service_name\/api\/foobar/)).to.be.ok;
+        expect(log.args[3][0].match(/GET https:\/\/api-gateway.com\/service_name\/api\/foo\/1/)).to.be.ok;
+        expect(log.args[4][0].match(/POST https:\/\/api-gateway.com\/service_name\/api\/bar\/2/)).to.be.ok;
       }));
     })
   })

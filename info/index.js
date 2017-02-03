@@ -12,7 +12,17 @@ class OpenWhiskInfo {
     this.hooks = {
       'info:info': () => BbPromise.bind(this)
         .then(this.validate)
-        .then(this.info)
+        .then(this.info),
+      'after:deploy:deploy': () => BbPromise.bind(this)
+        .then(() => {
+          if (this.options.noDeploy) {
+            return BbPromise.resolve();
+          }
+          this.consoleLog('')
+          return BbPromise.bind(this)
+            .then(this.validate)
+            .then(this.info)
+        })
     };
   }
 
@@ -77,28 +87,23 @@ class OpenWhiskInfo {
     this.consoleLog(`${chalk.yellow('endpoints:')}`);
     return this.client.routes.list().then(routes => {
       if (!routes.apis.length) return console.log('**no routes deployed**');
-      const action_routes = routes.apis
-        .map(api => {
-          this.consoleLog(`${chalk.yellow(api.value.gwApiUrl)}`);
-          const pathRoutes = this.getPathsInfo(api.value.apidoc.paths)
-            .join('    ')
-            this.consoleLog(pathRoutes)
-        })
+      routes.apis.forEach(api => this.logApiEndPoints(api.value))
     })
   }
 
-  getPathInfo (path, methods) {
-    return Object.keys(methods).map(
-      method => `${path} ${method.toUpperCase()} -> ${methods[method]['x-ibm-op-ext'].actionName}`
-    ).reduce(this.reduceArrs)
+  logEndPoint (baseUrl, path, method, actionName) {
+    this.consoleLog(`${method.toUpperCase()} ${baseUrl}${path} --> ${actionName}`)
   }
 
-  getPathsInfo (paths) {
-    return Object.keys(paths).map(path => this.getPathInfo(path, paths[path]))
-  }
-
-  reduceArrs (a, b) {
-    return a.concat(b)
+  logApiEndPoints (api) {
+    const paths = api.apidoc.paths
+    Object.keys(paths).forEach(path => {
+      const methods = Object.keys(paths[path])
+      methods.forEach(method => {
+        const actionName = paths[path][method]['x-ibm-op-ext'].actionName;
+        this.logEndPoint(api.gwApiUrl, path, method, actionName)
+      })
+    })
   }
 
   consoleLog (message) {
