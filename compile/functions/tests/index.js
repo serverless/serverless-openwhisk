@@ -41,7 +41,7 @@ describe('OpenWhiskCompileFunctions', () => {
     serverless = {classes: {Error}, service: {}, getProvider: sandbox.spy()};
     openwhiskCompileFunctions = new OpenWhiskCompileFunctions(serverless, options);
     serverless.service.service = 'serviceName';
-    serverless.service.defaults = {
+    serverless.service.provider = {
       namespace: '',
       apihost: '',
       auth: '',
@@ -77,13 +77,6 @@ describe('OpenWhiskCompileFunctions', () => {
 
     it('should return namespace from service provider', () => {
       openwhiskCompileFunctions.serverless.service.provider = { namespace: 'testing' };
-      expect(openwhiskCompileFunctions.calculateFunctionNameSpace('testing', {}))
-        .to.equal('testing');
-    });
-
-    it('should return namespace from environment defaults', () => {
-      openwhiskCompileFunctions.serverless.service.provider = {};
-      openwhiskCompileFunctions.serverless.service.defaults = { namespace: 'testing' };
       expect(openwhiskCompileFunctions.calculateFunctionNameSpace('testing', {}))
         .to.equal('testing');
     });
@@ -207,7 +200,7 @@ describe('OpenWhiskCompileFunctions', () => {
         expect(functionObj.handler).to.equal(handler);
         return Promise.resolve(new Buffer(fileContents));
       });
-      openwhiskCompileFunctions.serverless.service.defaults.namespace = 'namespace';
+      openwhiskCompileFunctions.serverless.service.provider.namespace = 'namespace';
       return expect(
         openwhiskCompileFunctions.compileFunction('functionName', {
           actionName: name,

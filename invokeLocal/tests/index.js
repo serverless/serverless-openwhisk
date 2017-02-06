@@ -25,7 +25,6 @@ describe('OpenWhiskInvokeLocal', () => {
       environment: {},
       getFunction: () => {}, 
       provider: {}, 
-      defaults: {namespace: ''}, 
       resources: {}, 
       getAllFunctions: () => []
     }

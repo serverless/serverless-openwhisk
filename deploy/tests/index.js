@@ -7,7 +7,7 @@ const sinon = require('sinon');
 
 describe('OpenWhiskDeploy', () => {
   const CLI = function () { this.log = function () {};};
-  const serverless = {classes: {Error, CLI}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
+  const serverless = {classes: {Error, CLI}, service: {provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
   const options = {
     stage: 'dev',
     region: 'us-east-1',

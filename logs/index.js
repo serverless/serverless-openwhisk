@@ -27,10 +27,10 @@ class OpenWhiskLogs {
     this.serverless.service.getFunction(this.options.function);
 
     this.options.stage = this.options.stage
-      || (this.serverless.service.defaults && this.serverless.service.defaults.stage)
+      || (this.serverless.service.provider && this.serverless.service.provider.stage)
       || 'dev';
     this.options.region = this.options.region
-      || (this.serverless.service.defaults && this.serverless.service.defaults.region)
+      || (this.serverless.service.provider && this.serverless.service.provider.region)
       || 'us-east-1';
 
     this.options.interval = this.options.interval || 1000;

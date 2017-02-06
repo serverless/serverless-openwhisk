@@ -14,7 +14,7 @@ describe('deployHttpEvents', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const CLI = function () { this.log = function () {};};
-    serverless = {classes: {Error, CLI}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
+    serverless = {classes: {Error, CLI}, service: {provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
     const options = {
       stage: 'dev',
       region: 'us-east-1',
@@ -22,7 +22,7 @@ describe('deployHttpEvents', () => {
     openwhiskDeploy = new OpenWhiskDeploy(serverless, options);
     openwhiskDeploy.serverless.cli = new serverless.classes.CLI();
     openwhiskDeploy.serverless.service.service = 'my-service'
-    openwhiskDeploy.serverless.service.defaults = {
+    openwhiskDeploy.serverless.service.provider = {
       namespace: 'testing',
       apihost: 'openwhisk.org',
       auth: 'user:pass',

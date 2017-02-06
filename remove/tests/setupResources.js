@@ -9,7 +9,7 @@ require('chai').use(chaiAsPromised);
 
 describe('OpenWhiskRemove', () => {
   const CLI = function () { this.log = function () {};};
-  const serverless = {setProvider: () => {}, config: () => {}, pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => ({}), provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
+  const serverless = {setProvider: () => {}, config: () => {}, pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => ({}), provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
   let openwhiskRemove;
   let sandbox;
 

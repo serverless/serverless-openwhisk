@@ -18,14 +18,14 @@ describe('OpenWhiskDeployFunction', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const CLI = function () { this.log = function () {};};
-    serverless = {pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => {}, provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
+    serverless = {pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => {}, provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
     const options = {
       stage: 'dev',
       region: 'us-east-1',
     };
     openwhiskDeployFunction = new OpenWhiskDeployFunction(serverless, options);
     openwhiskDeployFunction.serverless.cli = new serverless.classes.CLI();
-    openwhiskDeployFunction.serverless.service.defaults = {
+    openwhiskDeployFunction.serverless.service.provider = {
       namespace: 'testing',
       apihost: 'openwhisk.org',
       auth: 'user:pass',

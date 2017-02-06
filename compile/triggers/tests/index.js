@@ -15,14 +15,14 @@ describe('OpenWhiskCompileTriggers', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    serverless = {classes: {Error}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
+    serverless = {classes: {Error}, service: {provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
     const options = {
       stage: 'dev',
       region: 'us-east-1',
     };
     openwhiskCompileTriggers = new OpenWhiskCompileTriggers(serverless, options);
     serverless.service.service = 'serviceName';
-    serverless.service.defaults = {
+    serverless.service.provider = {
       namespace: 'testing',
       apihost: '',
       auth: '',

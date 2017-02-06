@@ -28,10 +28,6 @@ class OpenWhiskCompileFunctions {
     // This object will be used to store the Action resources, passed directly to
     // the OpenWhisk SDK during the deploy process.
     this.serverless.service.actions = {};
-
-    if (!this.serverless.service.defaults) { 
-      this.serverless.service.defaults = {};
-    }
    }
 
   convertHandlerToPath(functionHandler) {
@@ -73,9 +69,7 @@ class OpenWhiskCompileFunctions {
   }
 
   calculateFunctionNameSpace(functionName, functionObject) {
-    return functionObject.namespace
-      || this.serverless.service.provider.namespace
-      || this.serverless.service.defaults.namespace;
+    return functionObject.namespace || this.serverless.service.provider.namespace;
   }
 
   calculateMemorySize(functionObject) {

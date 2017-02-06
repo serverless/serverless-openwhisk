@@ -3,6 +3,8 @@ require('../compile/triggers/tests');
 require('../compile/rules/tests');
 require('../compile/apigw/tests');
 require('../compile/functions/tests');
+require('../compile/schedule/tests');
+require('../configCredentials/tests');
 require('../deploy/tests');
 require('../deploy/tests/all');
 require('../deployFunction/tests');

@@ -11,7 +11,7 @@ describe('OpenWhiskRemove', () => {
     region: 'us-east-1',
   };
   const CLI = function () { this.log = function () {};};
-  const serverless = {setProvider: () => {}, config: () => {}, pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => ({}), provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
+  const serverless = {setProvider: () => {}, config: () => {}, pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => ({}), provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
   const openwhiskRemove = new OpenWhiskRemove(serverless, options);
   openwhiskRemove.serverless.cli = new serverless.classes.CLI();
 

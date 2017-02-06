@@ -19,16 +19,13 @@ class OpenWhiskCompileRules {
     // the OpenWhisk SDK during the deploy process.
     this.serverless.service.rules = {};
 
-    if (!this.serverless.service.defaults) { 
-      this.serverless.service.defaults = {};
+    if (this.serverless.service.provider.namespace) {
+      return Promise.resolve();
     }
-
     // Actions and Triggers referenced by Rules must used fully qualified identifiers (including namespace).
-    if (!this.serverless.service.defaults.namespace) {
-      return this.provider.props().then(props => {
-        this.serverless.service.defaults.namespace = props.namespace || '_';
-      });
-    }
+    return this.provider.props().then(props => {
+      this.serverless.service.provider.namespace = props.namespace || '_';
+    });
   }
 
   calculateFunctionName(functionName, functionObject) {
@@ -38,14 +35,11 @@ class OpenWhiskCompileRules {
   }
 
   calculateFunctionNameSpace(functionObject) {
-    return functionObject.namespace
-      || this.serverless.service.provider.namespace
-      || this.serverless.service.defaults.namespace;
+    return functionObject.namespace || this.serverless.service.provider.namespace
   }
 
   calculateTriggerName(triggerName) {
-    let namespace = this.serverless.service.provider.namespace
-      || this.serverless.service.defaults.namespace;
+    let namespace = this.serverless.service.provider.namespace;
 
     const resources = this.serverless.service.resources;
     if (resources.triggers && resources.triggers[triggerName]) {

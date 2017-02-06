@@ -78,7 +78,6 @@ class OpenWhiskInvokeLocal {
   calculateFunctionNameSpace(functionObject) {
     return functionObject.namespace
       || this.serverless.service.provider.namespace
-      || this.serverless.service.defaults.namespace
       || '_';
   }
 

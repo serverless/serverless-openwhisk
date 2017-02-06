@@ -16,14 +16,14 @@ describe('OpenWhiskCompileRules', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    serverless = {classes: {Error}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
+    serverless = {classes: {Error}, service: {provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
     const options = {
       stage: 'dev',
       region: 'us-east-1',
     };
     openwhiskCompileRules = new OpenWhiskCompileRules(serverless, options);
     serverless.service.service = 'serviceName';
-    serverless.service.defaults = {
+    serverless.service.provider = {
       namespace: 'testing',
       apihost: '',
       auth: '',
@@ -43,20 +43,20 @@ describe('OpenWhiskCompileRules', () => {
     })
 
     it('should use provider props if namespace available', () => {
-      openwhiskCompileRules.serverless.service.defaults.namespace = null;
+      openwhiskCompileRules.serverless.service.provider.namespace = null;
       const props = () => BbPromise.resolve({namespace: 'sample_ns'})
       openwhiskCompileRules.provider = { props };
       return openwhiskCompileRules.setup().then(() => {
-        expect(openwhiskCompileRules.serverless.service.defaults.namespace).to.equal("sample_ns")
+        expect(openwhiskCompileRules.serverless.service.provider.namespace).to.equal("sample_ns")
       });
     })
 
     it('should use default namespace if provider namespace missing', () => {
-      openwhiskCompileRules.serverless.service.defaults.namespace = null;
+      openwhiskCompileRules.serverless.service.provider.namespace = null;
       const props = () => BbPromise.resolve({})
       openwhiskCompileRules.provider = { props };
       return openwhiskCompileRules.setup().then(() => {
-        expect(openwhiskCompileRules.serverless.service.defaults.namespace).to.equal("_")
+        expect(openwhiskCompileRules.serverless.service.provider.namespace).to.equal("_")
       });
     })
   });

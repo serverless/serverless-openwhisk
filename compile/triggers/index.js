@@ -84,11 +84,11 @@ class OpenWhiskCompileTriggers {
     const trigger = { triggerName: name, overwrite: true };
 
     trigger.namespace = params.namespace
-      || this.serverless.service.defaults.namespace;
+      || this.serverless.service.provider.namespace;
 
     if (params.hasOwnProperty('overwrite')) {
       trigger.overwrite = params.overwrite;
-    } else if (this.serverless.service.defaults.hasOwnProperty('overwrite')) {
+    } else if (this.serverless.service.provider.hasOwnProperty('overwrite')) {
       trigger.overwrite = params.overwrite;
     }
 

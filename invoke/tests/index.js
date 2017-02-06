@@ -15,7 +15,7 @@ describe('OpenWhiskInvoke', () => {
   let sandbox;
 
   const CLI = function () { this.log = function () {};};
-  const serverless = {config: () => {}, pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => {}, provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
+  const serverless = {config: () => {}, pluginManager: { getPlugins: () => []}, classes: {Error, CLI}, service: {getFunction: () => {}, provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: sinon.spy()};
 
   const options = {
     stage: 'dev',

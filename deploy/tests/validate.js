@@ -9,7 +9,7 @@ describe('#validate()', () => {
 
   beforeEach(() => {
     const CLI = function () { this.log = function () {};};
-    serverless = {classes: {Error, CLI}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: () => {}};
+    serverless = {classes: {Error, CLI}, service: {provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: () => {}};
     openwhiskDeploy = new OpenWhiskDeploy(serverless);
 
     openwhiskDeploy.serverless.config = { servicePath: true };

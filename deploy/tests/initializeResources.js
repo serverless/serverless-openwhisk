@@ -15,13 +15,12 @@ describe('#initializeResources()', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const CLI = function () { this.log = function () {};};
-    serverless = {classes: {Error, CLI}, service: {provider: {}, defaults: {namespace: ''}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
+    serverless = {classes: {Error, CLI}, service: {provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
     const options = {
       stage: 'dev',
       region: 'us-east-1',
     };
     openwhiskDeploy = new OpenWhiskDeploy(serverless, options);
-    openwhiskDeploy.serverless.service.defaults = {};
     openwhiskDeploy.provider = {props: () => {}};
 
     serverless.cli = { log: () => {} };
@@ -38,7 +37,7 @@ describe('#initializeResources()', () => {
 
     sandbox.stub(openwhiskDeploy.provider, 'props', () => Promise.resolve(mockObject));
     return openwhiskDeploy.initializeResources().then(() => {
-      expect(openwhiskDeploy.serverless.service.defaults).to.deep.equal(mockObject);
+      expect(openwhiskDeploy.serverless.service.provider).to.deep.equal(mockObject);
     });
   });
 

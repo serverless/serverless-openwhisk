@@ -8,7 +8,7 @@ module.exports = {
   initializeResources() {
     this.serverless.cli.log('Initialising Resources...');
     const ParamNames = ['auth', 'apihost', 'namespace'];
-    const Defaults = this.serverless.service.defaults;
+    const Defaults = this.serverless.service.provider;
 
     return this.provider.props()
       .then(props => {
