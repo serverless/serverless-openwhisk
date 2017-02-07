@@ -26,6 +26,20 @@ functions:
 This definition will create a new endpoint, which binds the configured Action
 (index) to the URL path (/api/greeting) and HTTP method (GET).
 
+HTTP operation and path parameters can also be passed object properties on the
+event object.
+
+```yaml
+# serverless.yaml
+functions:
+    index:
+        handler: users.handler
+        events:
+            - http: 
+                method: GET 
+                path: /api/greeting
+```
+
 During deployment the endpoint configuration file will be uploaded to OpenWhisk.
 Each user has a unique hostname which provides access to the configured API
 endpoints. Invoking the endpoints on the gateway host will execute functions
