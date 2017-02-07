@@ -89,7 +89,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
   });
 
   describe('#compileHttpEvent()', () => {
-    it('should define http events from property', () => {
+    it('should define http events from string property', () => {
       openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
       const http =  "GET /api/foo/bar"
@@ -97,8 +97,22 @@ describe('OpenWhiskCompileHttpEvents', () => {
       return expect(result).to.deep.equal({basepath: '/my-service', relpath: '/api/foo/bar', operation: 'GET', action: '/sample_ns/my-service_action-name'});
     });
 
+    it('should define http events from object property', () => {
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
+      const http =  {path: "/api/foo/bar", method: "GET"}
+      const result = openwhiskCompileHttpEvents.compileHttpEvent('action-name', {}, http);
+      return expect(result).to.deep.equal({basepath: '/my-service', relpath: '/api/foo/bar', operation: 'GET', action: '/sample_ns/my-service_action-name'});
+    });
+
     it('should throw if http event value invalid', () => {
       expect(() => openwhiskCompileHttpEvents.compileHttpEvent('', {}, 'OPERATION'))
+        .to.throw(Error, /Incorrect HTTP event/);
+      expect(() => openwhiskCompileHttpEvents.compileHttpEvent('', {}, {}))
+        .to.throw(Error, /Incorrect HTTP event/);
+      expect(() => openwhiskCompileHttpEvents.compileHttpEvent('', {}, {method: true}))
+        .to.throw(Error, /Incorrect HTTP event/);
+      expect(() => openwhiskCompileHttpEvents.compileHttpEvent('', {}, {path: true}))
         .to.throw(Error, /Incorrect HTTP event/);
     });
   });

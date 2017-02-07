@@ -49,15 +49,26 @@ class OpenWhiskCompileHttpEvents {
   // Parameter values will be parsed from the user's YAML definition, either as a value from
   // the rule definition or the service provider defaults.
   compileHttpEvent(funcName, funcObj, http) {
-    const method_and_path = http.trim().split(' ');
-    if (method_and_path.length !== 2) {
-      throw new this.serverless.classes.Error(
-        `Incorrect HTTP event parameter value (${http}), must be string in form: HTTP_METHOD API_PATH e.g. GET /api/foo`);
-    }
+    const options = this.parseHttpEvent(http);
+    options.action = this.calculateFunctionName(funcName, funcObj);
+    options.basepath = `/${this.serverless.service.service}`;
+    return options;
+  }
 
-    const action = this.calculateFunctionName(funcName, funcObj);
+  parseHttpEvent(httpEvent) {
+    if (httpEvent.path && httpEvent.method) {
+      return { relpath: httpEvent.path, operation: httpEvent.method };
+    } else if (typeof httpEvent === 'string') {
+      const method_and_path = httpEvent.trim().split(' ');
+      if (method_and_path.length !== 2) {
+        throw new this.serverless.classes.Error(
+          `Incorrect HTTP event parameter value (${httpEvent}), must be string in form: HTTP_METHOD API_PATH e.g. GET /api/foo`);
+      }
+      return { operation: method_and_path[0], relpath: method_and_path[1] }
+    } 
 
-    return { basepath: `/${this.serverless.service.service}`, relpath: method_and_path[1], operation: method_and_path[0], action };
+    throw new this.serverless.classes.Error(
+      `Incorrect HTTP event parameter value (${httpEvent}), must be string ("GET /api/foo") or object ({method: "GET", path: "/api/foo"})`);
   }
 
   compileFunctionHttpEvents(functionName, functionObject) {
