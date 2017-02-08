@@ -3,6 +3,15 @@
 const BbPromise = require('bluebird');
 
 module.exports = {
+
+  deleteFeed(feed) {
+    return new Promise((resolve, reject) => {
+      this.provider.client().then(ow =>
+          ow.feeds.delete(feed).then(() => resolve(feed)).catch(() => resolve(feed))
+      );
+    })
+  },
+
   deployFeed(feed) {
     return this.provider.client().then(ow =>
       ow.feeds.create(feed).catch(err => {
@@ -20,9 +29,10 @@ module.exports = {
       this.serverless.cli.log('Binding Feeds To Triggers...');
     }
 
-    return BbPromise.all(feeds
-        .map(feed => this.deployFeed(feed))
-    );
+    const deleteAndDeployFeeds = feeds.map(feed => {
+      return this.deleteFeed(feed).then(() => this.deployFeed(feed))
+    })
+    return BbPromise.all(deleteAndDeployFeeds)
   },
 
   getFeeds() {

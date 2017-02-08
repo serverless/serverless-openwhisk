@@ -43,16 +43,19 @@ describe('deployFeeds', () => {
   });
 
   describe('#deployFeeds()', () => {
-    it('should call deployFeed for each registered trigger feed', () => {
-      const stub = sandbox.stub(openwhiskDeploy, 'deployFeed', () => {});
+    it('should call deleteFeed & deployFeed for each registered trigger feed', () => {
+      const deployStub = sandbox.stub(openwhiskDeploy, 'deployFeed', () => Promise.resolve());
+      const deleteStub = sandbox.stub(openwhiskDeploy, 'deleteFeed', () => Promise.resolve());
 
       const triggerWithFeed = { feed: { feedName: 'blah' } };
       openwhiskDeploy.serverless.service.triggers
         = { myTrigger: triggerWithFeed, anotherTrigger: {}, finalTrigger: triggerWithFeed };
 
       return openwhiskDeploy.deployFeeds().then(() => {
-        expect(stub.calledTwice).to.be.equal(true);
-        expect(stub.calledWith(triggerWithFeed.feed)).to.be.equal(true);
+        expect(deployStub.calledTwice).to.be.equal(true);
+        expect(deployStub.calledWith(triggerWithFeed.feed)).to.be.equal(true);
+        expect(deleteStub.calledTwice).to.be.equal(true);
+        expect(deleteStub.calledWith(triggerWithFeed.feed)).to.be.equal(true);
       });
     });
     it('should not log anything for empty feeds', () => {
@@ -67,7 +70,7 @@ describe('deployFeeds', () => {
 
   describe('#deployFeed()', () => {
     it('should deploy feed to openwhisk', () => {
-      sandbox.stub(openwhiskDeploy.provider, 'client', () => {
+      const stub = sandbox.stub(openwhiskDeploy.provider, 'client', () => {
         const create = params => {
           expect(params).to.be.deep.equal(mockFeedObject.feeds.myFeed);
           return Promise.resolve();
@@ -75,8 +78,9 @@ describe('deployFeeds', () => {
 
         return Promise.resolve({ feeds: { create } });
       });
-      return expect(openwhiskDeploy.deployFeed(mockFeedObject.feeds.myFeed))
-        .to.eventually.be.fulfilled;
+      return openwhiskDeploy.deployFeed(mockFeedObject.feeds.myFeed).then(() => {
+        expect(stub.called).to.be.true
+      })
     });
 
     it('should reject when function handler fails to deploy with error message', () => {
@@ -90,6 +94,35 @@ describe('deployFeeds', () => {
         .to.eventually.be.rejectedWith(
           new RegExp(`${mockFeedObject.feeds.myFeed.feedName}.*${err.message}`)
         );
+    });
+  });
+
+  describe('#deleteFeed()', () => {
+    it('should delete feed from openwhisk', () => {
+      const stub = sandbox.stub(openwhiskDeploy.provider, 'client', () => {
+        const _delete = params => {
+          expect(params).to.be.deep.equal(mockFeedObject.feeds.myFeed);
+          return Promise.resolve();
+        };
+
+        return Promise.resolve({ feeds: { "delete": _delete } });
+      });
+
+      return openwhiskDeploy.deleteFeed(mockFeedObject.feeds.myFeed).then(() => {
+        expect(stub.called).to.be.true
+      })
+    });
+
+    it('should handle errors from non-existant feeds', () => {
+      const err = { message: 'some reason' };
+      const stub = sandbox.stub(openwhiskDeploy.provider, 'client', () => {
+        const _delete = () => Promise.reject(err);
+        return Promise.resolve({ feeds: { "delete": _delete } });
+      });
+
+      return openwhiskDeploy.deleteFeed(mockFeedObject.feeds.myFeed).then(() => {
+        expect(stub.called).to.be.true
+      })
     });
   });
 });
