@@ -24,44 +24,62 @@ Account credentials for OpenWhisk can be provided through a configuration file o
 - *OW_APIHOST* - Platform endpoint, e.g. `openwhisk.ng.bluemix.net`
 - *OW_AUTH* - Authentication key, e.g. `xxxxxx:yyyyy`
 
-### Download boilerplate
-
-Retrieve the [boilerplate repository](https://github.com/jthomas/serverless-openwhisk-boilerplate) from Github.
-
-```
-$ git clone https://github.com/jthomas/serverless-openwhisk-boilerplate
-$ cd serverless-openwhisk-boilerplate
-```
-
-### Install Project Dependencies
+### Install Framework & Dependencies
 
 *Due to an [outstanding issue](https://github.com/serverless/serverless/issues/2895) with provider plugins, the [OpenWhisk provider](https://github.com/serverless/serverless-openwhisk) must be installed as a global module.*
 
+```shell
+$ npm install --global serverless serverless-openwhisk
 ```
-$ sudo npm install --global serverless serverless-openwhisk
-$ npm install
+
+### Create Service From Template
+
+Using the `create` command, you can create an example service from the [following template](https://github.com/serverless/serverless/tree/master/lib/plugins/create/templates/openwhisk-nodejs).
+
+```shell
+serverless create --template openwhisk-nodejs --path my_service
+cd my_service
+npm install
 ```
+
+More service examples are available in the [`serverless-examples`](https://github.com/serverless/examples) repository.
 
 ### Deploy Service
 
-The boilerplate includes an example that can be deployed without modification.
+The sample service from the template can be deployed without modification.
 
 ```shell
 serverless deploy
 ```
 
-If the deployment succeed, the following messages will be printed to the console.
+If the deployment succeeds, the following messages will be printed to the console.
 
 ```sh
 $ serverless deploy
 Serverless: Packaging service...
 Serverless: Compiling Functions...
+Serverless: Compiling API Gateway definitions...
 Serverless: Compiling Rules...
 Serverless: Compiling Triggers & Feeds...
 Serverless: Deploying Functions...
-Serverless: Deploying Triggers...
-Serverless: Deploying Rules...
 Serverless: Deployment successful!
+
+Service Information
+platform:	openwhisk.ng.bluemix.net
+namespace:	_
+service:	my_service
+
+actions:
+my_service-dev-hello
+
+triggers:
+**no triggers deployed***
+
+rules:
+**no rules deployed**
+
+endpoints:
+**no routes deployed**
 ```
 
 ### Test Service
@@ -69,11 +87,11 @@ Serverless: Deployment successful!
 Use the `invoke` command to test your newly deployed service.
 
 ```shell
-$ serverless invoke --function my_function
+$ serverless invoke --function hello
 {
     "payload": "Hello, World!"
 }
-$ serverless invoke --function my_function --data '{"name": "OpenWhisk"}'
+$ serverless invoke --function hello --data '{"name": "OpenWhisk"}'
 {
     "payload": "Hello, OpenWhisk!"
 }
