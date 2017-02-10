@@ -1,6 +1,6 @@
 {
   "name": "serverless-openwhisk",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "OpenWhisk support for the Serverless Framework",
   "main": "index.js",
   "directories": {
@@ -24,8 +24,8 @@
   "bugs": {
     "url": "https://github.com/serverless/serverless-openwhisk/issues"
   },
-  "engines" : {
-    "node" : ">=6.0"
+  "engines": {
+    "node": ">=6.0"
   },
   "homepage": "https://github.com/serverless/serverless-openwhisk#readme",
   "dependencies": {
