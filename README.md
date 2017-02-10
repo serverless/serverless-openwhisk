@@ -32,6 +32,8 @@ Account credentials for OpenWhisk can be provided through a configuration file o
 $ npm install --global serverless serverless-openwhisk
 ```
 
+**_This framework plugin requires Node.js runtime version 6.0 or above._**
+
 ### Create Service From Template
 
 Using the `create` command, you can create an example service from the [following template](https://github.com/serverless/serverless/tree/master/lib/plugins/create/templates/openwhisk-nodejs).
