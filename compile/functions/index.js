@@ -105,6 +105,7 @@ class OpenWhiskCompileFunctions {
         exec: params.Exec,
         limits: { timeout: params.Timeout * 1000, memory: params.MemorySize },
         parameters: params.Parameters,
+        annotations: params.Annotations
       },
     };
   }
@@ -156,9 +157,13 @@ class OpenWhiskCompileFunctions {
       // optional action parameters
       const Parameters = Object.keys(functionObject.parameters || {})
         .map(key => ({ key, value: functionObject.parameters[key] }));
+      
+      // optional action annotations 
+      const Annotations = Object.keys(functionObject.annotations || {})
+        .map(key => ({ key, value: functionObject.annotations[key] }));
 
       return this.compileFunctionAction(
-        { FunctionName, NameSpace, Overwrite, Exec, Timeout, MemorySize, Parameters }
+        { FunctionName, NameSpace, Overwrite, Exec, Timeout, MemorySize, Parameters, Annotations }
       );
     });
   }

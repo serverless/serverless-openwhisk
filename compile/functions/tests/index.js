@@ -136,7 +136,8 @@ describe('OpenWhiskCompileFunctions', () => {
         action: {
           exec: { kind: 'sequence', components: ["/_/one", "/a/two", "/a/b/three"] },
           limits: { timeout: 60 * 1000, memory: 256 },
-          parameters: []
+          parameters: [],
+          annotations: []
         },
       };
      
@@ -159,6 +160,7 @@ describe('OpenWhiskCompileFunctions', () => {
           exec: { main: 'some_func', kind: 'nodejs:default', code: new Buffer(fileContents) },
           limits: { timeout: 60 * 1000, memory: 256 },
           parameters: [],
+          annotations: []
         },
       };
       sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionObj) => {
@@ -183,6 +185,9 @@ describe('OpenWhiskCompileFunctions', () => {
       const parameters = {
         foo: 'bar',
       };
+      const annotations = {
+        foo: 'bar',
+      };
 
       const newFunction = {
         actionName: name,
@@ -194,6 +199,9 @@ describe('OpenWhiskCompileFunctions', () => {
           parameters: [
             { key: 'foo', value: 'bar' },
           ],
+          annotations: [
+            { key: 'foo', value: 'bar'},
+          ]
         },
       };
       sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionObj) => {
@@ -211,6 +219,7 @@ describe('OpenWhiskCompileFunctions', () => {
           runtime,
           handler,
           parameters,
+          annotations
         })).to.eventually.deep.equal(newFunction);
     });
 
@@ -232,6 +241,7 @@ describe('OpenWhiskCompileFunctions', () => {
           exec: { main: 'some_function', kind: runtime, code: new Buffer(fileContents) },
           limits: { timeout: timeout * 1000, memory: mem },
           parameters: [],
+          annotations: []
         },
       };
       sandbox.stub(openwhiskCompileFunctions, 'generateActionPackage', (functionObj) => {
