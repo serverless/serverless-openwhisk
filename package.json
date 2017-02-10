@@ -19,10 +19,13 @@
     "framework",
     "openwhisk"
   ],
-  "author": "",
+  "author": "James Thomas <james@jamesthom.as>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/serverless/serverless-openwhisk/issues"
+  },
+  "engines" : {
+    "node" : ">=6.0"
   },
   "homepage": "https://github.com/serverless/serverless-openwhisk#readme",
   "dependencies": {

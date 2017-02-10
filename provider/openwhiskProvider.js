@@ -1,3 +1,5 @@
+'use strict';
+
 const BbPromise = require('bluebird');
 const openwhisk = require('openwhisk')
 const Credentials = require('./credentials');
