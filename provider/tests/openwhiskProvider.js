@@ -56,10 +56,10 @@ describe('OpenwhiskProvider', () => {
   describe('#client()', () => {
     it('should return pre-configured openwhisk client', () => {
       openwhiskProvider._client = null 
-      const creds = {apihost: 'some_api', auth: 'user:pass', namespace: 'namespace'}
+      const creds = {apihost: 'some_api', auth: 'user:pass'}
       sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
       return openwhiskProvider.client().then(client => {
-        expect(client.actions.options).to.be.deep.equal({api_key: creds.auth, ignore_certs: undefined, namespace: creds.namespace, api: `https://${creds.apihost}/api/v1/`})
+        expect(client.actions.client.options).to.be.deep.equal({api_key: creds.auth, ignore_certs: false, api: `https://${creds.apihost}/api/v1/`})
         expect(typeof openwhiskProvider._client).to.not.equal('undefined');
       })
     })
