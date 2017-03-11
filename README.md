@@ -46,6 +46,16 @@ npm install
 
 More service examples are available in the [`serverless-examples`](https://github.com/serverless/examples) repository.
 
+**Using a self-hosted version of the platform?** 
+
+Ensure you set the `ignore_certs` option in the serverless.yaml prior to deployment.
+
+```
+provider:
+  name: openwhisk
+  ignore_certs: true
+```
+
 ### Deploy Service
 
 The sample service from the template can be deployed without modification.

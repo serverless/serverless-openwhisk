@@ -25,8 +25,9 @@ class OpenwhiskProvider {
   client() {
     if (this._client) return BbPromise.resolve(this._client)
 
+    const ignore_certs = this.serverless.service.provider.ignore_certs || false
     return this.props().then(this.hasValidCreds).then(wskProps => {
-      this._client = openwhisk({ apihost: wskProps.apihost, api_key: wskProps.auth, namespace: wskProps.namespace });
+      this._client = openwhisk({ apihost: wskProps.apihost, api_key: wskProps.auth, namespace: wskProps.namespace, ignore_certs });
       return this._client
     })
   }

@@ -64,6 +64,18 @@ describe('OpenwhiskProvider', () => {
       })
     })
 
+    it('should allow ignore_certs options for openwhisk client', () => {
+      openwhiskProvider._client = null 
+      const creds = {apihost: 'some_api', auth: 'user:pass'}
+      sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
+      openwhiskProvider.serverless.service.provider.ignore_certs = true
+      return openwhiskProvider.client().then(client => {
+        expect(client.actions.client.options).to.be.deep.equal({namespace: undefined, api_key: creds.auth, ignore_certs: true, api: `https://${creds.apihost}/api/v1/`})
+        expect(typeof openwhiskProvider._client).to.not.equal('undefined');
+      })
+    })
+
+
     it('should cache client instance', () => {
       openwhiskProvider._client = {} 
       return openwhiskProvider.client().then(client => {
