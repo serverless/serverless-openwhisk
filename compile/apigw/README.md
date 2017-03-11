@@ -50,7 +50,8 @@ API Gateway hosts serving the API endpoints will be shown during deployment.
 ```shell
 $ serverless deploy
 ...
-API Gateway Host: https://xxx-gws.api-gw.mybluemix.net
+endpoints:
+GET https://xxx-gws.api-gw.mybluemix.net/api/greeting --> index
 ```
 
 Calling the configured API endpoints will execute the deployed functions.
