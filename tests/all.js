@@ -4,6 +4,7 @@ require('../compile/rules/tests');
 require('../compile/apigw/tests');
 require('../compile/functions/tests');
 require('../compile/schedule/tests');
+require('../compile/message_hub/tests');
 require('../configCredentials/tests');
 require('../deploy/tests');
 require('../deploy/tests/all');

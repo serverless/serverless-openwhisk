@@ -31,6 +31,9 @@ module.exports = {
           if (event.schedule) {
             triggers.add(event.schedule.name || 
               `${this.serverless.service.service}_${name}_schedule_trigger`)
+          } else if (event.message_hub) {
+            triggers.add(event.message_hub.name || 
+              `${this.serverless.service.service}_${name}_messagehub_${event.message_hub.topic}`)
           } else if (event.trigger) {
             triggers.add(event.trigger.name || event.trigger)
           }
@@ -64,6 +67,10 @@ module.exports = {
     return schedule.rule || `${this.serverless.service.service}_${funcName}_schedule_rule`
   },
 
+  getMessageHubRuleName(funcName, funcObj, config) {
+    return config.rule || `${this.serverless.service.service}_${funcName}_messagehub_${config.topic}_rule`
+  },
+
   getRuleNames(functionName, functionObject) {
     if (!functionObject.events) return []
 
@@ -75,7 +82,11 @@ module.exports = {
       .filter(e => e.schedule)
       .map(e => this.getScheduleRuleName(functionName, functionObject, e.schedule))
 
-    return triggerRules.concat(scheduleRules)
+    const messageHubRules = functionObject.events
+      .filter(e => e.message_hub)
+      .map(e => this.getMessageHubRuleName(functionName, functionObject, e.message_hub))
+
+    return triggerRules.concat(scheduleRules, messageHubRules)
   },
 
   generateDefaultRuleName(functionName, triggerName) {
