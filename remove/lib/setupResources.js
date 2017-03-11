@@ -34,6 +34,9 @@ module.exports = {
           } else if (event.message_hub) {
             triggers.add(event.message_hub.name || 
               `${this.serverless.service.service}_${name}_messagehub_${event.message_hub.topic}`)
+          } else if (event.cloudant) {
+            triggers.add(event.cloudant.name || 
+              `${this.serverless.service.service}_${name}_cloudant_${event.cloudant.db}`)
           } else if (event.trigger) {
             triggers.add(event.trigger.name || event.trigger)
           }
@@ -71,6 +74,10 @@ module.exports = {
     return config.rule || `${this.serverless.service.service}_${funcName}_messagehub_${config.topic}_rule`
   },
 
+  getCloudantRuleName(funcName, funcObj, config) {
+    return config.rule || `${this.serverless.service.service}_${funcName}_cloudant_${config.db}_rule`
+  },
+
   getRuleNames(functionName, functionObject) {
     if (!functionObject.events) return []
 
@@ -86,7 +93,11 @@ module.exports = {
       .filter(e => e.message_hub)
       .map(e => this.getMessageHubRuleName(functionName, functionObject, e.message_hub))
 
-    return triggerRules.concat(scheduleRules, messageHubRules)
+    const cloudantRules = functionObject.events
+      .filter(e => e.cloudant)
+      .map(e => this.getCloudantRuleName(functionName, functionObject, e.cloudant))
+
+    return triggerRules.concat(scheduleRules, messageHubRules, cloudantRules)
   },
 
   generateDefaultRuleName(functionName, triggerName) {

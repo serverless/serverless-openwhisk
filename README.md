@@ -439,6 +439,55 @@ functions:
 
 `topic`, `brokers`, `user`, `password` and `admin_url` are mandatory parameters.
 
+## Cloudant DB Events
+
+IBM Cloudant provides a hosted NoSQL database, based upon CouchDB, running on IBM Bluemix. Functions can be connected to events fired when the database is updated. These events use the [CouchDB changes feed](http://guide.couchdb.org/draft/notifications.html) to follow database modifications. 
+
+IBM Cloudant instances can be provisioned through the IBM Bluemix platform. OpenWhisk on Bluemix will export Cloudant service credentials bound to a package with the following name:
+
+```
+/${BLUEMIX_ORG}_${BLUEMIX_SPACE}/Bluemix_${SERVICE_NAME}_Credentials-1
+```
+
+Rather than having to manually define all the properties needed by the [Cloudant trigger feed](https://github.com/openwhisk/openwhisk-package-cloudant#using-the-cloudant-package), you can reference a package to use instead. Credentials from the referenced package will be used when executing the trigger feed.
+
+Developers only need to add the database name to follow for modifications.
+
+```yaml
+# serverless.yaml
+functions:
+    index:
+        handler: users.main
+        events:
+            - cloudant: 
+                package: /${BLUEMIX_ORG}_${BLUEMIX_SPACE}/Bluemix_${SERVICE_NAME}_Credentials-1
+                db: my_db_name
+ 
+```
+
+The plugin will create a trigger called `${serviceName}_${fnName}_cloudant_${topic}` and a rule called `${serviceName}_${fnName}_cloudant_${topic}_rule` to bind the function to the Cloudant update events.
+
+The trigger and rule names created can be set explicitly using the `trigger` and`rule` parameters. 
+
+Other functions can bind to the same trigger using the inline `trigger` event referencing this trigger name.
+
+## Using Manual Parameters
+
+Parameters for the Cloudant event source can be defined explicitly, rather than using pulling credentials from a package.
+
+```yaml
+# serverless.yaml
+functions:
+    index:
+        handler: users.main
+        events:
+            - cloudant: 
+                host: xxx-yyy-zzz-bluemix.cloudant.com
+                username: USERNAME
+                password: PASSWORD
+                db: db_name
+```
+
 ## Custom Event Triggers
 
 Functions are connected to event sources in OpenWhisk [using triggers and rules](https://github.com/openwhisk/openwhisk/blob/master/docs/triggers_rules.md). Triggers create a named event stream within the system. Triggers can be fired manually or connected to external data sources, like databases or message queues. 
