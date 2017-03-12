@@ -84,6 +84,10 @@ class OpenWhiskCompileFunctions {
     return functionObject.runtime || this.serverless.service.provider.runtime || 'nodejs:default';
   }
 
+  calculateImage(functionObject) {
+    return functionObject.image || this.serverless.service.provider.image || undefined;
+  }
+
   calculateOverwrite(functionObject) {
     let Overwrite = true;
 
@@ -135,7 +139,8 @@ class OpenWhiskCompileFunctions {
   compileFunctionExec(functionObject) {
     const main = this.calculateFunctionMain(functionObject);
     const kind = this.calculateRuntime(functionObject);
-    return this.generateActionPackage(functionObject).then(code => ({ main, kind, code }));
+    const image = this.calculateImage(functionObject);
+    return this.generateActionPackage(functionObject).then(code => image ? { main, kind, code, image } : { main, kind, code });
   }
 
   // This method takes the function handler definition, parsed from the user's YAML file,

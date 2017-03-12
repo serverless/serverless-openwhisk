@@ -181,6 +181,7 @@ describe('OpenWhiskCompileFunctions', () => {
       const mem = 100;
       const timeout = 10;
       const runtime = 'runtime';
+      const image = 'image';
       const overwrite = false;
       const parameters = {
         foo: 'bar',
@@ -194,7 +195,7 @@ describe('OpenWhiskCompileFunctions', () => {
         namespace: 'testing_namespace',
         overwrite: false,
         action: {
-          exec: { main: 'some_function', kind: runtime, code: new Buffer(fileContents) },
+          exec: { main: 'some_function', kind: runtime, image: image, code: new Buffer(fileContents) },
           limits: { timeout: timeout * 1000, memory: mem },
           parameters: [
             { key: 'foo', value: 'bar' },
@@ -217,6 +218,7 @@ describe('OpenWhiskCompileFunctions', () => {
           memory: mem,
           overwrite,
           runtime,
+          image,
           handler,
           parameters,
           annotations
@@ -231,6 +233,7 @@ describe('OpenWhiskCompileFunctions', () => {
       const mem = 100;
       const timeout = 10;
       const runtime = 'runtime';
+      const image = 'image';
       const overwrite = false;
 
       const newFunction = {
@@ -238,7 +241,7 @@ describe('OpenWhiskCompileFunctions', () => {
         namespace: 'testing_namespace',
         overwrite: false,
         action: {
-          exec: { main: 'some_function', kind: runtime, code: new Buffer(fileContents) },
+          exec: { main: 'some_function', kind: runtime, image: image, code: new Buffer(fileContents) },
           limits: { timeout: timeout * 1000, memory: mem },
           parameters: [],
           annotations: []
@@ -250,7 +253,7 @@ describe('OpenWhiskCompileFunctions', () => {
       });
 
       openwhiskCompileFunctions.serverless.service.provider = {
-        memory: mem, timeout, overwrite, namespace: 'namespace', runtime,
+        memory: mem, timeout, overwrite, namespace: 'namespace', runtime, image,
       };
       return expect(
         openwhiskCompileFunctions.compileFunction('functionName', {
