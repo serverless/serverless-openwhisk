@@ -3,6 +3,7 @@ require('../compile/triggers/tests');
 require('../compile/rules/tests');
 require('../compile/apigw/tests');
 require('../compile/functions/tests');
+require('../compile/functions/runtimes/tests/all.js');
 require('../compile/schedule/tests');
 require('../compile/message_hub/tests');
 require('../compile/cloudant/tests');

@@ -83,81 +83,18 @@ describe('OpenWhiskCompileFunctions', () => {
   });
 
 
-  describe('#generateActionPackage()', () => {
-    it('should read service artifact and add package.json for handler', () => {
-      openwhiskCompileFunctions.serverless.service.package = {artifact: '/path/to/zip_file.zip'};
-      const zip = new JSZip();
-      zip.file("handler.js", "function main() { return {}; }");
-      zip.file("package.json", '{"main": "index.js"}')
-      return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
-        sandbox.stub(fs, 'readFile', (path, cb) => {
-          expect(path).to.equal('/path/to/zip_file.zip');
-          cb(null, zipped);
-        });
-        return openwhiskCompileFunctions.generateActionPackage({handler: 'handler.main'}).then(data => {
-          return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
-            return zip.file("package.json").async("string").then(package_json => {
-              expect(package_json).to.be.equal('{"main":"handler.js"}')
-            })
-          })
-        })
-      });
-    })
-  
-    it('should handle service artifact for individual function handler', () => {
-      const functionObj = {handler: 'handler.main', artifact: '/path/to/zip_file.zip'}
-      openwhiskCompileFunctions.serverless.service.package = {individually: true};
-
-      const zip = new JSZip();
-      zip.file("handler.js", "function main() { return {}; }");
-      zip.file("package.json", '{"main": "index.js"}')
-      return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
-        sandbox.stub(fs, 'readFile', (path, cb) => {
-          expect(path).to.equal('/path/to/zip_file.zip');
-          cb(null, zipped);
-        });
-        return openwhiskCompileFunctions.generateActionPackage(functionObj).then(data => {
-          return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
-            return zip.file("package.json").async("string").then(package_json => {
-              expect(package_json).to.be.equal('{"main":"handler.js"}')
-            })
-          })
-        })
-      });
-    })
-  })
-
   describe('#compileFunction()', () => {
-    it('should return sequence definition for sequence function', () => {
-      const newFunction = {
-        actionName: 'serviceName_functionName',
-        namespace: 'namespace',
-        overwrite: true,
-        action: {
-          exec: { kind: 'sequence', components: ["/_/one", "/a/two", "/a/b/three"] },
-          limits: { timeout: 60 * 1000, memory: 256 },
-          parameters: [],
-          annotations: []
-        },
-      };
-     
-      openwhiskCompileFunctions.serverless.service.getFunction = () => ({name: 'one'});
-      openwhiskCompileFunctions.serverless.service.provider.namespace = 'namespace';
-      return expect(openwhiskCompileFunctions.compileFunction('functionName', {
-        sequence: ["one", "/a/two", "/a/b/three"]
-      })).to.eventually.deep.equal(newFunction);
-    });
-
     it('should return default function instance for handler', () => {
-      const fileContents = 'some file contents';
-      const handler = 'handler.some_func';
+      const exec = { foo: 'bar' }
+      openwhiskCompileFunctions.runtimes.exec = () => Promise.resolve(exec)
+      const handler = 'handler.some_function';
 
       const newFunction = {
         actionName: 'serviceName_functionName',
         namespace: 'namespace',
         overwrite: true,
         action: {
-          exec: { main: 'some_func', kind: 'nodejs:default', code: new Buffer(fileContents) },
+          exec,
           limits: { timeout: 60 * 1000, memory: 256 },
           parameters: [],
           annotations: []
@@ -169,11 +106,13 @@ describe('OpenWhiskCompileFunctions', () => {
       });
       openwhiskCompileFunctions.serverless.service.provider.namespace = 'namespace';
       return expect(openwhiskCompileFunctions.compileFunction('functionName', {
-        handler,
+        handler
       })).to.eventually.deep.equal(newFunction);
     });
 
     it('should allow manifest parameters to override defaults', () => {
+      const exec = { foo: 'bar' }
+      openwhiskCompileFunctions.runtimes.exec = () => Promise.resolve(exec)
       const fileContents = 'some file contents';
       const handler = 'handler.some_function';
       const name = 'serviceName_functionName';
@@ -194,7 +133,7 @@ describe('OpenWhiskCompileFunctions', () => {
         namespace: 'testing_namespace',
         overwrite: false,
         action: {
-          exec: { main: 'some_function', kind: runtime, code: new Buffer(fileContents) },
+          exec,
           limits: { timeout: timeout * 1000, memory: mem },
           parameters: [
             { key: 'foo', value: 'bar' },
@@ -224,6 +163,8 @@ describe('OpenWhiskCompileFunctions', () => {
     });
 
     it('should allow provider default parameters to override defaults', () => {
+      const exec = { foo: 'bar' }
+      openwhiskCompileFunctions.runtimes.exec = () => Promise.resolve(exec)
       const fileContents = 'some file contents';
       const handler = 'handler.some_function';
       const name = 'serviceName_functionName';
@@ -238,7 +179,7 @@ describe('OpenWhiskCompileFunctions', () => {
         namespace: 'testing_namespace',
         overwrite: false,
         action: {
-          exec: { main: 'some_function', kind: runtime, code: new Buffer(fileContents) },
+          exec,
           limits: { timeout: timeout * 1000, memory: mem },
           parameters: [],
           annotations: []
