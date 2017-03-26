@@ -6,11 +6,11 @@ const chaiAsPromised = require('chai-as-promised');
 require('chai').use(chaiAsPromised);
 
 const sinon = require('sinon');
-const Python = require('../python');
+const Swift = require('../swift');
 const JSZip = require("jszip");
 const fs = require('fs-extra');
 
-describe('Python', () => {
+describe('Swift', () => {
   let serverless;
   let node;
   let sandbox;
@@ -19,7 +19,7 @@ describe('Python', () => {
     sandbox = sinon.sandbox.create();
     serverless = {classes: {Error}, service: {}, getProvider: sandbox.spy()};
     serverless.service.provider = { name: 'openwhisk' };
-    node = new Python(serverless);
+    node = new Swift(serverless);
   });
 
   afterEach(() => {
@@ -29,11 +29,11 @@ describe('Python', () => {
   describe('#match()', () => {
     it('should match with explicit runtime', () => {
       serverless.service.provider.runtime = 'nodejs';
-      expect(node.match({runtime: 'python', handler: 'file.func'})).to.equal(true)
+      expect(node.match({runtime: 'swift', handler: 'file.func'})).to.equal(true)
     });
 
     it('should match with provider runtime', () => {
-      serverless.service.provider.runtime = 'python';
+      serverless.service.provider.runtime = 'swift';
       expect(node.match({handler: 'file.func'})).to.equal(true)
     });
 
@@ -56,16 +56,16 @@ describe('Python', () => {
   });
 
   describe('#exec()', () => {
-    it('should return python exec definition', () => {
+    it('should return swift exec definition', () => {
       const fileContents = 'some file contents';
       const handler = 'handler.some_func';
 
-      const exec = { main: 'some_func', kind: 'python:default', code: new Buffer(fileContents) };
+      const exec = { main: 'some_func', kind: 'swift:default', code: new Buffer(fileContents) };
       sandbox.stub(node, 'generateActionPackage', (functionObj) => {
         expect(functionObj.handler).to.equal(handler);
         return Promise.resolve(new Buffer(fileContents));
       });
-      return expect(node.exec({ handler, runtime: 'python'}))
+      return expect(node.exec({ handler, runtime: 'swift'}))
         .to.eventually.deep.equal(exec);
     })
   });
@@ -73,14 +73,15 @@ describe('Python', () => {
   describe('#generateActionPackage()', () => {
     it('should throw error for missing handler file', () => {
       expect(() => node.generateActionPackage({handler: 'does_not_exist.main'}))
-        .to.throw(Error, 'Function handler (does_not_exist.py) does not exist.');
+        .to.throw(Error, 'Function handler (does_not_exist.swift) does not exist.');
     })
 
     it('should read service artifact and add package.json for handler', () => {
       node.serverless.service.package = {artifact: '/path/to/zip_file.zip'};
       node.isValidFile = () => true
+      const source = 'func main(args: [String:Any]) -> [String:Any] {\nreturn ["hello": "world"]\n}' 
       const zip = new JSZip();
-      zip.file("handler.py", "def main(dict):\n\treturn {}");
+      zip.file("handler.swift", source);
       return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
         sandbox.stub(fs, 'readFile', (path, cb) => {
           expect(path).to.equal('/path/to/zip_file.zip');
@@ -88,9 +89,9 @@ describe('Python', () => {
         });
         return node.generateActionPackage({handler: 'handler.main'}).then(data => {
           return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
-            expect(zip.file("handler.py")).to.be.equal(null)
-            return zip.file("__main__.py").async("string").then(package_json => {
-              expect(package_json).to.be.equal('def main(dict):\n\treturn {}')
+            expect(zip.file("handler.swift")).to.be.equal(null)
+            return zip.file("main.swift").async("string").then(code => {
+              expect(code).to.be.equal(source)
             })
           })
         })
@@ -103,7 +104,8 @@ describe('Python', () => {
       node.isValidFile = () => true
 
       const zip = new JSZip();
-      zip.file("handler.py", "def main(dict):\n\treturn {}");
+      const source = 'func main(args: [String:Any]) -> [String:Any] {\nreturn ["hello": "world"]\n}' 
+      zip.file("handler.swift", source);
       return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
         sandbox.stub(fs, 'readFile', (path, cb) => {
           expect(path).to.equal('/path/to/zip_file.zip');
@@ -111,9 +113,9 @@ describe('Python', () => {
         });
         return node.generateActionPackage(functionObj).then(data => {
           return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
-            expect(zip.file("handler.py")).to.be.equal(null)
-            return zip.file("__main__.py").async("string").then(package_json => {
-              expect(package_json).to.be.equal('def main(dict):\n\treturn {}')
+            expect(zip.file("handler.swift")).to.be.equal(null)
+            return zip.file("main.swift").async("string").then(code => {
+              expect(code).to.be.equal(source)
             })
           })
         })

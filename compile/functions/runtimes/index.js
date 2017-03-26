@@ -2,6 +2,7 @@
 
 const Node = require('./node')
 const Python = require('./python')
+const Swift = require('./swift')
 const Sequence = require('./sequence')
 
 class Runtimes {
@@ -10,6 +11,7 @@ class Runtimes {
     this.runtimes = [
       new Node(serverless),
       new Python(serverless),
+      new Swift(serverless),
       new Sequence(serverless)
     ];
   }

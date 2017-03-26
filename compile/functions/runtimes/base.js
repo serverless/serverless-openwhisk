@@ -17,7 +17,7 @@ class BaseRuntime {
 
   exec (functionObject) {
     const main = this.calculateFunctionMain(functionObject);
-    const kind = this.calculateRuntime(functionObject);
+    const kind = this.calculateKind(functionObject);
     return this.generateActionPackage(functionObject).then(code => ({ main, kind, code }));
   }
 
@@ -27,6 +27,11 @@ class BaseRuntime {
 
   calculateRuntime(functionObject) {
     return functionObject.runtime || this.serverless.service.provider.runtime
+  }
+
+  calculateKind(functionObject) {
+    const runtime = this.calculateRuntime(functionObject)
+    return runtime.includes(':') ? runtime : `${runtime}:default`
   }
 
   isValidFile (handlerFile) {
