@@ -60,6 +60,7 @@ class BaseRuntime {
     const readFile = BbPromise.promisify(fs.readFile);
     return readFile(artifactPath).then(zipBuffer => JSZip.loadAsync(zipBuffer))
   }
+
   getArtifactPath(functionObject) {
     return this.serverless.service.package.individually ? 
       functionObject.artifact : this.serverless.service.package.artifact;

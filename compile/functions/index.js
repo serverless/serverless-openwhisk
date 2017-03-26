@@ -32,40 +32,6 @@ class OpenWhiskCompileFunctions {
     this.serverless.service.actions = {};
    }
 
-  convertHandlerToPath(functionHandler) {
-    return functionHandler.replace(/\..*$/, '.js');
-  }
-
-  readFunctionSource(functionHandler) {
-    const handlerFile = this.convertHandlerToPath(functionHandler);
-    const readFile = BbPromise.promisify(fs.readFile);
-    return readFile(handlerFile, 'utf8');
-  }
-
-  getArtifactPath(functionObject) {
-    return this.serverless.service.package.individually ? 
-      functionObject.artifact : this.serverless.service.package.artifact;
-  }
-
-  getArtifactZip(functionObject) {
-    const artifactPath = this.getArtifactPath(functionObject)
-    const readFile = BbPromise.promisify(fs.readFile);
-    return readFile(artifactPath).then(zipBuffer => JSZip.loadAsync(zipBuffer))
-  }
-
-  generateActionPackage(functionObject) {
-    const handlerFile = this.convertHandlerToPath(functionObject.handler);
-
-    return this.getArtifactZip(functionObject).then(zip => {
-      zip.file("package.json", JSON.stringify({main: handlerFile}))
-      return zip.generateAsync({type:"nodebuffer"})
-    }).then(buf => buf.toString('base64'))
-  }
-
-  calculateFunctionMain(functionObject) {
-    return functionObject.handler.split('.')[1]
-  }
-
   calculateFunctionName(functionName, functionObject) {
     return functionObject.name || `${this.serverless.service.service}_${functionName}`;
   }
@@ -80,10 +46,6 @@ class OpenWhiskCompileFunctions {
 
   calculateTimeout(functionObject) {
     return functionObject.timeout || this.serverless.service.provider.timeout || 60;
-  }
-
-  calculateRuntime(functionObject) {
-    return functionObject.runtime || this.serverless.service.provider.runtime || 'nodejs:default';
   }
 
   calculateOverwrite(functionObject) {

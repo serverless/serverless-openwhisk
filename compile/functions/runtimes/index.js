@@ -1,5 +1,6 @@
 'use strict';
 
+const Binary = require('./binary')
 const Node = require('./node')
 const Python = require('./python')
 const Swift = require('./swift')
@@ -9,6 +10,7 @@ class Runtimes {
   constructor(serverless) {
     this.serverless = serverless;
     this.runtimes = [
+      new Binary(serverless),
       new Node(serverless),
       new Python(serverless),
       new Swift(serverless),
