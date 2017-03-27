@@ -68,6 +68,19 @@ describe('Swift', () => {
       return expect(node.exec({ handler, runtime: 'swift'}))
         .to.eventually.deep.equal(exec);
     })
+
+    it('should return swift exec definition with custom image', () => {
+      const fileContents = 'some file contents';
+      const handler = 'handler.some_func';
+
+      const exec = { main: 'some_func', kind: 'blackbox', image: 'foo', code: new Buffer(fileContents) };
+      sandbox.stub(node, 'generateActionPackage', (functionObj) => {
+        expect(functionObj.handler).to.equal(handler);
+        return Promise.resolve(new Buffer(fileContents));
+      });
+      return expect(node.exec({ handler, runtime: 'swift', image: 'foo' }))
+        .to.eventually.deep.equal(exec);
+    })
   });
 
   describe('#generateActionPackage()', () => {

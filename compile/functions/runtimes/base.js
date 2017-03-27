@@ -18,7 +18,13 @@ class BaseRuntime {
   exec (functionObject) {
     const main = this.calculateFunctionMain(functionObject);
     const kind = this.calculateKind(functionObject);
-    return this.generateActionPackage(functionObject).then(code => ({ main, kind, code }));
+    const exec = { main, kind }
+
+    if (functionObject.hasOwnProperty('image')) {
+      exec.image = functionObject.image
+    }
+
+    return this.generateActionPackage(functionObject).then(code => Object.assign(exec, { code }))
   }
 
   calculateFunctionMain(functionObject) {
@@ -30,6 +36,8 @@ class BaseRuntime {
   }
 
   calculateKind(functionObject) {
+    if (functionObject.hasOwnProperty('image')) return 'blackbox'
+
     const runtime = this.calculateRuntime(functionObject)
     return runtime.includes(':') ? runtime : `${runtime}:default`
   }

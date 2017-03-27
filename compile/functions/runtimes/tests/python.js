@@ -68,6 +68,19 @@ describe('Python', () => {
       return expect(node.exec({ handler, runtime: 'python'}))
         .to.eventually.deep.equal(exec);
     })
+
+    it('should support using custom image', () => {
+      const fileContents = 'some file contents';
+      const handler = 'handler.some_func';
+
+      const exec = { main: 'some_func', image: 'blah', kind: 'blackbox', code: new Buffer(fileContents) };
+      sandbox.stub(node, 'generateActionPackage', (functionObj) => {
+        expect(functionObj.handler).to.equal(handler);
+        return Promise.resolve(new Buffer(fileContents));
+      });
+      return expect(node.exec({ handler, image: 'blah', runtime: 'python' }))
+        .to.eventually.deep.equal(exec);
+    })
   });
 
   describe('#generateActionPackage()', () => {
