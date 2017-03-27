@@ -2,8 +2,6 @@
 
 const BaseRuntime = require('./base')
 
-const fs = require('fs-extra')
-
 class Node extends BaseRuntime {
   constructor (serverless) {
     super(serverless)

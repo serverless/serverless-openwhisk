@@ -60,7 +60,7 @@ describe('Python', () => {
       const fileContents = 'some file contents';
       const handler = 'handler.some_func';
 
-      const exec = { main: 'some_func', kind: 'python:default', code: new Buffer(fileContents) };
+      const exec = { main: 'some_func', kind: 'python', code: new Buffer(fileContents) };
       sandbox.stub(node, 'generateActionPackage', (functionObj) => {
         expect(functionObj.handler).to.equal(handler);
         return Promise.resolve(new Buffer(fileContents));

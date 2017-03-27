@@ -35,11 +35,15 @@ class BaseRuntime {
     return functionObject.runtime || this.serverless.service.provider.runtime
   }
 
+  calculateDefaultRuntime(functionObject) {
+    const runtime = this.calculateRuntime(functionObject)
+    return runtime.includes(':') ? runtime : `${runtime}:default`
+  }
+
   calculateKind(functionObject) {
     if (functionObject.hasOwnProperty('image')) return 'blackbox'
 
-    const runtime = this.calculateRuntime(functionObject)
-    return runtime.includes(':') ? runtime : `${runtime}:default`
+    return this.calculateDefaultRuntime(functionObject)
   }
 
   isValidFile (handlerFile) {

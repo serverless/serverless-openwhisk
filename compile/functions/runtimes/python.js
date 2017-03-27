@@ -2,10 +2,6 @@
 
 const BaseRuntime = require('./base')
 
-const fs = require('fs-extra')
-const BbPromise = require('bluebird')
-const JSZip = require('jszip')
-
 class Python extends BaseRuntime {
   constructor (serverless) {
     super(serverless)
@@ -18,6 +14,10 @@ class Python extends BaseRuntime {
       zip.remove(handlerFile)
       return zip.file('__main__.py', data)
     })
+  }
+
+  calculateDefaultRuntime (functionObject) {
+    return this.calculateRuntime(functionObject)
   }
 }
 

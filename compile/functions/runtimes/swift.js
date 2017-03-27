@@ -2,10 +2,6 @@
 
 const BaseRuntime = require('./base')
 
-const fs = require('fs-extra')
-const BbPromise = require('bluebird')
-const JSZip = require('jszip')
-
 class Swift extends BaseRuntime {
   constructor (serverless) {
     super(serverless)
