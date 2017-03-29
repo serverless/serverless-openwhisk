@@ -47,7 +47,8 @@ class OpenWhiskInfo {
       .then(this.showActionsInfo)
       .then(this.showTriggersInfo)
       .then(this.showRulesInfo)
-      .then(this.showRoutesInfo);
+      .then(this.showRoutesInfo)
+      .then(this.showWebActionsInfo);
   }
 
   showServiceInfo () {
@@ -59,9 +60,28 @@ class OpenWhiskInfo {
   showActionsInfo () {
     this.consoleLog(`${chalk.yellow('actions:')}`);
     return this.client.actions.list().then(actions => {
+      this._actions = actions;
       if (!actions.length) return console.log('**no actions deployed**\n');
       const names = actions.map(action => action.name).join('    ');
       this.consoleLog(names + '\n')
+    })
+  }
+
+  showWebActionsInfo () {
+    this.consoleLog(`${chalk.yellow('endpoints (web actions):')}`);
+    const web_actions = this._actions.filter(action => {
+      const annotations = action.annotations || []
+      return annotations.some(a => a.key === 'web-export' && a.value === true)
+    })
+    if (!web_actions.length) {
+      this.consoleLog('**no web actions deployed**\n');
+      return Promise.resolve();
+    }
+
+    return this.provider.props().then(props => {
+      web_actions.forEach(action => {
+        this.consoleLog(`https://${props.apihost}/api/v1/web/${action.namespace}/default/${action.name}`)
+      })
     })
   }
 
@@ -84,10 +104,11 @@ class OpenWhiskInfo {
   }
 
   showRoutesInfo () {
-    this.consoleLog(`${chalk.yellow('endpoints:')}`);
+    this.consoleLog(`${chalk.yellow('endpoints (api-gw):')}`);
     return this.client.routes.list().then(routes => {
-      if (!routes.apis.length) return console.log('**no routes deployed**');
+      if (!routes.apis.length) return console.log('**no routes deployed**\n');
       routes.apis.forEach(api => this.logApiEndPoints(api.value))
+      this.consoleLog('')
     })
   }
 

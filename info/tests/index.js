@@ -63,6 +63,7 @@ describe('OpenWhiskInfo', () => {
       const triggers = sandbox.stub(openwhiskInfo, 'showTriggersInfo')
       const rules = sandbox.stub(openwhiskInfo, 'showRulesInfo')
       const routes = sandbox.stub(openwhiskInfo, 'showRoutesInfo')
+      const web_actions = sandbox.stub(openwhiskInfo, 'showWebActionsInfo')
 
       return openwhiskInfo.info().then(() => {
         expect(service.calledOnce).to.be.equal(true);
@@ -70,6 +71,7 @@ describe('OpenWhiskInfo', () => {
         expect(triggers.calledOnce).to.be.equal(true);
         expect(rules.calledOnce).to.be.equal(true);
         expect(routes.calledOnce).to.be.equal(true);
+        expect(web_actions.calledOnce).to.be.equal(true);
         expect(log.args[0][0].match(/Service Information/)).to.be.ok;
       });
     });
@@ -169,11 +171,33 @@ describe('OpenWhiskInfo', () => {
       sandbox.stub(openwhiskInfo.client.routes, 'list').returns(BbPromise.resolve({ apis }));
 
       return expect(openwhiskInfo.showRoutesInfo().then(() => {
-        expect(log.args[0][0].match(/endpoints:/)).to.be.ok;
+        expect(log.args[0][0].match(/endpoints \(api-gw\):/)).to.be.ok;
         expect(log.args[1][0].match(/GET https:\/\/api-gateway.com\/service_name\/api\/hello/)).to.be.ok;
         expect(log.args[2][0].match(/POST https:\/\/api-gateway.com\/service_name\/api\/foobar/)).to.be.ok;
         expect(log.args[3][0].match(/GET https:\/\/api-gateway.com\/service_name\/api\/foo\/1/)).to.be.ok;
         expect(log.args[4][0].match(/POST https:\/\/api-gateway.com\/service_name\/api\/bar\/2/)).to.be.ok;
+      }));
+    })
+  })
+
+  describe('#showWebActionsInfo()', () => {
+    it('should show web action routes returned', () => {
+      const apihost = 'openwhisk.ng.bluemix.net'
+      openwhiskInfo.provider = { props: () => Promise.resolve({ apihost }) }
+      const log = sandbox.stub(openwhiskInfo, 'consoleLog')
+      openwhiskInfo._actions = [
+        {name: 'first', namespace: 'user_name', annotations: [{key: 'web-export', value: true}, {key: 'a', value: 'b'}]}, 
+        {name: 'second', namespace: 'user_name', annotations: [{key: 'web-export', value: false}]}, 
+        {name: 'third'},
+        {name: 'fourth', namespace: 'user_name', annotations: [{key: 'web-export', value: true}]}, 
+        {name: 'fifth', annotations: []}
+      ];
+
+      return expect(openwhiskInfo.showWebActionsInfo().then(() => {
+        expect(log.calledThrice).to.be.equal(true);
+        expect(log.args[0][0].match(/endpoints \(web actions\):/)).to.be.ok;
+        expect(log.args[1][0].match(/https:\/\/openwhisk.ng.bluemix.net\/api\/v1\/web\/user_name\/default\/first/)).to.be.ok;
+        expect(log.args[2][0].match(/https:\/\/openwhisk.ng.bluemix.net\/api\/v1\/web\/user_name\/default\/fourth/)).to.be.ok;
       }));
     })
   })
