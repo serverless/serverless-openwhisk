@@ -94,12 +94,20 @@ class OpenWhiskInvoke {
     }
 
     return this.client.actions.invoke(options)
-      .catch(err => {
-        throw new this.serverless.classes.Error(
-          `Failed to invoke function service (${this.options.function}) due to error:`
-          + ` ${err.message}`
-        );
-      });
+      .catch(err => this.formatErrMsg(err));
+  }
+
+  formatErrMsg (err) {
+    let err_msg = `Failed to invoke function service (${this.options.function}) due to error:`
+    const base_err = err.error
+    if (base_err.response && base_err.response.result && typeof base_err.response.result.error === 'string') {
+      err.message = base_err.response.result.error
+      err_msg = `Failed to invoke function service (${this.options.function}) due to application error:`
+      const logs_msg = ` Check logs for activation: ${base_err.activationId}`
+      throw new this.serverless.classes.Error(`${err_msg}\n\n     ${err.message}\n\n    ${logs_msg}`)
+    }
+
+    throw new this.serverless.classes.Error(`${err_msg}\n\n     ${err.message}`)
   }
 
   isBlocking() {

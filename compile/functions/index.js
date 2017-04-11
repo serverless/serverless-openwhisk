@@ -3,12 +3,14 @@
 const fs = require('fs-extra');
 const BbPromise = require('bluebird');
 const JSZip = require('jszip');
+const Runtimes = require('./runtimes/index.js')
 
 class OpenWhiskCompileFunctions {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options;
     this.provider = this.serverless.getProvider('openwhisk');
+    this.runtimes = new Runtimes(serverless)
 
     this.hooks = {
       'before:deploy:createDeploymentArtifacts': this.excludes.bind(this),
@@ -30,40 +32,6 @@ class OpenWhiskCompileFunctions {
     this.serverless.service.actions = {};
    }
 
-  convertHandlerToPath(functionHandler) {
-    return functionHandler.replace(/\..*$/, '.js');
-  }
-
-  readFunctionSource(functionHandler) {
-    const handlerFile = this.convertHandlerToPath(functionHandler);
-    const readFile = BbPromise.promisify(fs.readFile);
-    return readFile(handlerFile, 'utf8');
-  }
-
-  getArtifactPath(functionObject) {
-    return this.serverless.service.package.individually ? 
-      functionObject.artifact : this.serverless.service.package.artifact;
-  }
-
-  getArtifactZip(functionObject) {
-    const artifactPath = this.getArtifactPath(functionObject)
-    const readFile = BbPromise.promisify(fs.readFile);
-    return readFile(artifactPath).then(zipBuffer => JSZip.loadAsync(zipBuffer))
-  }
-
-  generateActionPackage(functionObject) {
-    const handlerFile = this.convertHandlerToPath(functionObject.handler);
-
-    return this.getArtifactZip(functionObject).then(zip => {
-      zip.file("package.json", JSON.stringify({main: handlerFile}))
-      return zip.generateAsync({type:"nodebuffer"})
-    }).then(buf => buf.toString('base64'))
-  }
-
-  calculateFunctionMain(functionObject) {
-    return functionObject.handler.split('.')[1]
-  }
-
   calculateFunctionName(functionName, functionObject) {
     return functionObject.name || `${this.serverless.service.service}_${functionName}`;
   }
@@ -78,10 +46,6 @@ class OpenWhiskCompileFunctions {
 
   calculateTimeout(functionObject) {
     return functionObject.timeout || this.serverless.service.provider.timeout || 60;
-  }
-
-  calculateRuntime(functionObject) {
-    return functionObject.runtime || this.serverless.service.provider.runtime || 'nodejs:default';
   }
 
   calculateOverwrite(functionObject) {
@@ -110,34 +74,6 @@ class OpenWhiskCompileFunctions {
     };
   }
 
-  compileExec(functionObject) {
-    if (functionObject.sequence) {
-      return this.compileSequenceExec(functionObject);
-    }
-
-    return this.compileFunctionExec(functionObject);
-  }
-
-  compileSequenceExec(functionObject) {
-    // sequence action names must be fully qualified.
-    // use default namespace if this is missing.
-    const components = functionObject.sequence.map(name => {
-      if (name.startsWith('/')) {
-        return name
-      }
-      const func = this.serverless.service.getFunction(name)
-      return `/_/${func.name}`
-    })
-
-    return BbPromise.resolve({ kind: 'sequence', components })
-  }
-
-  compileFunctionExec(functionObject) {
-    const main = this.calculateFunctionMain(functionObject);
-    const kind = this.calculateRuntime(functionObject);
-    return this.generateActionPackage(functionObject).then(code => ({ main, kind, code }));
-  }
-
   // This method takes the function handler definition, parsed from the user's YAML file,
   // and turns it into the OpenWhisk Action resource object.
   //
@@ -147,7 +83,7 @@ class OpenWhiskCompileFunctions {
   // Parameter values will be parsed from the user's YAML definition, either as a value from
   // the function handler definition or the service provider defaults.
   compileFunction(functionName, functionObject) {
-    return this.compileExec(functionObject).then(Exec => {
+    return this.runtimes.exec(functionObject).then(Exec => {
       const FunctionName = this.calculateFunctionName(functionName, functionObject);
       const NameSpace = this.calculateFunctionNameSpace(functionName, functionObject);
       const MemorySize = this.calculateMemorySize(functionObject);

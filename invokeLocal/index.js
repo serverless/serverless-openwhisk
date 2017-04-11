@@ -5,6 +5,7 @@ const _ = require('lodash');
 const path = require('path');
 const chalk = require('chalk');
 const stdin = require('get-stdin');
+const spawn = require('child_process').spawn;
 
 class OpenWhiskInvokeLocal {
   constructor(serverless, options) {
@@ -46,11 +47,15 @@ class OpenWhiskInvokeLocal {
         });
       }
     }).then(() => {
+      const params = this.options.functionObj.parameters || {};
+      let data = {};
       try {
-        this.options.data = JSON.parse(this.options.data);
+        data = JSON.parse(this.options.data);
       } catch (exception) {
         // do nothing if it's a simple string or object already
       }
+
+      this.options.data = Object.assign(params, data);
     });
   }
 
@@ -81,7 +86,6 @@ class OpenWhiskInvokeLocal {
       || '_';
   }
 
-
   invokeLocal() {
     const runtime = this.options.functionObj.runtime
       || this.serverless.service.provider.runtime
@@ -95,10 +99,15 @@ class OpenWhiskInvokeLocal {
         handlerPath,
         handlerName,
         this.options.data);
+    } else if (runtime.startsWith('python')) {
+      return this.invokeLocalPython(
+        handlerPath,
+        handlerName,
+        this.options.data);
     }
 
     throw new this.serverless.classes
-      .Error('You can only invoke Node.js functions locally.');
+      .Error('You can only invoke Node.js or Python functions locally.');
   }
 
   invokeLocalNodeJs(handlerPath, handlerName, params) {
@@ -136,6 +145,21 @@ class OpenWhiskInvokeLocal {
       this.serverless.cli.consoleLog(chalk.red(JSON.stringify(errorResult, null, 4)));
       process.exitCode = 1;
     }
+  }
+
+  invokeLocalPython(handlerPath, handlerName, params) {
+    if (process.env.VIRTUAL_ENV) {
+      process.env.PATH = `${process.env.VIRTUAL_ENV}/bin:${process.env.PATH}`;
+    }
+    return new BbPromise(resolve => {
+      const python = spawn(
+        path.join(__dirname, 'invoke.py'), [handlerPath, handlerName], { env: process.env });
+      python.stdout.on('data', (buf) => this.serverless.cli.consoleLog(buf.toString()));
+      python.stderr.on('data', (buf) => this.serverless.cli.consoleLog(buf.toString()));
+      python.stdin.write(JSON.stringify(params || {}));
+      python.stdin.end();
+      python.on('close', () => resolve());
+    });
   }
 }
 

@@ -92,6 +92,9 @@ rules:
 
 endpoints:
 **no routes deployed**
+
+web-actions:
+**no web actions deployed**
 ```
 
 ### Test Service
@@ -109,7 +112,7 @@ $ serverless invoke --function hello --data '{"name": "OpenWhisk"}'
 }
 ```
 
-## Writing Functions
+## Writing Functions - Node.js
 
 Here's an `index.js` file containing an example handler function.
 
@@ -198,18 +201,152 @@ function pad_lines(args) {
 exports.handler = pad_lines;
 ```
 
-### Configuration Properties
+## Writing Functions - Python
 
-The following configuration properties are supported in the `serverless.yaml` file.
+Here's an `index.py` file containing an example handler function.
+
+```python
+def endpoint(params):
+    name = params.get("name", "stranger")
+    greeting = "Hello " + name + "!"
+    print(greeting)
+    return {"greeting": greeting}
+```
+
+In the `serverless.yaml` file, the `handler` property is used to denote the source file and module property containing the serverless function.
+
+```yaml
+functions:
+  my_function:
+    handler: index.endpoint
+    runtime: python
+```
+
+### Request Properties
+
+OpenWhisk executes the handler function for each request. This function is called with a single argument, a dictionary [containing the request properties](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#passing-parameters-to-an-action).
+
+```python
+def endpoint(params):
+    name = params.get("name", "stranger")
+    ...
+```
+
+### Function Return Values
+
+The handler must return a dictionary from the function call. 
+
+```python
+def endpoint(params):
+    ...
+    return {"foo": "bar"}
+```
+
+If you want to return an error message, return an object with an `error` property with the message. 
+
+## Writing Functions - Swift
+
+Here's an `index.swift` file containing an example handler function.
+
+```swift
+func main(args: [String:Any]) -> [String:Any] {
+    if let name = args["name"] as? String {
+      return [ "greeting" : "Hello \(name)!" ]
+    } else {
+      return [ "greeting" : "Hello stranger!" ]
+    }
+}
+```
+
+In the `serverless.yaml` file, the `handler` property is used to denote the source file and module property containing the serverless function.
+
+```yaml
+functions:
+  my_function:
+    handler: index.greeting
+    runtime: swift
+```
+
+### Request Properties
+
+OpenWhisk executes the handler function for each request. This function is called with a single argument, a dictionary [containing the request properties](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#passing-parameters-to-an-action).
+
+```swift
+func main(args: [String:Any]) -> [String:Any] {
+    let prop = args["prop"] as? String
+}
+```
+
+### Function Return Values
+
+The handler must return a dictionary from the function call. 
+
+```swift
+func main(args: [String:Any]) -> [String:Any] {
+	...
+    return ["foo": "bar"]
+}
+```
+
+If you want to return an error message, return an object with an `error` property with the message. 
+
+## Writing Functions - Binary
+
+OpenWhisk supports executing a compiled binary for the function handler. Using a Python wrapper, the file will be invoked within the `openwhisk/dockerskeleton` Docker container. 
+
+The binary must be compiled for the correct platform architecture and only link to shared libraries installed in the `openwhisk/dockerskeleton` runtime.
+
+In the `serverless.yaml` file, the `handler` property is used to denote the binary file to upload.
+
+```yaml
+functions:
+  my_function:
+    handler: bin_file
+    runtime: binary
+```
+
+### Request Properties
+
+OpenWhisk executes the binary file for each request. Event parameters are streamed to `stdio` as a JSON object string.
+
+### Function Return Values
+
+The handler must write a JSON object string with the response parameters to `stdout` before exiting.
+
+If you want to return an error message, return an object with an `error` property with the message. 
+
+## Writing Functions - Docker
+
+OpenWhisk supports custom runtimes using public images on Docker Hub. These images are expected to support the platform API used to instantiate and invoke serverless functions.
+
+All necessary files for execution must be provided within the image. Local source files will not be uploaded to the runtime environment.
+
+In the `serverless.yaml` file, the `handler` property is used to denote the image label. 
+
+```yaml
+functions:
+  my_function:
+    handler: repo/image_name
+    runtime: docker
+```
+
+## Runtime Configuration Properties
+
+The following OpenWhisk configuration properties are supported for functions defined in
+the `serverless.yaml` file.
 
 ```yaml
 functions:
   my_function:
     handler: file_name.handler_func
+    runtime: 'runtime_label' // defaults to nodejs:default
     namespace: "..." // defaults to user-provided credentials
     memory: 256 // 128 to 512 (MB).
     timeout: 60 // 0.1 to 600 (seconds)
-    runtime: 'nodejs:default'
+    properties:
+      foo: bar // default parameters
+    anotations:
+      foo: bar // action annotations
 ```
 
 ## Writing Sequences

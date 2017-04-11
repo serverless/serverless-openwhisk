@@ -96,13 +96,22 @@ describe('OpenWhiskInvokeLocal', () => {
       };
       openwhiskInvokeLocal.options.data = null;
       openwhiskInvokeLocal.options.path = false;
+      serverless.service.getFunction = () => serverless.service.functions.first
     });
 
-    it('should keep data if it is a simple string', () => {
+    it('should ignore data if it is a simple string', () => {
       openwhiskInvokeLocal.options.data = 'simple-string';
 
       return openwhiskInvokeLocal.validate().then(() => {
-        expect(openwhiskInvokeLocal.options.data).to.equal('simple-string');
+        expect(openwhiskInvokeLocal.options.data).to.deep.equal({});
+      });
+    });
+
+    it('should ignore data if it is an array', () => {
+      openwhiskInvokeLocal.options.data = '[]';
+
+      return openwhiskInvokeLocal.validate().then(() => {
+        expect(openwhiskInvokeLocal.options.data).to.deep.equal({});
       });
     });
 
@@ -120,7 +129,7 @@ describe('OpenWhiskInvokeLocal', () => {
         testProp: 'testValue',
       };
       serverless.utils.fileExistsSync = () => true;
-      serverless.utils.readFileSync = path => data;
+      serverless.utils.readFileSync = path => JSON.stringify(data);
       openwhiskInvokeLocal.options.path = 'data.json';
 
       return openwhiskInvokeLocal.validate().then(() => {
@@ -136,7 +145,7 @@ describe('OpenWhiskInvokeLocal', () => {
         },
       };
       serverless.utils.fileExistsSync = () => true;
-      serverless.utils.readFileSync = path => data;
+      serverless.utils.readFileSync = path => JSON.stringify(data);
       const dataFile = path.join(serverless.config.servicePath, 'data.json');
       openwhiskInvokeLocal.options.path = dataFile;
 
@@ -159,10 +168,36 @@ describe('OpenWhiskInvokeLocal', () => {
       });
     });
 
-    it('should resolve if path is not given', (done) => {
+    it('should resolve if path is not given', () => {
       openwhiskInvokeLocal.options.path = false;
 
-      openwhiskInvokeLocal.validate().then(() => done());
+      return openwhiskInvokeLocal.validate()
+    });
+
+    it('should use parameters from function object', () => {
+      serverless.service.functions.first.parameters = {
+        foo: 'bar', nums: 1, arr: ['foo', 'bar']
+      }
+
+      return openwhiskInvokeLocal.validate().then(() => {
+        expect(openwhiskInvokeLocal.options.data).to.deep.equal(serverless.service.functions.first.parameters);
+      });
+    });
+
+    it('should merge parameters from function object and data parameters', () => {
+      serverless.service.functions.first.parameters = {
+        foo: 'bar', nums: 1, arr: ['foo', 'bar']
+      }
+      openwhiskInvokeLocal.options.data = JSON.stringify({ foo: 'foo', bar: 'foo' })
+
+      return openwhiskInvokeLocal.validate().then(() => {
+        expect(openwhiskInvokeLocal.options.data).to.deep.equal({
+          foo: 'foo',
+          bar: 'foo',
+          nums: 1,
+          arr: ['foo', 'bar']
+        });
+      });
     });
   });
 
@@ -199,11 +234,13 @@ describe('OpenWhiskInvokeLocal', () => {
   });
 
   describe('#invokeLocal()', () => {
-    let invokeLocalNodeJsStub;
+    let invokeLocalNodeJsStub, invokeLocalPythonStub;
 
     beforeEach(() => {
       invokeLocalNodeJsStub =
         sinon.stub(openwhiskInvokeLocal, 'invokeLocalNodeJs').returns(BbPromise.resolve());
+      invokeLocalPythonStub =
+        sinon.stub(openwhiskInvokeLocal, 'invokeLocalPython').returns(BbPromise.resolve());
 
       openwhiskInvokeLocal.serverless.service.service = 'new-service';
       openwhiskInvokeLocal.options = {
@@ -219,6 +256,7 @@ describe('OpenWhiskInvokeLocal', () => {
 
     afterEach(() => {
       invokeLocalNodeJsStub.restore();
+      invokeLocalPythonStub.restore();
     });
 
     it('should call invokeLocalNodeJs when no runtime is set', () => openwhiskInvokeLocal.invokeLocal()
@@ -233,8 +271,36 @@ describe('OpenWhiskInvokeLocal', () => {
       })
     );
 
-    it('throw error when using runtime other than Node.js', () => {
+    it('should call invokeLocalNodeJs when nodejs runtime is set', () => {
+      openwhiskInvokeLocal.options.functionObj.runtime = 'nodejs:6';
+      openwhiskInvokeLocal.invokeLocal()
+      .then(() => {
+        expect(invokeLocalNodeJsStub.calledOnce).to.be.equal(true);
+        expect(invokeLocalNodeJsStub.calledWithExactly(
+          'handler',
+          'hello',
+          {}
+        )).to.be.equal(true);
+        openwhiskInvokeLocal.invokeLocalNodeJs.restore();
+      })
+    });
+
+    it('should call invokeLocalPython when python runtime is set', () => {
       openwhiskInvokeLocal.options.functionObj.runtime = 'python';
+      openwhiskInvokeLocal.invokeLocal()
+      .then(() => {
+        expect(invokeLocalPythonStub.calledOnce).to.be.equal(true);
+        expect(invokeLocalPythonStub.calledWithExactly(
+          'handler',
+          'hello',
+          {}
+        )).to.be.equal(true);
+        openwhiskInvokeLocal.invokeLocalPython.restore();
+      })
+    });
+
+    it('throw error when using invalid runtime', () => {
+      openwhiskInvokeLocal.options.functionObj.runtime = 'wrong';
       expect(() => openwhiskInvokeLocal.invokeLocal()).to.throw(Error);
       delete openwhiskInvokeLocal.options.functionObj.runtime;
     });
