@@ -180,6 +180,19 @@ describe('OpenWhiskInfo', () => {
     })
   })
 
+  describe('#showFailsafeRoutesInfo()', () => {
+    it('should display error message in failsafe mode', () => {
+      openwhiskInfo.failsafe = true;
+      const log = sandbox.stub(openwhiskInfo, 'consoleLog')
+      sandbox.stub(openwhiskInfo.client.routes, 'list').returns(BbPromise.resolve(false));
+
+      return expect(openwhiskInfo.showRoutesInfo().then(() => {
+        expect(log.args[0][0].match(/endpoints \(api-gw\):/)).to.be.ok;
+        expect(log.args[1][0].match(/failed to fetch routes/)).to.be.ok;
+      }));
+    })
+  })
+  
   describe('#showWebActionsInfo()', () => {
     it('should show web action routes returned', () => {
       const apihost = 'openwhisk.ng.bluemix.net'
