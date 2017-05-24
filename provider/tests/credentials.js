@@ -24,11 +24,13 @@ describe('#getWskProps()', () => {
       apihost: 'openwhisk.ng.bluemix.net',
       auth: 'user:pass',
       namespace: 'blah@provider.com_dev',
+      apigw_access_token: 'blahblahblahkey1234',
     };
 
     const home = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
-    const wskProps =
-      'APIHOST=openwhisk.ng.bluemix.net\nNAMESPACE=blah@provider.com_dev\nAUTH=user:pass\n';
+    const wskProps = 
+      'APIHOST=openwhisk.ng.bluemix.net\nNAMESPACE=blah@provider.com_dev\n'  +
+      'AUTH=user:pass\nAPIGW_ACCESS_TOKEN=blahblahblahkey1234\n';
 
     sandbox.stub(fs, 'readFile', (path, encoding, cb) => {
       expect(path.match(home).length).to.equal(1);
@@ -44,6 +46,7 @@ describe('#getWskProps()', () => {
       apihost: 'blah.blah.com',
       auth: 'another_user:another_pass',
       namespace: 'user@user.com',
+      apigw_access_token: 'some_access_token'
     };
 
     sandbox.stub(fs, 'readFile', (path, encoding, cb) => {
@@ -53,6 +56,7 @@ describe('#getWskProps()', () => {
     process.env.OW_APIHOST = 'blah.blah.com';
     process.env.OW_AUTH = 'another_user:another_pass';
     process.env.OW_NAMESPACE = 'user@user.com';
+    process.env.OW_APIGW_ACCESS_TOKEN = 'some_access_token';
 
     return expect(Credentials.getWskProps()).to.eventually.deep.equal(mockObject);
   });
@@ -62,10 +66,11 @@ describe('#getWskProps()', () => {
       apihost: 'blah.blah.com',
       auth: 'another_user:another_pass',
       namespace: 'user@user.com',
+      apigw_access_token: 'some_access_token'
     };
 
     const wskProps =
-      'APIHOST=openwhisk.ng.bluemix.net\nNAMESPACE=blah@provider.com_dev\nAUTH=user:pass\n';
+      'APIHOST=openwhisk.ng.bluemix.net\nNAMESPACE=blah@provider.com_dev\nAUTH=user:pass\nAPIGW_ACCESS_TOKEN=hello\n';
 
     sandbox.stub(fs, 'readFile', (path, encoding, cb) => {
       cb(null, wskProps);
@@ -74,6 +79,7 @@ describe('#getWskProps()', () => {
     process.env.OW_APIHOST = 'blah.blah.com';
     process.env.OW_AUTH = 'another_user:another_pass';
     process.env.OW_NAMESPACE = 'user@user.com';
+    process.env.OW_APIGW_ACCESS_TOKEN = 'some_access_token';
 
     return expect(Credentials.getWskProps()).to.eventually.deep.equal(mockObject);
   });

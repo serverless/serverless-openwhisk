@@ -178,6 +178,46 @@ describe('OpenWhiskInfo', () => {
         expect(log.args[4][0].match(/POST https:\/\/api-gateway.com\/service_name\/api\/bar\/2/)).to.be.ok;
       }));
     })
+
+    it('should show api v2 routes returned', () => {
+      const endpoint = {
+        "x-openwhisk": {
+          "action": "my_service-dev-hello"
+        }
+      }
+      const apis = [{
+        value: {
+          gwApiUrl: 'https://api-gateway.com/service_name/api',
+          apidoc: {
+            paths: {
+              "hello": { get: endpoint },
+              "foobar": { post: endpoint }
+            }
+          }
+        }
+      }, {
+        value: {
+          gwApiUrl: 'https://api-gateway.com/service_name/api',
+          apidoc: {
+            paths: {
+              "foo/1": { get: endpoint },
+              "bar/2": { post: endpoint }
+            }
+          }
+        }
+      }] 
+
+      const log = sandbox.stub(openwhiskInfo, 'consoleLog')
+      sandbox.stub(openwhiskInfo.client.routes, 'list').returns(BbPromise.resolve({ apis }));
+
+      return expect(openwhiskInfo.showRoutesInfo().then(() => {
+        expect(log.args[0][0].match(/endpoints \(api-gw\):/)).to.be.ok;
+        expect(log.args[1][0].match(/GET https:\/\/api-gateway.com\/service_name\/api\/hello/)).to.be.ok;
+        expect(log.args[2][0].match(/POST https:\/\/api-gateway.com\/service_name\/api\/foobar/)).to.be.ok;
+        expect(log.args[3][0].match(/GET https:\/\/api-gateway.com\/service_name\/api\/foo\/1/)).to.be.ok;
+        expect(log.args[4][0].match(/POST https:\/\/api-gateway.com\/service_name\/api\/bar\/2/)).to.be.ok;
+      }));
+    })
   })
 
   describe('#showWebActionsInfo()', () => {

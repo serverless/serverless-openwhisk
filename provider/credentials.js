@@ -3,7 +3,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 
-const ENV_PARAMS = ['OW_APIHOST', 'OW_AUTH', 'OW_NAMESPACE'];
+const ENV_PARAMS = ['OW_APIHOST', 'OW_AUTH', 'OW_NAMESPACE', 'OW_APIGW_ACCESS_TOKEN'];
 
 function getWskPropsFile() {
   const Home = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];

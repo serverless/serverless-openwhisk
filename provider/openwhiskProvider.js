@@ -27,7 +27,7 @@ class OpenwhiskProvider {
 
     const ignore_certs = this.serverless.service.provider.ignore_certs || false
     return this.props().then(this.hasValidCreds).then(wskProps => {
-      this._client = openwhisk({ apihost: wskProps.apihost, api_key: wskProps.auth, namespace: wskProps.namespace, ignore_certs });
+      this._client = openwhisk({ apihost: wskProps.apihost, api_key: wskProps.auth, namespace: wskProps.namespace, ignore_certs, apigw_token: wskProps.apigw_access_token });
       return this._client
     })
   }

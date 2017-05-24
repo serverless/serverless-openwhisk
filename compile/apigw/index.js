@@ -10,6 +10,7 @@ class OpenWhiskCompileHttpEvents {
 
     this.hooks = {
       'before:deploy:compileEvents': this.setup.bind(this),
+      'before:deploy:compileFunctions': this.addWebAnnotations.bind(this),
       'deploy:compileEvents': this.compileHttpEvents.bind(this),
     };
   }
@@ -25,6 +26,22 @@ class OpenWhiskCompileHttpEvents {
         this.serverless.service.provider.namespace = props.namespace;
       });
     }
+  }
+
+  // HTTP events need Web Actions enabled for those functions. Add
+  // annotation 'web-export' if it is not already present.
+  addWebAnnotations() {
+    const names = Object.keys(this.serverless.service.functions)
+    names.forEach(fnName => {
+      const f = this.serverless.service.functions[fnName]
+      const httpEvents = (f.events || []).filter(e => e.http)
+      if (httpEvents.length) {
+        if (!f.annotations) f.annotations = {}
+        f.annotations['web-export'] = true
+      }
+    })
+
+    return BbPromise.resolve();
   }
 
   calculateFunctionName(functionName, functionObject) {

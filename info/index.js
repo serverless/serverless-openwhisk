@@ -113,6 +113,9 @@ class OpenWhiskInfo {
   }
 
   logEndPoint (baseUrl, path, method, actionName) {
+    if (!path.startsWith('/')) {
+      path = `/${path}`
+    }
     this.consoleLog(`${method.toUpperCase()} ${baseUrl}${path} --> ${actionName}`)
   }
 
@@ -121,7 +124,13 @@ class OpenWhiskInfo {
     Object.keys(paths).forEach(path => {
       const methods = Object.keys(paths[path])
       methods.forEach(method => {
-        const actionName = paths[path][method]['x-ibm-op-ext'].actionName;
+        const operation = paths[path][method]
+        let actionName = 'unknown'
+        if (operation.hasOwnProperty('x-openwhisk')) {
+          actionName = operation['x-openwhisk'].action;
+        } else if (operation.hasOwnProperty('x-ibm-op-ext')) {
+          actionName = operation['x-ibm-op-ext'].actionName;
+        }
         this.logEndPoint(api.gwApiUrl, path, method, actionName)
       })
     })

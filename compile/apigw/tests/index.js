@@ -37,6 +37,37 @@ describe('OpenWhiskCompileHttpEvents', () => {
     sandbox.restore();
   });
 
+
+  describe('#addWebAnnotations()', () => {
+    it('should add annotations when http event present', () => {
+      openwhiskCompileHttpEvents.serverless.service.functions = {
+        a: { events: [ { http: true } ], annotations: {} },
+        b: { events: [ { http: true } ], annotations: { foo: 'bar' } },
+        c: { events: [ { http: true } ], annotations: { 'web-export': false } },
+        d: { events: [ { http: true } ] }
+      }
+      return openwhiskCompileHttpEvents.addWebAnnotations().then(() => {
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.a.annotations).to.deep.equal({ 'web-export': true })
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.b.annotations).to.deep.equal({ foo: 'bar', 'web-export': true })
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.c.annotations).to.deep.equal({ 'web-export': true })
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.d.annotations).to.deep.equal({ 'web-export': true })
+      })
+    });
+
+    it('should ignore annotations when http event not present', () => {
+      openwhiskCompileHttpEvents.serverless.service.functions = {
+        a: { },
+        b: { events: [] },
+        c: { events: [], annotations: { hello: 'world', 'web-export': true } }
+      }
+      return openwhiskCompileHttpEvents.addWebAnnotations().then(() => {
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.a.annotations).to.be.equal(undefined)
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.b.annotations).to.be.equal(undefined)
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.c.annotations).to.deep.equal({ hello: 'world', 'web-export': true })
+      })
+    });
+  })
+
   describe('#compileHttpEvents()', () => {
     it('should return empty rules if functions has no triggers', () =>
       expect(openwhiskCompileHttpEvents.compileHttpEvents().then(() => {
