@@ -4,12 +4,21 @@ const BbPromise = require('bluebird');
 
 module.exports = {
   deployFunctionHandler(functionHandler) {
-    return this.provider.client().then(ow =>
-      ow.actions.create(functionHandler).catch(err => {
+    return this.provider.client().then(ow => {
+      if (this.options.verbose) {
+        this.serverless.cli.log(`Deploying Function: ${functionHandler.actionName}`);
+      }
+      return ow.actions.create(functionHandler)
+        .then(() => {
+          if (this.options.verbose) {
+            this.serverless.cli.log(`Deployed Function: ${functionHandler.actionName}`);
+          }
+        })
+        .catch(err => {
         throw new this.serverless.classes.Error(
           `Failed to deploy function (${functionHandler.actionName}) due to error: ${err.message}`
         );
-      })
+      })}
     );
   },
 

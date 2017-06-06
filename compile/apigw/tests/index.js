@@ -29,7 +29,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
       auth: '',
     };
 
-    serverless.cli = { log: () => {} };
+    serverless.cli = { consoleLog: () => {}, log: () => {} };
     openwhiskCompileHttpEvents.setup();
   });
 
@@ -116,6 +116,22 @@ describe('OpenWhiskCompileHttpEvents', () => {
       ] })
       expect(events).to.deep.equal([{}, {}, {}]);
       expect(stub.calledThrice).to.be.equal(true);
+    })
+
+    it('should log event when verbose flag is used', () => {
+      openwhiskCompileHttpEvents.options.verbose = true
+      const log = sandbox.stub(openwhiskCompileHttpEvents.serverless.cli, 'log')
+      const clog = sandbox.stub(openwhiskCompileHttpEvents.serverless.cli, 'consoleLog')
+      const stub = sinon.stub(openwhiskCompileHttpEvents, 'compileHttpEvent').returns({ foo: 'bar' })
+      openwhiskCompileHttpEvents.compileFunctionHttpEvents('name', { events: [
+        {"http": true},
+        {"http": true},
+        {"http": true}
+      ] })
+
+      expect(log.calledOnce).to.be.equal(true);
+      const result = JSON.stringify([{foo: "bar"}, {foo: "bar"}, {foo: "bar"}])
+      expect(log.args[0][0]).to.be.equal(`Compiled API Gateway definition (name): ${result}`);
     })
   });
 

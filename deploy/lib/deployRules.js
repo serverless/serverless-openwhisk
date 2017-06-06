@@ -4,13 +4,21 @@ const BbPromise = require('bluebird');
 
 module.exports = {
   deployRule(rule) {
-    return this.provider.client().then(ow =>
-      ow.rules.create(rule).catch(err => {
+    return this.provider.client().then(ow => {
+      if (this.options.verbose) {
+        this.serverless.cli.log(`Deploying Rule: ${rule.ruleName}`);
+      }
+      return ow.rules.create(rule)
+       .then(() => {
+          if (this.options.verbose) {
+            this.serverless.cli.log(`Deployed Rule: ${rule.ruleName}`);
+          }
+        }).catch(err => {
         throw new this.serverless.classes.Error(
           `Failed to deploy rule (${rule.ruleName}) due to error: ${err.message}`
         );
       })
-    );
+    });
   },
 
   enableRule(rule) {

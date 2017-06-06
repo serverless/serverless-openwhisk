@@ -106,6 +106,10 @@ class OpenWhiskCompileTriggers {
       );
     }
 
+    if (this.options.verbose) {
+      this.serverless.cli.log(`Compiled Trigger (${name}): ${JSON.stringify(trigger)}`);
+    }
+
     return trigger;
   }
 

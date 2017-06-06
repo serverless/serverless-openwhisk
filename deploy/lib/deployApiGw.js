@@ -4,13 +4,21 @@ const BbPromise = require('bluebird');
 
 module.exports = {
   deployRoute(route) {
-    return this.provider.client().then(ow =>
-      ow.routes.create(route).then().catch(err => {
+    return this.provider.client().then(ow => {
+      if (this.options.verbose) {
+        this.serverless.cli.log(`Deploying API Gateway Route: ${JSON.stringify(route)}`);
+      }
+      return ow.routes.create(route)
+        .then(() => {
+          if (this.options.verbose) {
+            this.serverless.cli.log(`Deployed API Gateway Route: ${JSON.stringify(route)}`);
+          }
+        }).catch(err => {
         throw new this.serverless.classes.Error(
           `Failed to deploy API Gateway route (${route.relpath}) due to error: ${err.message}`
         );
       })
-    );
+    });
   },
 
   unbindAllRoutes() {

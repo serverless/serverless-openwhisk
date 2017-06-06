@@ -29,7 +29,7 @@ describe('deployFeeds', () => {
       region: 'us-east-1',
     };
     openwhiskDeploy = new OpenWhiskDeploy(serverless, options);
-    openwhiskDeploy.serverless.cli = new serverless.classes.CLI();
+    openwhiskDeploy.serverless.cli = { consoleLog: () => {}, log: () => {} };
     openwhiskDeploy.serverless.service.provider = {
       namespace: 'testing',
       apihost: 'openwhisk.org',
@@ -82,6 +82,26 @@ describe('deployFeeds', () => {
         expect(stub.called).to.be.true
       })
     });
+
+    it('should log function deploy information with verbose flag', () => {
+      openwhiskDeploy.options.verbose = true
+      const log = sandbox.stub(openwhiskDeploy.serverless.cli, 'log')
+      const clog = sandbox.stub(openwhiskDeploy.serverless.cli, 'consoleLog')
+      sandbox.stub(openwhiskDeploy.provider, 'client', () => {
+        const create = params => {
+          return Promise.resolve();
+        };
+
+        return Promise.resolve({ feeds: { create } });
+      });
+
+      return openwhiskDeploy.deployFeed(mockFeedObject.feeds.myFeed).then(() => {
+      expect(log.calledTwice).to.be.equal(true);
+      expect(log.args[0][0]).to.be.equal('Deploying Feed: myFeed')
+      expect(log.args[1][0]).to.be.equal('Deployed Feed: myFeed')
+      })
+    });
+
 
     it('should reject when function handler fails to deploy with error message', () => {
       const err = { message: 'some reason' };

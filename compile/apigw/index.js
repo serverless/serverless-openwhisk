@@ -91,9 +91,15 @@ class OpenWhiskCompileHttpEvents {
   compileFunctionHttpEvents(functionName, functionObject) {
     if (!functionObject.events) return []
 
-    return functionObject.events
+    const events = functionObject.events
       .filter(e => e.http)
       .map(e => this.compileHttpEvent(functionName, functionObject, e.http))
+
+    if (events.length && this.options.verbose) {
+      this.serverless.cli.log(`Compiled API Gateway definition (${functionName}): ${JSON.stringify(events)}`);
+    }
+
+    return events
   }
 
   compileHttpEvents () {

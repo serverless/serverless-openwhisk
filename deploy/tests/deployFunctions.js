@@ -36,7 +36,7 @@ describe('deployFunctions', () => {
       region: 'us-east-1',
     };
     openwhiskDeploy = new OpenWhiskDeploy(serverless, options);
-    openwhiskDeploy.serverless.cli = new serverless.classes.CLI();
+    openwhiskDeploy.serverless.cli = { consoleLog: () => {}, log: () => {} };
     openwhiskDeploy.serverless.service.provider = {
       namespace: 'testing',
       apihost: 'openwhisk.org',
@@ -65,6 +65,25 @@ describe('deployFunctions', () => {
       });
       return expect(openwhiskDeploy.deployFunctionHandler(mockFunctionObject))
         .to.eventually.be.fulfilled;
+    });
+
+    it('should log function deploy information with verbose flag', () => {
+      openwhiskDeploy.options.verbose = true
+      const log = sandbox.stub(openwhiskDeploy.serverless.cli, 'log')
+      const clog = sandbox.stub(openwhiskDeploy.serverless.cli, 'consoleLog')
+      sandbox.stub(openwhiskDeploy.provider, 'client', () => {
+        const create = params => {
+          return Promise.resolve();
+        };
+
+        return Promise.resolve({ actions: { create } });
+      });
+
+      return openwhiskDeploy.deployFunctionHandler(mockFunctionObject).then(() => {
+      expect(log.calledTwice).to.be.equal(true);
+      expect(log.args[0][0]).to.be.equal('Deploying Function: serviceName_functionName')
+      expect(log.args[1][0]).to.be.equal('Deployed Function: serviceName_functionName')
+      })
     });
 
     it('should reject when function handler fails to deploy with error message', () => {

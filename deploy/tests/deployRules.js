@@ -31,7 +31,7 @@ describe('deployRules', () => {
       region: 'us-east-1',
     };
     openwhiskDeploy = new OpenWhiskDeploy(serverless, options);
-    openwhiskDeploy.serverless.cli = new serverless.classes.CLI();
+    openwhiskDeploy.serverless.cli = { consoleLog: () => {}, log: () => {} };
     openwhiskDeploy.serverless.service.provider = {
       namespace: 'testing',
       apihost: 'openwhisk.org',
@@ -70,6 +70,25 @@ describe('deployRules', () => {
           new RegExp(`${mockRuleObject.rules.myRule.ruleName}.*${err.message}`)
         );
     });
+
+    it('should log function deploy information with verbose flag', () => {
+      openwhiskDeploy.options.verbose = true
+      const log = sandbox.stub(openwhiskDeploy.serverless.cli, 'log')
+      const clog = sandbox.stub(openwhiskDeploy.serverless.cli, 'consoleLog')
+      sandbox.stub(openwhiskDeploy.provider, 'client', () => {
+        const create = params => {
+          return Promise.resolve();
+        };
+
+        return Promise.resolve({ rules: { create } });
+      });
+
+      return openwhiskDeploy.deployRule(mockRuleObject.rules.myRule).then(() => {
+      expect(log.calledTwice).to.be.equal(true);
+      expect(log.args[0][0]).to.be.equal('Deploying Rule: myRule')
+      expect(log.args[1][0]).to.be.equal('Deployed Rule: myRule')
+      })
+    });
   });
 
   describe('#enableRule()', () => {
@@ -98,6 +117,7 @@ describe('deployRules', () => {
           new RegExp(`${mockRuleObject.rules.myRule.ruleName}.*${err.message}`)
         );
     });
+
   });
 
   describe('#deployRules()', () => {

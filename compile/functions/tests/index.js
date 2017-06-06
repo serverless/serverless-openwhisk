@@ -6,9 +6,7 @@ const chaiAsPromised = require('chai-as-promised');
 require('chai').use(chaiAsPromised);
 
 const sinon = require('sinon');
-const fs = require('fs-extra');
 const OpenWhiskCompileFunctions = require('../index');
-const JSZip = require("jszip");
 
 describe('OpenWhiskCompileFunctions', () => {
   let serverless;
@@ -48,7 +46,7 @@ describe('OpenWhiskCompileFunctions', () => {
     };
     serverless.service.provider = { name: 'openwhisk' };
 
-    serverless.cli = { log: () => {} };
+    serverless.cli = { consoleLog: () => {}, log: () => {} };
 
     openwhiskCompileFunctions.setup();
   });
@@ -71,6 +69,29 @@ describe('OpenWhiskCompileFunctions', () => {
     });
   });
 
+  describe('#logCompiledFunction()', () => {
+    it('should log function contents with code to console.', () => {
+      const log = sandbox.stub(openwhiskCompileFunctions.serverless.cli, 'log')
+      const clog = sandbox.stub(openwhiskCompileFunctions.serverless.cli, 'consoleLog')
+
+      openwhiskCompileFunctions.logCompiledFunction('first', openwhiskResourcesMockObject.first)
+      expect(log.calledOnce).to.be.equal(true);
+      const clone = JSON.parse(JSON.stringify(openwhiskResourcesMockObject.first))
+      clone.action.exec.code = '<hidden>'
+      expect(log.args[0][0]).to.be.equal(`Compiled Function (first): ${JSON.stringify(clone)}`) 
+    });
+  
+    it('should log function contents without code to console.', () => {
+      const log = sandbox.stub(openwhiskCompileFunctions.serverless.cli, 'log')
+      const clog = sandbox.stub(openwhiskCompileFunctions.serverless.cli, 'consoleLog')
+
+      const clone = JSON.parse(JSON.stringify(openwhiskResourcesMockObject.first))
+      delete clone.action.exec.code
+      openwhiskCompileFunctions.logCompiledFunction('first', clone)
+      expect(log.calledOnce).to.be.equal(true);
+      expect(log.args[0][0]).to.be.equal(`Compiled Function (first): ${JSON.stringify(clone)}`) 
+    });
+  });
 
   describe('#compileFunctions()', () => {
     it('should throw an error if the resource section is not available', () => {
@@ -116,15 +137,37 @@ describe('OpenWhiskCompileFunctions', () => {
       };
       openwhiskCompileFunctions.serverless.service.getAllFunctions = () => keys;
       openwhiskCompileFunctions.serverless.service.getFunction = name => handler(name);
+      const log = sandbox.stub(openwhiskCompileFunctions, 'logCompiledFunction')
 
       const mock = openwhiskResourcesMockObject;
       sandbox.stub(
         openwhiskCompileFunctions, 'compileFunction', name => Promise.resolve(mock[name]));
       const f = openwhiskCompileFunctions.serverless.service.actions;
 
-      return openwhiskCompileFunctions.compileFunctions().then(
-        () => expect(f).to.deep.equal(openwhiskResourcesMockObject)
-      );
+      return openwhiskCompileFunctions.compileFunctions().then(() => { 
+        expect(f).to.deep.equal(openwhiskResourcesMockObject) 
+        expect(log.called).to.be.equal(false);
+      });
+    });
+
+    it('should log compiled functions with verbose flag', () => {
+      const keys = Object.keys(openwhiskResourcesMockObject);
+      const handler = function (name) {
+        return { handler: `${name}.handler` };
+      };
+      openwhiskCompileFunctions.options.verbose = true;
+      openwhiskCompileFunctions.serverless.service.getAllFunctions = () => keys;
+      openwhiskCompileFunctions.serverless.service.getFunction = name => handler(name);
+      const log = sandbox.stub(openwhiskCompileFunctions, 'logCompiledFunction')
+
+      const mock = openwhiskResourcesMockObject;
+      sandbox.stub(
+        openwhiskCompileFunctions, 'compileFunction', name => Promise.resolve(mock[name]));
+      const f = openwhiskCompileFunctions.serverless.service.actions;
+
+      return openwhiskCompileFunctions.compileFunctions().then(() => {
+        expect(log.calledTwice).to.be.equal(true);
+      });
     });
   });
 });

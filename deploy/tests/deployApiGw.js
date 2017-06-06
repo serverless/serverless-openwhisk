@@ -20,7 +20,7 @@ describe('deployHttpEvents', () => {
       region: 'us-east-1',
     };
     openwhiskDeploy = new OpenWhiskDeploy(serverless, options);
-    openwhiskDeploy.serverless.cli = new serverless.classes.CLI();
+    openwhiskDeploy.serverless.cli = { consoleLog: () => {}, log: () => {} };
     openwhiskDeploy.serverless.service.service = 'my-service'
     openwhiskDeploy.serverless.service.provider = {
       namespace: 'testing',
@@ -87,5 +87,25 @@ describe('deployHttpEvents', () => {
           new RegExp(`/foo/bar.*${err.message}`)
         );
     });
+
+    it('should log function deploy information with verbose flag', () => {
+      openwhiskDeploy.options.verbose = true
+      const log = sandbox.stub(openwhiskDeploy.serverless.cli, 'log')
+      const clog = sandbox.stub(openwhiskDeploy.serverless.cli, 'consoleLog')
+      sandbox.stub(openwhiskDeploy.provider, 'client', () => {
+        const create = params => {
+          return Promise.resolve();
+        };
+
+        return Promise.resolve({ routes: { create } });
+      });
+
+      return openwhiskDeploy.deployRoute({foo: 'bar'}).then(() => {
+      expect(log.calledTwice).to.be.equal(true);
+      expect(log.args[0][0]).to.be.equal('Deploying API Gateway Route: ' + JSON.stringify({foo: 'bar'}))
+      expect(log.args[1][0]).to.be.equal('Deployed API Gateway Route: ' + JSON.stringify({foo: 'bar'}))
+      })
+    });
+
   });
 });

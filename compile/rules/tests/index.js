@@ -29,7 +29,7 @@ describe('OpenWhiskCompileRules', () => {
       auth: '',
     };
 
-    serverless.cli = { log: () => {} };
+    serverless.cli = { consoleLog: () => {}, log: () => {} };
   });
 
   afterEach(() => {
@@ -125,6 +125,23 @@ describe('OpenWhiskCompileRules', () => {
       expect(rules).to.deep.equal([{}, {}, {}]);
       expect(stub.calledThrice).to.be.equal(true);
     })
+
+    it('should log rules when verbose flag is used', () => {
+      openwhiskCompileRules.options.verbose = true
+      const log = sandbox.stub(openwhiskCompileRules.serverless.cli, 'log')
+      const clog = sandbox.stub(openwhiskCompileRules.serverless.cli, 'consoleLog')
+      const stub = sinon.stub(openwhiskCompileRules, 'compileRule').returns({ foo: 'bar' })
+      openwhiskCompileRules.compileFunctionRules('name', { events: [
+        {"trigger": true},
+        {"trigger": true},
+        {"trigger": true}
+      ] })
+
+      expect(log.calledOnce).to.be.equal(true);
+      const result = JSON.stringify([{foo: 'bar'}, {foo: 'bar'}, {foo: 'bar'}]);
+      expect(log.args[0][0]).to.be.equal(`Compiled Rule (name): ${result}`);
+    })
+
   });
 
   describe('#compileRule()', () => {

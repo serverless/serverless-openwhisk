@@ -13,13 +13,21 @@ module.exports = {
   },
 
   deployFeed(feed) {
-    return this.provider.client().then(ow =>
-      ow.feeds.create(feed).catch(err => {
+    return this.provider.client().then(ow => {
+      if (this.options.verbose) {
+        this.serverless.cli.log(`Deploying Feed: ${feed.feedName}`);
+      }
+      return ow.feeds.create(feed)
+        .then(() => {
+          if (this.options.verbose) {
+            this.serverless.cli.log(`Deployed Feed: ${feed.feedName}`);
+          }
+        }).catch(err => {
         throw new this.serverless.classes.Error(
           `Failed to deploy feed (${feed.feedName}) due to error: ${err.message}`
         );
       })
-    );
+    });
   },
 
   deployFeeds() {

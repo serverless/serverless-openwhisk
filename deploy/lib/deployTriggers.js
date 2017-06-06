@@ -4,13 +4,21 @@ const BbPromise = require('bluebird');
 
 module.exports = {
   deployTrigger(trigger) {
-    return this.provider.client().then(ow =>
-      ow.triggers.create(trigger).catch(err => {
+    return this.provider.client().then(ow => {
+      if (this.options.verbose) {
+        this.serverless.cli.log(`Deploying Trigger: ${trigger.triggerName}`);
+      }
+      return ow.triggers.create(trigger)
+       .then(() => {
+          if (this.options.verbose) {
+            this.serverless.cli.log(`Deployed Trigger: ${trigger.triggerName}`);
+          }
+        }).catch(err => {
         throw new this.serverless.classes.Error(
           `Failed to deploy trigger (${trigger.triggerName}) due to error: ${err.message}`
         );
       })
-    );
+    });
   },
 
   deployTriggers() {

@@ -28,7 +28,7 @@ describe('OpenWhiskCompileTriggers', () => {
       auth: '',
     };
 
-    serverless.cli = { log: () => {} };
+    serverless.cli = { consoleLog: () => {}, log: () => {} };
     openwhiskCompileTriggers.setup();
   });
 
@@ -179,6 +179,28 @@ describe('OpenWhiskCompileTriggers', () => {
       };
       const result = openwhiskCompileTriggers.compileTrigger('myTrigger', params);
       return expect(result).to.deep.equal(expected);
+    });
+
+    it('should log triggers to console when verbose flag is set', () => {
+      openwhiskCompileTriggers.options.verbose = true
+      const log = sandbox.stub(openwhiskCompileTriggers.serverless.cli, 'log')
+      const clog = sandbox.stub(openwhiskCompileTriggers.serverless.cli, 'consoleLog')
+      const feedName = '/ns/package/feed';
+      const params = { feed: feedName, feed_parameters: { hello: 'world' } };
+      const expected = {
+        triggerName: 'myTrigger',
+        overwrite: true,
+        namespace: 'testing',
+        feed: {
+          feedName: 'package/feed',
+          namespace: 'ns',
+          trigger: '/testing/myTrigger',
+          params: params.feed_parameters,
+        },
+      };
+      const result = openwhiskCompileTriggers.compileTrigger('myTrigger', params);
+      expect(log.calledOnce).to.be.equal(true);
+      expect(log.args[0][0]).to.be.equal(`Compiled Trigger (myTrigger): ${JSON.stringify(result)}`)
     });
   });
 });

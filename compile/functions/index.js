@@ -1,8 +1,6 @@
 'use strict';
 
-const fs = require('fs-extra');
 const BbPromise = require('bluebird');
-const JSZip = require('jszip');
 const Runtimes = require('./runtimes/index.js')
 
 class OpenWhiskCompileFunctions {
@@ -104,6 +102,14 @@ class OpenWhiskCompileFunctions {
     });
   }
 
+  logCompiledFunction (name, fn) {
+    const clone = JSON.parse(JSON.stringify(fn))
+    if (clone.action.exec.code) {
+      clone.action.exec.code = '<hidden>'
+    }
+    this.serverless.cli.log(`Compiled Function (${name}): ${JSON.stringify(clone)}`);
+  }
+
   compileFunctions() {
     this.serverless.cli.log('Compiling Functions...');
 
@@ -131,9 +137,14 @@ class OpenWhiskCompileFunctions {
           .Error(`Unable to read handler file in function ${functionName}`);
       };
 
-      return this.compileFunction(functionName, functionObject)
+      let compileFn = this.compileFunction(functionName, functionObject)
         .then(newFunction => (functions[functionName] = newFunction))
-        .catch(err);
+
+      if (this.options.verbose) {
+        compileFn = compileFn.then(fn => this.logCompiledFunction(functionName, fn))
+      }
+
+      return compileFn.catch(err);
     });
 
     return BbPromise.all(functionPromises);

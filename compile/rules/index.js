@@ -94,9 +94,15 @@ class OpenWhiskCompileRules {
   compileFunctionRules(functionName, functionObject) {
     if (!functionObject.events) return []
 
-    return functionObject.events
+    const events = functionObject.events
       .filter(e => e.trigger)
       .map(e => this.compileRule(functionName, functionObject, e.trigger))
+
+    if (events.length && this.options.verbose) {
+      this.serverless.cli.log(`Compiled Rule (${functionName}): ${JSON.stringify(events)}`);
+    }
+
+    return events
   }
 
   compileRules() {
