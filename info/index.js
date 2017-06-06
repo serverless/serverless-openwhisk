@@ -105,20 +105,20 @@ class OpenWhiskInfo {
   }
 
   showRoutesInfo () {
-	var obj = this;
-    this.consoleLog(`${chalk.yellow('endpoints (api-gw):')}`);
-    return this.client.routes.list().then(routes => {
-      if (!routes.apis.length) return console.log('**no routes deployed**\n');
+    this.consoleLog(`${chalk.yellow('endpoints (api-gw):')}`)
+    let operation = this.client.routes.list().then(routes => {
+      if (!routes.apis.length) return console.log('**no routes deployed**\n')
       routes.apis.forEach(api => this.logApiEndPoints(api.value))
       this.consoleLog('')
-    }).catch(function (error) {
-      if (obj.failsafe) {
-        obj.consoleLog(`${chalk.red('**failed to fetch routes**\n')}`);
-        Promise.resolve(); 
-      } else {
-        throw error;
-      }
     })
+      
+    if (this.failsafe) {
+      operation = operation.catch(() => {
+        this.consoleLog(`${chalk.red('**failed to fetch routes**\n')}`)
+      })
+    }
+
+    return operation
   }
 
   logEndPoint (baseUrl, path, method, actionName) {
