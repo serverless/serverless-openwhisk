@@ -12,7 +12,7 @@ class OpenWhiskCompileCloudant {
     this.default_package = '/whisk.system/cloudant'
 
     this.hooks = {
-      'before:deploy:compileEvents': () => BbPromise.bind(this)
+      'before:package:compileEvents': () => BbPromise.bind(this)
         .then(this.setup)
         .then(this.processCloudantEvents)
     };

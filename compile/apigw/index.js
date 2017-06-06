@@ -9,9 +9,9 @@ class OpenWhiskCompileHttpEvents {
     this.provider = this.serverless.getProvider('openwhisk');
 
     this.hooks = {
-      'before:deploy:compileEvents': this.setup.bind(this),
-      'before:deploy:compileFunctions': this.addWebAnnotations.bind(this),
-      'deploy:compileEvents': this.compileHttpEvents.bind(this),
+      'before:package:compileEvents': this.setup.bind(this),
+      'before:package:compileFunctions': this.addWebAnnotations.bind(this),
+      'package:compileEvents': this.compileHttpEvents.bind(this),
     };
   }
 

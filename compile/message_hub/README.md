@@ -4,7 +4,7 @@ This plugins compiles the `message_hub` events in `serverless.yaml` to correspon
 
 ## How it works
 
-`Compile Message Hub` hooks into the [`deploy:compileEvents`](/lib/plugins/deploy) lifecycle.
+`Compile Message Hub` hooks into the [`package:compileEvents`](/lib/plugins/deploy) lifecycle.
 
 It loops over all schedule event which are defined in `serverless.yaml`.
 

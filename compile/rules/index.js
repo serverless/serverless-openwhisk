@@ -9,8 +9,8 @@ class OpenWhiskCompileRules {
     this.provider = this.serverless.getProvider('openwhisk');
 
     this.hooks = {
-      'before:deploy:compileEvents': this.setup.bind(this),
-      'deploy:compileEvents': this.compileRules.bind(this),
+      'before:package:compileEvents': this.setup.bind(this),
+      'package:compileEvents': this.compileRules.bind(this),
     };
   }
 

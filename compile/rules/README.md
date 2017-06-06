@@ -6,7 +6,7 @@ definitions.
 
 ## How it works
 
-`Compile Rules` hooks into the [`deploy:compileEvents`](/lib/plugins/deploy) lifecycle.
+`Compile Rules` hooks into the [`package:compileEvents`](/lib/plugins/deploy) lifecycle.
 
 It loops over all functions which are defined in `serverless.yaml` looking for
 the defined events. For each `trigger` event defined for the function, the

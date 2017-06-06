@@ -5,7 +5,7 @@ definitions.
 
 ## How it works
 
-`Compile Functions` hooks into the [`deploy:compileFunctions`](/lib/plugins/deploy) lifecycle.
+`Compile Functions` hooks into the [`package:compileFunctions`](/lib/plugins/deploy) lifecycle.
 
 It loops over all functions which are defined in `serverless.yaml`.
 

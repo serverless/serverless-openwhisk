@@ -12,7 +12,7 @@ class OpenWhiskCompileMessageHub {
     this.default_package = '/whisk.system/messaging'
 
     this.hooks = {
-      'before:deploy:compileEvents': () => BbPromise.bind(this)
+      'before:package:compileEvents': () => BbPromise.bind(this)
         .then(this.setup)
         .then(this.processMessageHubEvents)
     };

@@ -5,7 +5,7 @@ definitions.
 
 ## How it works
 
-`Compile Schedule` hooks into the [`deploy:compileEvents`](/lib/plugins/deploy) lifecycle.
+`Compile Schedule` hooks into the [`package:compileEvents`](/lib/plugins/deploy) lifecycle.
 
 It loops over all schedule event which are defined in `serverless.yaml`.
 

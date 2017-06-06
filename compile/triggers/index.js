@@ -9,10 +9,10 @@ class OpenWhiskCompileTriggers {
     this.provider = this.serverless.getProvider('openwhisk');
 
     this.hooks = {
-      'before:deploy:compileEvents': () => BbPromise.bind(this)
+      'before:package:compileEvents': () => BbPromise.bind(this)
         .then(this.setup)
         .then(this.mergeEventTriggers),
-      'deploy:compileEvents': this.compileTriggers.bind(this),
+      'package:compileEvents': this.compileTriggers.bind(this),
     };
   }
 

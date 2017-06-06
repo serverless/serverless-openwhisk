@@ -4,7 +4,7 @@ This plugins compiles the `cloudant` events in `serverless.yaml` to correspondin
 
 ## How it works
 
-`Compile Cloudant` hooks into the [`deploy:compileEvents`](/lib/plugins/deploy) lifecycle.
+`Compile Cloudant` hooks into the [`package:compileEvents`](/lib/plugins/deploy) lifecycle.
 
 It loops over all schedule event which are defined in `serverless.yaml`.
 

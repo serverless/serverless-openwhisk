@@ -11,9 +11,9 @@ class OpenWhiskCompileFunctions {
     this.runtimes = new Runtimes(serverless)
 
     this.hooks = {
-      'before:deploy:createDeploymentArtifacts': this.excludes.bind(this),
-      'before:deploy:compileFunctions': this.setup.bind(this),
-      'deploy:compileFunctions': this.compileFunctions.bind(this),
+      'before:package:createDeploymentArtifacts': this.excludes.bind(this),
+      'before:package:compileFunctions': this.setup.bind(this),
+      'package:compileFunctions': this.compileFunctions.bind(this),
     };
   }
 

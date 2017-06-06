@@ -5,7 +5,7 @@ definitions.
 
 ## How it works
 
-`Compile Triggers` hooks into the [`deploy:compileEvents`](/lib/plugins/deploy) lifecycle.
+`Compile Triggers` hooks into the [`package:compileEvents`](/lib/plugins/deploy) lifecycle.
 
 It loops over all triggers which are defined in `serverless.yaml`.
 

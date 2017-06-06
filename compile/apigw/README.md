@@ -6,7 +6,7 @@ definitions.
 
 ## How it works
 
-`Compile HTTP` hooks into the [`deploy:compileEvents`](/lib/plugins/deploy) lifecycle.
+`Compile HTTP` hooks into the [`package:compileEvents`](/lib/plugins/deploy) lifecycle.
 
 It loops over all functions which are defined in `serverless.yaml` looking for
 the defined events. For each `http` event defined for the function, the

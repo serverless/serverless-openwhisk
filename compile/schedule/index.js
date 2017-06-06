@@ -10,7 +10,7 @@ class OpenWhiskCompileSchedules {
     this.feed = '/whisk.system/alarms/alarm'
 
     this.hooks = {
-      'before:deploy:compileEvents': () => BbPromise.bind(this)
+      'before:package:compileEvents': () => BbPromise.bind(this)
         .then(this.setup)
         .then(this.processScheduleEvents)
     };
