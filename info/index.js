@@ -18,7 +18,8 @@ class OpenWhiskInfo {
           if (this.options.noDeploy) {
             return BbPromise.resolve();
           }
-          this.consoleLog('')
+          this.consoleLog('');
+          this.failsafe = true;
           return BbPromise.bind(this)
             .then(this.validate)
             .then(this.info)
@@ -104,11 +105,19 @@ class OpenWhiskInfo {
   }
 
   showRoutesInfo () {
+	var obj = this;
     this.consoleLog(`${chalk.yellow('endpoints (api-gw):')}`);
     return this.client.routes.list().then(routes => {
       if (!routes.apis.length) return console.log('**no routes deployed**\n');
       routes.apis.forEach(api => this.logApiEndPoints(api.value))
       this.consoleLog('')
+    }).catch(function (error) {
+      if (obj.failsafe) {
+        obj.consoleLog(`${chalk.red('**failed to fetch routes**\n')}`);
+        Promise.resolve(); 
+      } else {
+        throw error;
+      }
     })
   }
 
