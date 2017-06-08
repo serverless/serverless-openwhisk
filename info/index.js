@@ -112,11 +112,14 @@ class OpenWhiskInfo {
       this.consoleLog('')
     })
       
-    if (this.failsafe) {
-      operation = operation.catch(() => {
-        this.consoleLog(`${chalk.red('**failed to fetch routes**\n')}`)
-      })
-    }
+    operation = operation.catch(err => {
+      this.consoleLog(`${chalk.red('**failed to fetch routes**')}`)
+      if(err.message.match(/status code 400/) && err.message.match(/expired/)) {
+        this.consoleLog(`${chalk.red('**api gateway key is wrong or has expired! if it has expired, please refresh with wsk bluemix login**\n')}`)
+      }
+
+      if (!this.failsafe) throw err
+    })
 
     return operation
   }

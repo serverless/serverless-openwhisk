@@ -218,21 +218,42 @@ describe('OpenWhiskInfo', () => {
         expect(log.args[4][0].match(/POST https:\/\/api-gateway.com\/service_name\/api\/bar\/2/)).to.be.ok;
       }));
     })
-  })
 
-  describe('#showFailsafeRoutesInfo()', () => {
     it('should display error message in failsafe mode', () => {
       openwhiskInfo.failsafe = true;
       const log = sandbox.stub(openwhiskInfo, 'consoleLog')
       sandbox.stub(openwhiskInfo.client.routes, 'list').returns(BbPromise.resolve(false));
 
       return expect(openwhiskInfo.showRoutesInfo().then(() => {
+        expect(log.calledTwice).to.be.equal(true);
         expect(log.args[0][0].match(/endpoints \(api-gw\):/)).to.be.ok;
         expect(log.args[1][0].match(/failed to fetch routes/)).to.be.ok;
       }));
     })
+
+    it('should display error message about expired key in failsafe mode', () => {
+      openwhiskInfo.failsafe = true;
+      const log = sandbox.stub(openwhiskInfo, 'consoleLog')
+      sandbox.stub(openwhiskInfo.client.routes, 'list').returns(BbPromise.reject(new Error('status code 400 blah blah expired')));
+
+      return expect(openwhiskInfo.showRoutesInfo().then(() => {
+        expect(log.calledThrice).to.be.equal(true);
+        expect(log.args[0][0].match(/endpoints \(api-gw\):/)).to.be.ok;
+        expect(log.args[1][0].match(/failed to fetch routes/)).to.be.ok;
+        expect(log.args[2][0].match(/expired/)).to.be.ok;
+      }));
+    })
+
+    it('should return error about expired key without failsafe mode', () => {
+      openwhiskInfo.failsafe = false;
+      const log = sandbox.stub(openwhiskInfo, 'consoleLog')
+      sandbox.stub(openwhiskInfo.client.routes, 'list').returns(BbPromise.reject(new Error('status code 400 blah blah expired')));
+
+      return expect(openwhiskInfo.showRoutesInfo())
+        .to.eventually.be.rejected;
+    })
   })
-  
+
   describe('#showWebActionsInfo()', () => {
     it('should show web action routes returned', () => {
       const apihost = 'openwhisk.ng.bluemix.net'
