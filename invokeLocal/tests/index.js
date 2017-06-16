@@ -17,15 +17,15 @@ const getTmpFilePath = (fileName) => path.join(getTmpDirPath(), fileName);
 describe('OpenWhiskInvokeLocal', () => {
   const CLI = function () { this.consoleLog = function () {};};
   const serverless = {
-    config: () => {}, 
+    config: () => {},
     utils: {},
-    pluginManager: { getPlugins: () => []}, 
-    classes: {Error, CLI}, 
+    pluginManager: { getPlugins: () => []},
+    classes: {Error, CLI},
     service: {
       environment: {},
-      getFunction: () => {}, 
-      provider: {}, 
-      resources: {}, 
+      getFunction: () => {},
+      provider: {},
+      resources: {},
       getAllFunctions: () => []
     }
   };
@@ -146,6 +146,23 @@ describe('OpenWhiskInvokeLocal', () => {
       };
       serverless.utils.fileExistsSync = () => true;
       serverless.utils.readFileSync = path => JSON.stringify(data);
+      const dataFile = path.join(serverless.config.servicePath, 'data.json');
+      openwhiskInvokeLocal.options.path = dataFile;
+
+      return openwhiskInvokeLocal.validate().then(() => {
+        expect(openwhiskInvokeLocal.options.data).to.deep.equal(data);
+      });
+    });
+
+    it('it should accept file path containing javascript object', () => {
+      serverless.config.servicePath = getTmpDirPath();
+      const data = {
+        event: {
+          testProp: 'testValue',
+        },
+      };
+      serverless.utils.fileExistsSync = () => true;
+      serverless.utils.readFileSync = path => data;
       const dataFile = path.join(serverless.config.servicePath, 'data.json');
       openwhiskInvokeLocal.options.path = dataFile;
 
@@ -353,7 +370,7 @@ describe('OpenWhiskInvokeLocal', () => {
       return openwhiskInvokeLocal.invokeLocalNodeJs('fixture/handlerWithError', 'withRejectedPromise').then(() => {
         expect(process.exitCode).to.be.equal(1);
         expect(serverless.cli.consoleLog.lastCall.args[0]).to.contain('errorMessage');
-      }) 
+      })
     });
   });
 });

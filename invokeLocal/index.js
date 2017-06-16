@@ -50,7 +50,11 @@ class OpenWhiskInvokeLocal {
       const params = this.options.functionObj.parameters || {};
       let data = {};
       try {
-        data = JSON.parse(this.options.data);
+        if(typeof this.options.data === 'object') {
+          data = this.options.data;
+        } else {
+          data = JSON.parse(this.options.data);
+        }
       } catch (exception) {
         // do nothing if it's a simple string or object already
       }
