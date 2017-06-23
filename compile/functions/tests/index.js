@@ -55,6 +55,22 @@ describe('OpenWhiskCompileFunctions', () => {
     sandbox.restore();
   });
 
+  describe('#disableSeqPackaging()', () => {
+    it('should add disable flag to sequences', () => {
+      const fns = {
+        first: { handler: 'foo.js' },
+        second: { handler: 'foo.js' },
+        seq: { sequence: [ 'first', 'second' ] }
+      }
+
+      openwhiskCompileFunctions.serverless.service.getAllFunctions = () => Object.keys(fns)
+      openwhiskCompileFunctions.serverless.service.getFunction = name => fns[name];
+
+      openwhiskCompileFunctions.disableSeqPackaging()
+      expect(fns.seq.package.disable).to.be.true
+    });
+  });
+
   describe('#calculateFunctionNameSpace()', () => {
     it('should return namespace from function object', () => {
       expect(openwhiskCompileFunctions

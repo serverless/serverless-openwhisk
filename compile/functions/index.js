@@ -11,7 +11,9 @@ class OpenWhiskCompileFunctions {
     this.runtimes = new Runtimes(serverless)
 
     this.hooks = {
-      'before:package:createDeploymentArtifacts': this.excludes.bind(this),
+      'before:package:createDeploymentArtifacts':  () => BbPromise.bind(this)
+        .then(this.excludes)
+        .then(this.disableSeqPackaging),
       'before:package:compileFunctions': this.setup.bind(this),
       'package:compileFunctions': this.compileFunctions.bind(this),
     };
@@ -22,6 +24,16 @@ class OpenWhiskCompileFunctions {
     const exclude = this.serverless.service.package.exclude || [];
     exclude.push("node_modules/serverless-openwhisk/**");
     this.serverless.service.package.exclude = exclude;
+  }
+
+  disableSeqPackaging() {
+    this.serverless.service.getAllFunctions().forEach(functionName => {
+      const functionObject = this.serverless.service.getFunction(functionName);
+
+      if (functionObject.sequence) {
+        Object.assign(functionObject, { package: { disable: true } })
+      }
+    })
   }
 
   setup() {
