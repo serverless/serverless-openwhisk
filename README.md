@@ -264,7 +264,7 @@ In the `serverless.yaml` file, the `handler` property is used to denote the sour
 ```yaml
 functions:
   my_function:
-    handler: index.greeting
+    handler: index.main
     runtime: swift
 ```
 
@@ -290,6 +290,42 @@ func main(args: [String:Any]) -> [String:Any] {
 ```
 
 If you want to return an error message, return an object with an `error` property with the message. 
+
+## Writing Functions - Pre-Compiled Swift Binaries
+
+OpenWhisk supports creating Swift actions from a pre-compiled binary. This reduces startup time for Swift actions by removing the need for a dynamic compilation step.
+
+In the `serverless.yaml` file, the `handler` property can refer to the compiled binary file produced by the build. 
+
+```yaml
+functions:
+  hello:
+    handler: .build/release/Hello
+```
+
+This configuration will generate the deployment package for that function containing only this binary file. It will not include other local files, e.g. Swift source files.
+
+Pre-compiled Swift actions must be compatible with the platform runtime and architecture. There is an [open-source Swift package](https://packagecatalog.com/package/jthomas/OpenWhiskAction) (`OpenWhiskAction`) that handles wrapping functions within a shim to support runtime execution.
+
+```
+import OpenWhiskAction
+
+func hello(args: [String:Any]) -> [String:Any] {
+    if let name = args["name"] as? String {
+      return [ "greeting" : "Hello \(name)!" ]
+    } else {
+      return [ "greeting" : "Hello stranger!" ]
+    }
+}
+
+OpenWhiskAction(main: hello)
+```
+
+Binaries produced by the Swift build process must be generated for the correct platform architecture. This Docker command will compile Swift sources files using the relevant Swift environment.
+
+```
+docker run --rm -it -v $(pwd):/swift-package openwhisk/swift3action bash -e -c "cd /swift-package && swift build -v -c release"
+```
 
 ## Writing Functions - Binary
 

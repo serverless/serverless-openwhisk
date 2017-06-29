@@ -83,6 +83,16 @@ describe('Swift', () => {
     })
   });
 
+  describe('#convertHandlerToPath()', () => {
+    it('should return file path for swift function handlers', () => {
+      expect(node.convertHandlerToPath('file.func')).to.be.equal('file.swift')
+    })
+
+    it('should return file path for build binaries', () => {
+      expect(node.convertHandlerToPath('.build/release/Action')).to.be.equal('.build/release/Action')
+    })
+  })
+
   describe('#generateActionPackage()', () => {
     it('should throw error for missing handler file', () => {
       expect(() => node.generateActionPackage({handler: 'does_not_exist.main'}))
@@ -134,5 +144,28 @@ describe('Swift', () => {
         })
       });
     })
+
+    it('should create zip file with binary action', () => {
+      node.serverless.service.package = {artifact: '/path/to/zip_file.zip'};
+      node.isValidFile = () => true
+      const zip = new JSZip();
+      const source = 'binary file contents' 
+      zip.file(".build/release/foo/bar", source);
+      return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
+        sandbox.stub(fs, 'readFile', (path, cb) => {
+          expect(path).to.equal('/path/to/zip_file.zip');
+          cb(null, zipped);
+        });
+        return node.generateActionPackage({handler: '.build/release/foo/bar'}).then(data => {
+          return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
+            return zip.file(".build/release/Action").async("string").then(contents => {
+              expect(contents).to.be.equal(source)
+            })
+          })
+        })
+      });
+    })
+
+
   })
 });
