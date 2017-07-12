@@ -87,6 +87,20 @@ describe('OpenWhiskDeployFunction', () => {
     });
   });
 
+  describe('#packageFunction()', () => {
+    it('should not package sequence actions', () => {
+      const fObj = {sequence: ['a', 'b', 'c']}
+      const spy = sinon.spy()
+      openwhiskDeployFunction.pkg = { packageFunction: spy }
+
+      const getFunctionStub = sinon.stub(openwhiskDeployFunction.serverless.service, "getFunction").returns(fObj)
+
+      return openwhiskDeployFunction.packageFunction().then(() => {
+        expect(spy.called).to.be.false
+      })
+    })
+  })
+
   describe('#compileFunction()', () => {
     it('should store compiled function on instance', () => {
       const fObj = {handler: "file.main"}
@@ -126,20 +140,6 @@ describe('OpenWhiskDeployFunction', () => {
       });
       return expect(openwhiskDeployFunction.deployFunction())
         .to.eventually.be.rejected;
-    });
-  });
-
-  describe('#cleanup()', () => {
-    it('should remove the temporary .serverless directory', () => {
-      openwhiskDeployFunction.pkg = { cleanup: () => {}};
-
-      const cleanupStub = sinon
-        .stub(openwhiskDeployFunction.pkg, 'cleanup').returns(BbPromise.resolve());
-
-      return openwhiskDeployFunction.cleanup().then(() => {
-        expect(cleanupStub.calledOnce).to.be.equal(true);
-        openwhiskDeployFunction.pkg.cleanup.restore();
-      });
     });
   });
 });

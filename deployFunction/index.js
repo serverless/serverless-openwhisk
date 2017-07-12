@@ -1,7 +1,8 @@
 'use strict';
 
 const BbPromise = require('bluebird');
-const fs = require('fs');
+const fs = require('fs-extra');
+const path = require('path')
 const CompileFunctions = require('../compile/functions/')
 
 class OpenWhiskDeployFunction {
@@ -50,6 +51,12 @@ class OpenWhiskDeployFunction {
 
   packageFunction () {
     this.serverless.cli.log(`Packaging function: ${this.options.function}...`);
+    const functionObject = this.serverless.service.getFunction(this.options.function);
+    // sequences do not need packaging, no files to deploy
+    if (functionObject.sequence) {
+      return BbPromise.resolve();
+    }
+
     this.serverless.service.package.individually = true
     return this.pkg.packageFunction(this.options.function);
   }
@@ -68,7 +75,15 @@ class OpenWhiskDeployFunction {
   }
 
   cleanup () {
-    return this.pkg.cleanup();
+    if (this.serverless.config.servicePath) {
+      const serverlessTmpDirPath = path.join(this.serverless.config.servicePath, '.serverless');
+
+      if (this.serverless.utils.dirExistsSync(serverlessTmpDirPath)) {
+        fs.removeSync(serverlessTmpDirPath);
+      }
+    }
+
+    return BbPromise.resolve();
   }
 }
 
