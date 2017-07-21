@@ -7,6 +7,29 @@ require('chai').use(chaiAsPromised);
 
 const sinon = require('sinon');
 const OpenWhiskCompileFunctions = require('../index');
+const BaseRuntime = require('../runtimes/base.js');
+
+describe('BaseRuntime', () => {
+  describe('#convertHandlerToPath', () => {
+    const base = new BaseRuntime();
+    base.extension = '.js';
+
+    it('should extract the path for a given file handler', () => {
+      const result = base.convertHandlerToPath('index.main');
+      expect(result).to.equal('index.js');
+    });
+
+    it('should return the input for a given file handler without exported function', () => {
+      const result = base.convertHandlerToPath('index');
+      expect(result).to.equal('index');
+    });
+
+    it('should extract the path for a given path handler', () => {
+      const result = base.convertHandlerToPath('myFunction@0.1.0/index.main');
+      expect(result).to.equal('myFunction@0.1.0/index.js');
+    });
+  });
+});
 
 describe('OpenWhiskCompileFunctions', () => {
   let serverless;
