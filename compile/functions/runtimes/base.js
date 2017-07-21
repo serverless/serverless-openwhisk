@@ -51,7 +51,11 @@ class BaseRuntime {
   }
 
   convertHandlerToPath(functionHandler) {
-    return functionHandler.replace(/\..*$/, this.extension)
+    const lastDot = functionHandler.lastIndexOf('.');
+    if (lastDot === -1) {
+      return functionHandler;
+    }
+    return functionHandler.substring(0, lastDot) + this.extension;
   }
 
   generateActionPackage(functionObject) {
