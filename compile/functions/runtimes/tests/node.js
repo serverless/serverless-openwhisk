@@ -123,6 +123,27 @@ describe('Node', () => {
       });
     })
 
+    it('should read service artifact and add package.json for relative path handler', () => {
+      node.serverless.service.package = { artifact: '/path/to/zip_file.zip' };
+      node.isValidFile = () => true;
+      const zip = new JSZip();
+      zip.file('folder/handler.js', 'function main() { return {}; }');
+      zip.file('folder/package.json', '{"main": "index.js"}');
+      return zip.generateAsync({ type: 'nodebuffer' }).then(zipped => {
+        sandbox.stub(fs, 'readFile', (path, cb) => {
+          expect(path).to.equal('/path/to/zip_file.zip');
+          cb(null, zipped);
+        });
+        return node.generateActionPackage({ handler: '../folder/handler.main' }).then(data => {
+          return JSZip.loadAsync(new Buffer(data, 'base64')).then(actionPackage => {
+            return actionPackage.file('package.json').async('string').then(packageJson => {
+              expect(packageJson).to.be.equal('{"main":"folder/handler.js"}');
+            });
+          });
+        });
+      });
+    });
+
     it('should handle service artifact for individual function handler', () => {
       const functionObj = {handler: 'handler.main', artifact: '/path/to/zip_file.zip'}
       node.serverless.service.package = {individually: true};

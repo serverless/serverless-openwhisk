@@ -28,7 +28,11 @@ class BaseRuntime {
   }
 
   calculateFunctionMain(functionObject) {
-    return functionObject.handler.split('.')[1]
+    const splitted = functionObject.handler.split('.');
+    if (splitted.length < 2) {
+      return functionObject;
+    }
+    return splitted[splitted.length - 1];
   }
 
   calculateRuntime(functionObject) {
@@ -58,15 +62,26 @@ class BaseRuntime {
     return functionHandler.substring(0, lastDot) + this.extension;
   }
 
-  generateActionPackage(functionObject) {
-    const handlerFile = this.convertHandlerToPath(functionObject.handler);
+  convertHandlerToPathInZip(functionHandler) {
+    let path = this.convertHandlerToPath(functionHandler);
+    while (path.startsWith('../')) {
+      path = path.substring(3);
+    }
+    return path;
+  }
 
+  generateActionPackage(functionObject) {
+    // Check that handler file exists
+    const handlerFile = this.convertHandlerToPath(functionObject.handler);
     if (!this.isValidFile(handlerFile)) {
       throw new this.serverless.classes.Error(`Function handler (${handlerFile}) does not exist.`)
     }
 
+    // Generate action package
+    const handlerFileZipPath = this.convertHandlerToPathInZip(functionObject.handler);
+
     return this.getArtifactZip(functionObject)
-      .then(zip => this.processActionPackage(handlerFile, zip))
+      .then(zip => this.processActionPackage(handlerFileZipPath, zip))
       .then(zip => zip.generateAsync({type: 'nodebuffer'}))
       .then(buf => buf.toString('base64'))
   }
