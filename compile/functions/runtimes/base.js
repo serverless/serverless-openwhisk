@@ -82,8 +82,10 @@ class BaseRuntime {
 
     return this.getArtifactZip(functionObject)
       .then(zip => this.processActionPackage(handlerFileZipPath, zip))
-      .then(zip => zip.generateAsync({type: 'nodebuffer'}))
-      .then(buf => buf.toString('base64'))
+      .then(zip => zip.generateAsync(
+        { type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } }
+      ))
+      .then(buf => buf.toString('base64'));
   }
 
   getArtifactZip(functionObject) {
