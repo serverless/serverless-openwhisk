@@ -137,7 +137,7 @@ class OpenWhiskLogs {
   formatLogLine (logLine) {
     const items = logLine.split(' ').filter(item => item !== '')
     const format = 'YYYY-MM-DD HH:mm:ss.SSS'
-    const timestamp = chalk.green(moment(items[0]).format(format))
+    const timestamp = chalk.green(moment(items[0]).utc().format(format))
 
     let contents = items.slice(2).join(' ')
     if (items[1] === 'stderr:') {

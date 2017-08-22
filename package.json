@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "istanbul cover -x '**/*.test.js' node_modules/mocha/bin/_mocha tests/all -- -R spec --recursive",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "report": "istanbul report lcovonly && codecov"
   },
   "repository": {
     "type": "git",
