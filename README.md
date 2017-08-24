@@ -1,6 +1,6 @@
-
-
 # Serverless OpenWhisk Plugin
+[![Build Status](https://travis-ci.org/serverless/serverless-openwhisk.svg?branch=master)](https://travis-ci.org/serverless/serverless-openwhisk)
+[![codecov](https://codecov.io/gh/serverless/serverless-openwhisk/branch/master/graph/badge.svg)](https://codecov.io/gh/serverless/serverless-openwhisk)
 
 This plugin enables support for the [OpenWhisk platform](http://openwhisk.org/) within the Serverless Framework.
 
@@ -11,7 +11,7 @@ This plugin enables support for the [OpenWhisk platform](http://openwhisk.org/) 
 Before you can deploy your service to OpenWhisk, you need to have an account registered with the platform.
 
 - *Want to run the platform locally?* Please read the project's [*Quick Start*](https://github.com/openwhisk/openwhisk#quick-start) guide for deploying it locally.
-- *Want to use a hosted provider?* Please sign up for an account with [IBM Bluemix](https://console.ng.bluemix.net/) and then follow the instructions for getting access to [OpenWhisk on Bluemix](https://console.ng.bluemix.net/openwhisk/). 
+- *Want to use a hosted provider?* Please sign up for an account with [IBM Bluemix](https://console.ng.bluemix.net/) and then follow the instructions for getting access to [OpenWhisk on Bluemix](https://console.ng.bluemix.net/openwhisk/).
 
 ### Set up account credentials
 
@@ -47,7 +47,7 @@ npm install
 
 More service examples are available in the [`serverless-examples`](https://github.com/serverless/examples) repository.
 
-**Using a self-hosted version of the platform?** 
+**Using a self-hosted version of the platform?**
 
 Ensure you set the `ignore_certs` option in the serverless.yaml prior to deployment.
 
@@ -126,7 +126,7 @@ function main(params) {
 exports.main = main;
 ```
 
-Modules [should return the function handler](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#packaging-an-action-as-a-nodejs-module) as a custom property on the global `exports` object. 
+Modules [should return the function handler](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#packaging-an-action-as-a-nodejs-module) as a custom property on the global `exports` object.
 
 In the `serverless.yaml` file, the `handler` property is used to denote the source file and module property containing the serverless function.
 
@@ -149,7 +149,7 @@ function main(params) {
 
 ### Function Return Values
 
-The handler must return an object from the function call. Returning `undefined` or `null` will result in an error. If the handler is carrying out an [asynchronous task](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#creating-asynchronous-actions), it can return a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). 
+The handler must return an object from the function call. Returning `undefined` or `null` will result in an error. If the handler is carrying out an [asynchronous task](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#creating-asynchronous-actions), it can return a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
 ```javascript
 // synchronous return
@@ -235,7 +235,7 @@ def endpoint(params):
 
 ### Function Return Values
 
-The handler must return a dictionary from the function call. 
+The handler must return a dictionary from the function call.
 
 ```python
 def endpoint(params):
@@ -243,7 +243,7 @@ def endpoint(params):
     return {"foo": "bar"}
 ```
 
-If you want to return an error message, return an object with an `error` property with the message. 
+If you want to return an error message, return an object with an `error` property with the message.
 
 ## Writing Functions - Swift
 
@@ -280,7 +280,7 @@ func main(args: [String:Any]) -> [String:Any] {
 
 ### Function Return Values
 
-The handler must return a dictionary from the function call. 
+The handler must return a dictionary from the function call.
 
 ```swift
 func main(args: [String:Any]) -> [String:Any] {
@@ -289,13 +289,13 @@ func main(args: [String:Any]) -> [String:Any] {
 }
 ```
 
-If you want to return an error message, return an object with an `error` property with the message. 
+If you want to return an error message, return an object with an `error` property with the message.
 
 ## Writing Functions - Pre-Compiled Swift Binaries
 
 OpenWhisk supports creating Swift actions from a pre-compiled binary. This reduces startup time for Swift actions by removing the need for a dynamic compilation step.
 
-In the `serverless.yaml` file, the `handler` property can refer to the compiled binary file produced by the build. 
+In the `serverless.yaml` file, the `handler` property can refer to the compiled binary file produced by the build.
 
 ```yaml
 functions:
@@ -329,7 +329,7 @@ docker run --rm -it -v $(pwd):/swift-package openwhisk/swift3action bash -e -c "
 
 ## Writing Functions - Binary
 
-OpenWhisk supports executing a compiled binary for the function handler. Using a Python wrapper, the file will be invoked within the `openwhisk/dockerskeleton` Docker container. 
+OpenWhisk supports executing a compiled binary for the function handler. Using a Python wrapper, the file will be invoked within the `openwhisk/dockerskeleton` Docker container.
 
 The binary must be compiled for the correct platform architecture and only link to shared libraries installed in the `openwhisk/dockerskeleton` runtime.
 
@@ -350,7 +350,7 @@ OpenWhisk executes the binary file for each request. Event parameters are stream
 
 The handler must write a JSON object string with the response parameters to `stdout` before exiting.
 
-If you want to return an error message, return an object with an `error` property with the message. 
+If you want to return an error message, return an object with an `error` property with the message.
 
 ## Writing Functions - Docker
 
@@ -358,7 +358,7 @@ OpenWhisk supports custom runtimes using public images on Docker Hub. These imag
 
 All necessary files for execution must be provided within the image. Local source files will not be uploaded to the runtime environment.
 
-In the `serverless.yaml` file, the `handler` property is used to denote the image label. 
+In the `serverless.yaml` file, the `handler` property is used to denote the image label.
 
 ```yaml
 functions:
@@ -491,7 +491,7 @@ Here is an example of returning binary data:
 ```
 function main() {
    let png = <base 64 encoded string>
-   return { 
+   return {
       headers: { "Content-Type": "image/png" },
       body: png };
 }
@@ -519,7 +519,7 @@ The `schedule` event configuration is controlled by a string, based on the UNIX 
 functions:
   my_function:
     handler: index.main
-    events: 
+    events:
       - schedule: cron(* * * * *) // fires each minute.
 ```
 
@@ -561,15 +561,15 @@ functions:
     index:
         handler: users.main
         events:
-            - message_hub: 
+            - message_hub:
                 package: /${BLUEMIX_ORG}_${BLUEMIX_SPACE}/Bluemix_${SERVICE_NAME}_Credentials-1
                 topic: my_kafka_topic
- 
+
 ```
 
 The plugin will create a trigger called `${serviceName}_${fnName}_messagehub_${topic}` and a rule called `${serviceName}_${fnName}_messagehub_${topic}_rule` to bind the function to the message hub events.
 
-The trigger and rule names created can be set explicitly using the `trigger` and`rule` parameters. 
+The trigger and rule names created can be set explicitly using the `trigger` and`rule` parameters.
 
 Other functions can bind to the same trigger using the inline `trigger` event referencing this trigger name.
 
@@ -579,15 +579,15 @@ functions:
     index:
         handler: users.main
         events:
-            - message_hub: 
+            - message_hub:
                 package: /${BLUEMIX_ORG}_${BLUEMIX_SPACE}/Bluemix_${SERVICE_NAME}_Credentials-1
                 topic: my_kafka_topic
                 trigger: log_events
-                rule: connect_index_to_kafka 
+                rule: connect_index_to_kafka
      another:
         handler: users.another
         events:
-            - trigger: log_events 
+            - trigger: log_events
 ```
 
 ### Using Manual Parameters
@@ -600,7 +600,7 @@ functions:
     index:
         handler: users.main
         events:
-            - message_hub: 
+            - message_hub:
                 topic: my_kafka_topic
                 brokers: afka01-prod01.messagehub.services.us-south.bluemix.net:9093
                 user: USERNAME
@@ -615,7 +615,7 @@ functions:
 
 ## Cloudant DB Events
 
-IBM Cloudant provides a hosted NoSQL database, based upon CouchDB, running on IBM Bluemix. Functions can be connected to events fired when the database is updated. These events use the [CouchDB changes feed](http://guide.couchdb.org/draft/notifications.html) to follow database modifications. 
+IBM Cloudant provides a hosted NoSQL database, based upon CouchDB, running on IBM Bluemix. Functions can be connected to events fired when the database is updated. These events use the [CouchDB changes feed](http://guide.couchdb.org/draft/notifications.html) to follow database modifications.
 
 IBM Cloudant instances can be provisioned through the IBM Bluemix platform. OpenWhisk on Bluemix will export Cloudant service credentials bound to a package with the following name:
 
@@ -633,15 +633,15 @@ functions:
     index:
         handler: users.main
         events:
-            - cloudant: 
+            - cloudant:
                 package: /${BLUEMIX_ORG}_${BLUEMIX_SPACE}/Bluemix_${SERVICE_NAME}_Credentials-1
                 db: my_db_name
- 
+
 ```
 
 The plugin will create a trigger called `${serviceName}_${fnName}_cloudant_${topic}` and a rule called `${serviceName}_${fnName}_cloudant_${topic}_rule` to bind the function to the Cloudant update events.
 
-The trigger and rule names created can be set explicitly using the `trigger` and`rule` parameters. 
+The trigger and rule names created can be set explicitly using the `trigger` and`rule` parameters.
 
 Other functions can bind to the same trigger using the inline `trigger` event referencing this trigger name.
 
@@ -655,7 +655,7 @@ functions:
     index:
         handler: users.main
         events:
-            - cloudant: 
+            - cloudant:
                 host: xxx-yyy-zzz-bluemix.cloudant.com
                 username: USERNAME
                 password: PASSWORD
@@ -664,7 +664,7 @@ functions:
 
 ## Custom Event Triggers
 
-Functions are connected to event sources in OpenWhisk [using triggers and rules](https://github.com/openwhisk/openwhisk/blob/master/docs/triggers_rules.md). Triggers create a named event stream within the system. Triggers can be fired manually or connected to external data sources, like databases or message queues. 
+Functions are connected to event sources in OpenWhisk [using triggers and rules](https://github.com/openwhisk/openwhisk/blob/master/docs/triggers_rules.md). Triggers create a named event stream within the system. Triggers can be fired manually or connected to external data sources, like databases or message queues.
 
 Rules set up a binding between triggers and serverless functions. With an active rule, each time a trigger is fired, the function will be executed with the trigger payload.
 
@@ -677,7 +677,7 @@ functions:
     events:
       - trigger: my_trigger
 ```
-This configuration will create a trigger called `servicename-my_trigger` with an active rule binding `my_function` to this event stream. 
+This configuration will create a trigger called `servicename-my_trigger` with an active rule binding `my_function` to this event stream.
 
 ### Customising Rules
 
@@ -703,11 +703,11 @@ functions:
     handler: index.main
     events:
       - trigger: my_trigger
-      
+
 resources:
   triggers:
     my_trigger:
-      parameters: 
+      parameters:
         hello: world            
 ```
 
@@ -721,10 +721,10 @@ This example demonstrates setting up a trigger which uses the `/whisk.system/ala
 resources:
   triggers:
     alarm_trigger:
-      parameters: 
+      parameters:
         hello: world
       feed: /whisk.system/alarms/alarm
-      feed_parameters: 
+      feed_parameters:
         cron: '*/8 * * * * *'
 ```
 
@@ -736,5 +736,5 @@ The following serverless commands are currently implemented for the OpenWhisk pr
 - `invoke`- [Invoke deployed serverless function and show result](https://serverless.com/framework/docs/providers/openwhisk/cli-reference/invoke/).
 - `invokeLocal`- [Invoke serverless functions locally and show result](https://serverless.com/framework/docs/providers/openwhisk/cli-reference/invoke#invoke-local).
 - `remove` - [Remove functions, triggers and rules for service](https://serverless.com/framework/docs/providers/openwhisk/cli-reference/remove/).
-- `logs` - [Display activation logs for deployed function](https://serverless.com/framework/docs/providers/openwhisk/cli-reference/logs/). 
+- `logs` - [Display activation logs for deployed function](https://serverless.com/framework/docs/providers/openwhisk/cli-reference/logs/).
 - `info` - [Display details on deployed functions, triggers and rules](https://serverless.com/framework/docs/providers/openwhisk/cli-reference/info/).

@@ -3,3 +3,20 @@ node_js:
   - "8"
   - "7"
   - "6"
+
+sudo: required
+
+services:
+ - docker
+
+before_install:
+  - cd $TRAVIS_BUILD_DIR
+
+install:
+  - ./tools/travis/setup.sh
+  - cd $TRAVIS_BUILD_DIR
+
+script:
+  - ./tools/travis/build.sh
+  - cd $TRAVIS_BUILD_DIR
+  - npm run report
