@@ -352,9 +352,29 @@ The handler must write a JSON object string with the response parameters to `std
 
 If you want to return an error message, return an object with an `error` property with the message.
 
+## Custom Runtime Images
+
+OpenWhisk actions can use [custom Docker images as the runtime environment](https://medium.com/openwhisk/large-applications-on-openwhisk-bcf15bff94ec). This allows extra packages, libraries or tools to be pre-installed in the runtime environment. Using a custom runtime image, with extra libraries and dependencies built-in, is useful for overcoming the [maximum deployment size](https://github.com/apache/incubator-openwhisk/blob/master/docs/reference.md#system-limits) on actions.
+
+*Images must implement the [API used by the platform](http://jamesthom.as/blog/2017/01/16/openwhisk-docker-actions/) to interact with runtime environments. Images must also be available on Docker Hub. OpenWhisk does not support private Docker registries.*
+
+OpenWhisk publishes the [existing runtime images on Docker Hub](https://hub.docker.com/r/openwhisk/). Using these images in the `FROM` directive in the `Dockerfile` is an easy way to [create new images](https://docs.docker.com/engine/reference/commandline/build/) compatible with the platform.
+
+In the `serverless.yaml` file, the `image` property is used to denote the custom runtime image.
+
+```yaml
+functions:
+  my_function:
+    handler: source.js
+    runtime: nodejs
+    image: dockerhub_user/image_name
+```
+
+*Node.js, Swift, Python and Binary runtimes support using a custom image property.*
+
 ## Writing Functions - Docker
 
-OpenWhisk supports custom runtimes using public images on Docker Hub. These images are expected to support the platform API used to instantiate and invoke serverless functions.
+OpenWhisk supports creating actions from public images on Docker Hub without handler files. These images are expected to support the platform API used to instantiate and invoke serverless functions.
 
 All necessary files for execution must be provided within the image. Local source files will not be uploaded to the runtime environment.
 
