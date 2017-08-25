@@ -202,6 +202,55 @@ function pad_lines(args) {
 exports.handler = pad_lines;
 ```
 
+## Writing Functions - PHP
+
+Here's an `index.php` file containing an example handler function.
+
+```php
+<?php
+function main(array $args) : array
+{
+    $name = $args["name"] ?? "stranger";
+    $greeting = "Hello $name!";
+    echo $greeting;
+    return ["greeting" => $greeting];
+}
+```
+
+In the `serverless.yaml` file, the `handler` property is used to denote the source file and function name of the serverless function.
+
+```yaml
+functions:
+  my_function:
+    handler: index.main
+    runtime: php
+```
+
+### Request Properties
+
+OpenWhisk executes the handler function for each request. This function is called with a single argument, an associative array [containing the request properties](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#passing-parameters-to-an-action).
+
+```php
+function main(array $args) : array
+{
+    $name = $args["name"] ?? "stranger";
+    ...
+}
+```
+
+### Function Return Values
+
+The handler must return  an associative array from the function call.
+
+```swift
+func main(args: [String:Any]) -> [String:Any] {
+	...
+    return ["foo" => $bar];
+}
+```
+
+If you want to return an error message, return an object with an `error` property with the message.
+
 ## Writing Functions - Python
 
 Here's an `index.py` file containing an example handler function.

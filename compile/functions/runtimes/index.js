@@ -5,6 +5,7 @@ const Docker = require('./docker')
 const Node = require('./node')
 const Python = require('./python')
 const Swift = require('./swift')
+const Php = require('./php')
 const Sequence = require('./sequence')
 
 class Runtimes {
@@ -16,6 +17,7 @@ class Runtimes {
       new Node(serverless),
       new Python(serverless),
       new Swift(serverless),
+      new Php(serverless),
       new Sequence(serverless)
     ];
   }
