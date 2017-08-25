@@ -65,6 +65,18 @@ class OpenWhiskCompileCloudant {
       feed_parameters.host = config.host
     }
 
+    if (config.max) {
+      feed_parameters.maxTriggers = config.max
+    }
+
+    if (config.query) {
+      feed_parameters.query_params = config.query
+    }
+
+    if (config.filter) {
+      feed_parameters.filter = config.filter
+    }
+
     return { name, content: { feed, feed_parameters } }
   }
 

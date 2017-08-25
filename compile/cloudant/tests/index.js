@@ -123,5 +123,29 @@ describe('OpenWhiskCompileCloudant', () => {
         }
       })
     })
+
+    it('should return trigger with optional configuration parameters.', () => {
+      const config = { db: 'dbname', username: 'user', password: 'password', host: 'hostname', max: 10000, query: { key: 'value' }, filter: 'some/view' }
+      const trigger = openwhiskCompileCloudant.compileCloudantTrigger('testing', config) 
+      expect(trigger).to.be.deep.equal({
+        name: `${serverless.service.service}_testing_cloudant_${config.db}`,
+        content: {
+          feed: `/whisk.system/cloudant/changes`,
+          feed_parameters: {
+            username: config.username,
+            password: config.password,
+            host: config.host,
+            dbname: config.db,
+            maxTriggers: 10000,
+            filter: 'some/view',
+            query_params: {
+              key: 'value'
+            }
+          }
+        }
+      })
+    })
+
+
   })
 });
