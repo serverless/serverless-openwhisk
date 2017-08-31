@@ -714,7 +714,7 @@ The trigger and rule names created can be set explicitly using the `trigger` and
 
 Other functions can bind to the same trigger using the inline `trigger` event referencing this trigger name.
 
-## Using Manual Parameters
+### Using Manual Parameters
 
 Parameters for the Cloudant event source can be defined explicitly, rather than using pulling credentials from a package.
 
@@ -729,6 +729,28 @@ functions:
                 username: USERNAME
                 password: PASSWORD
                 db: db_name
+```
+
+### Adding Optional Parameters
+
+The following optional feed parameters are also supported:
+
+* `max` - Maximum number of triggers to fire. Defaults to infinite.
+* `filter` - Filter function defined on a design document.
+* `query` - Optional query parameters for the filter function. 
+
+```yaml
+# serverless.yaml
+functions:
+    index:
+        handler: users.main
+        events:
+            - cloudant: 
+                ...
+                max: 10000 
+                query: 
+                   status: new
+                filter: mailbox/by_status
 ```
 
 ## Custom Event Triggers
