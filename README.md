@@ -488,6 +488,23 @@ functions:
       - http: GET /api/greeting
 ```
 
+HTTP event configuration also supports using explicit parameters.
+
+- `method` - HTTP method (mandatory).
+- `path` - URI path for API gateway (mandatory).
+- `resp` - controls [web action content type](https://github.com/apache/incubator-openwhisk/blob/master/docs/webactions.md#additional-features), values include: `json`, `html`, `http`, `svg`or `text` (optional, defaults to `json`).
+
+```yaml
+functions:
+  my_function:
+    handler: index.main
+    events:
+      - http:
+          method: GET
+          path: /api/http
+          resp: http
+```
+
 API Gateway hosts serving the API endpoints will be shown during deployment.
 
 ```shell
@@ -510,7 +527,7 @@ Date: Mon, 19 Dec 2016 15:47:53 GMT
 }
 ````
 
-_**IMPORTANT: [API Gateway support](https://github.com/openwhisk/openwhisk/blob/master/docs/apigateway.md) is currently experimental and may be subject to breaking changes.**_
+
 
 ## Exporting Web Actions
 

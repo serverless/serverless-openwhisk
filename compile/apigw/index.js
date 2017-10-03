@@ -74,7 +74,7 @@ class OpenWhiskCompileHttpEvents {
 
   parseHttpEvent(httpEvent) {
     if (httpEvent.path && httpEvent.method) {
-      return { relpath: httpEvent.path, operation: httpEvent.method };
+      return { relpath: httpEvent.path, operation: httpEvent.method, responsetype: httpEvent.resp || 'json' };
     } else if (typeof httpEvent === 'string') {
       const method_and_path = httpEvent.trim().split(' ');
       if (method_and_path.length !== 2) {

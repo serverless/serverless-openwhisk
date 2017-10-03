@@ -38,6 +38,7 @@ functions:
             - http: 
                 method: GET 
                 path: /api/greeting
+                resp: json
 ```
 
 During deployment the endpoint configuration file will be uploaded to OpenWhisk.

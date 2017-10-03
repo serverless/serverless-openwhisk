@@ -149,7 +149,15 @@ describe('OpenWhiskCompileHttpEvents', () => {
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
       const http =  {path: "/api/foo/bar", method: "GET"}
       const result = openwhiskCompileHttpEvents.compileHttpEvent('action-name', {}, http);
-      return expect(result).to.deep.equal({basepath: '/my-service', relpath: '/api/foo/bar', operation: 'GET', action: '/sample_ns/my-service_action-name'});
+      return expect(result).to.deep.equal({basepath: '/my-service', relpath: '/api/foo/bar', operation: 'GET', action: '/sample_ns/my-service_action-name', responsetype: 'json'});
+    });
+
+    it('should define http events with explicit response type', () => {
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
+      const http =  {path: "/api/foo/bar", method: "GET", resp: 'http'}
+      const result = openwhiskCompileHttpEvents.compileHttpEvent('action-name', {}, http);
+      return expect(result).to.deep.equal({basepath: '/my-service', relpath: '/api/foo/bar', operation: 'GET', action: '/sample_ns/my-service_action-name', responsetype: 'http'});
     });
 
     it('should throw if http event value invalid', () => {
