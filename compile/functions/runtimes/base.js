@@ -96,7 +96,7 @@ class BaseRuntime {
 
   getArtifactPath(functionObject) {
     return this.serverless.service.package.individually ? 
-      functionObject.artifact : this.serverless.service.package.artifact;
+      functionObject.package.artifact : this.serverless.service.package.artifact;
   }
 }
 

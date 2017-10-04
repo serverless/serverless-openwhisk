@@ -109,7 +109,7 @@ describe('Php', () => {
     })
 
     it('should handle service artifact for individual function handler', () => {
-      const functionObj = {handler: 'handler.main', artifact: '/path/to/zip_file.zip'}
+      const functionObj = {handler: 'handler.main', package: { artifact: '/path/to/zip_file.zip'}}
       php.serverless.service.package = {individually: true};
       php.isValidFile = () => true
 

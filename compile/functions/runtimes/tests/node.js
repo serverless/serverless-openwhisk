@@ -145,7 +145,7 @@ describe('Node', () => {
     });
 
     it('should handle service artifact for individual function handler', () => {
-      const functionObj = {handler: 'handler.main', artifact: '/path/to/zip_file.zip'}
+      const functionObj = {handler: 'handler.main', package: { artifact: '/path/to/zip_file.zip'}}
       node.serverless.service.package = {individually: true};
       node.isValidFile = () => true
 
