@@ -60,7 +60,33 @@ describe('deployHttpEvents', () => {
     });
 
   });
- 
+  
+  describe('#deploySequentialRoutes()', () => {
+    it('should deploy each route in sequential order', () => {
+      let inflight = 0
+      let count = 0
+      const routes = [
+        {order: 0}, {order: 1}, {order: 2} 
+      ];
+      sandbox.stub(openwhiskDeploy, 'deployRoute', r => {
+        expect(inflight).to.equal(0)
+        expect(count).to.equal(r.order)
+        inflight += 1
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            inflight -= 1
+            count++
+            expect(inflight).to.equal(0)
+            resolve()
+          }, 10)
+        })
+      });
+      return openwhiskDeploy.deploySequentialRoutes(routes).then(() => {
+        expect(count).to.equal(routes.length)
+      })
+    });
+  });
+
   describe('#deployRoute()', () => {
     it('should deploy api gw route handler to openwhisk', () => {
       sandbox.stub(openwhiskDeploy.provider, 'client', () => {

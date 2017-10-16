@@ -30,6 +30,10 @@ module.exports = {
     })
   },
 
+  deploySequentialRoutes(routes) {
+      return BbPromise.mapSeries(routes, r => this.deployRoute(r))
+  },
+
   deployRoutes() {
     const apigw = this.serverless.service.apigw;
 
@@ -38,9 +42,7 @@ module.exports = {
     }
 
     this.serverless.cli.log('Deploying API Gateway definitions...');
-    return this.unbindAllRoutes().then(() => {
-      const requests = apigw.map(r => this.deployRoute(r))
-      return BbPromise.all(requests)
-    })
+    return this.unbindAllRoutes()
+      .then(() => this.deploySequentialRoutes(apigw))
   }
 };
