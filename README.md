@@ -449,7 +449,7 @@ functions:
     namespace: "..." // defaults to user-provided credentials
     memory: 256 // 128 to 512 (MB).
     timeout: 60 // 0.1 to 600 (seconds)
-    properties:
+    parameters:
       foo: bar // default parameters
     anotations:
       foo: bar // action annotations
