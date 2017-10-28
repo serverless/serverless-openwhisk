@@ -132,5 +132,30 @@ describe('Php', () => {
         })
       });
     });
+
+    it('should upload the sub-directory only for sub-directory handlers', () => {
+      const functionObj = {handler: 'first-function/handler.main', package: { artifact: '/path/to/zip_file.zip'}}
+      php.serverless.service.package = {individually: true};
+      php.isValidFile = () => true
+
+      const zip = new JSZip();
+      const source = '<?php\nfunction main(array $args) : array\n{\nreturn [];\n}'
+      zip.folder("first-function").file("handler.php", source);
+
+      return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
+        sandbox.stub(fs, 'readFile', (path, cb) => {
+          expect(path).to.equal('/path/to/zip_file.zip');
+          cb(null, zipped);
+        });
+        return php.generateActionPackage(functionObj).then(data => {
+          return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
+            expect(zip.file("handler.php")).to.be.equal(null)            
+            return zip.file("index.php").async("string").then(main => {
+              expect(main).to.be.equal(source)
+            })
+          })
+        })
+      });
+    })
   })
 });
