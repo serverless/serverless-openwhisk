@@ -1,6 +1,6 @@
 'use strict';
 
-class Sequence {
+class Docker {
   constructor(serverless) {
     this.serverless = serverless
   }
@@ -20,4 +20,4 @@ class Sequence {
 }
 
 
-module.exports = Sequence
+module.exports = Docker
