@@ -373,7 +373,7 @@ OpenWhiskAction(main: hello)
 Binaries produced by the Swift build process must be generated for the correct platform architecture. This Docker command will compile Swift sources files using the relevant Swift environment.
 
 ```
-docker run --rm -it -v $(pwd):/swift-package openwhisk/swift3action bash -e -c "cd /swift-package && swift build -v -c release"
+docker run --rm -it -v $(pwd):/swift-package openwhisk/action-swift-v3.1.1 bash -e -c "cd /swift-package && swift build -v -c release"
 ```
 
 ## Writing Functions - Binary
