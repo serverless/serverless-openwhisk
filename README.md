@@ -242,7 +242,7 @@ function main(array $args) : array
 
 The handler must return  an associative array from the function call.
 
-```swift
+```php
 func main(args: [String:Any]) -> [String:Any] {
 	...
     return ["foo" => $bar];
@@ -375,6 +375,125 @@ Binaries produced by the Swift build process must be generated for the correct p
 ```
 docker run --rm -it -v $(pwd):/swift-package openwhisk/action-swift-v3.1.1 bash -e -c "cd /swift-package && swift build -v -c release"
 ```
+
+## Writing Functions - Java
+
+Here's an `src/main/java/HelloWorld.java` file containing an example handler function.
+
+```java
+import com.google.gson.JsonObject;
+
+public class HelloWorld {
+
+  public static JsonObject main(JsonObject args) throws Exception {
+
+    final String name = args.getAsJsonPrimitive("name").getAsString();
+
+    final JsonObject response = new JsonObject();
+    response.addProperty("greeting", "Hello " + name + "!");
+
+    return response;
+  }
+}
+```
+
+Here is a simple `pom.xml` file that will allow you to use Maven to build it. You will notice that `gson` is excluded from the uberjar. That is because OpenWhisk already provides this dependency.
+
+```xml
+<project>
+ <modelVersion>4.0.0</modelVersion>
+ <groupId>hello</groupId>
+ <artifactId>hello-world</artifactId>
+ <version>1.0</version>
+
+ <dependencies>
+  <dependency>
+    <groupId>com.google.code.gson</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.8.2</version>
+  </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <minimizeJar>true</minimizeJar>
+              <artifactSet>
+                <excludes>
+                  <exclude>com.google.code.gson:gson</exclude>
+                </excludes>
+              </artifactSet>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+ </project>
+```
+
+In the `serverless.yaml` file (see below), the `handler` property is the uberjar produced by calling `mvn clean package`. To specify the name of the class containing the `main` function, add an `annotation` called `main_class` (this should be the fully qualified class name). If you do not provide this `annotation`, it will look for a class in the default package called `Main`.
+
+```yaml
+service: my-java-service
+provider:
+  name: openwhisk
+  runtime: java
+functions:
+  hello:
+    handler: target/hello-world-1.0.jar
+    annotations:
+      main_class: HelloWorld
+plugins:
+  - serverless-openwhisk
+```
+
+### Request Properties
+
+OpenWhisk executes the handler function for each request. This function is called with a single argument, an associative array [containing the request properties](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#passing-parameters-to-an-action).
+
+```java
+import com.google.gson.JsonObject;
+
+public class MyActionClass {
+  public static JsonObject main(JsonObject args) throws Exception
+  {
+    final String name = args.getAsJsonPrimitive("name").getAsString();
+    ...
+  }
+}
+```
+
+### Function Return Values
+
+The handler must return an `com.google.gson.JsonObject` from the function call.
+
+```java
+import com.google.gson.JsonObject;
+
+public class MyActionClass {
+  public static JsonObject main(JsonObject args) throws Exception
+  {
+    ...
+    final JsonObject response = new JsonObject();
+    response.addProperty("greeting", "Hello " + name + "!");
+
+    return response;
+  }
+}
+```
+
+If you want to return an error message, throw an exception.
 
 ## Writing Functions - Binary
 
