@@ -460,7 +460,7 @@ plugins:
 
 ### Request Properties
 
-OpenWhisk executes the handler function for each request. This function is called with a single argument, an associative array [containing the request properties](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#passing-parameters-to-an-action).
+OpenWhisk executes the handler function for each request. This function is called with a single argument, a `com.google.gson.JsonObject` [containing the request properties](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#passing-parameters-to-an-action).
 
 ```java
 import com.google.gson.JsonObject;
