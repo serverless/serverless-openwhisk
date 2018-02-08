@@ -442,7 +442,7 @@ Here is a simple `pom.xml` file that will allow you to use Maven to build it. Yo
  </project>
 ```
 
-In the `serverless.yaml` file (see below), the `handler` property is the uberjar produced by calling `mvn clean package`. To specify the name of the class containing the `main` function, add an `annotation` called `main_class` (this should be the fully qualified class name). If you do not provide this `annotation`, it will look for a class in the default package called `Main`.
+In the `serverless.yaml` file (see below), the `handler` property is the uberjar produced by calling `mvn clean package`, a colon, and then the fully qualified class name of the class with the main function. If you do not provide a class name after the jar, it will look for a class in the default package called `Main`.
 
 ```yaml
 service: my-java-service
@@ -451,9 +451,7 @@ provider:
   runtime: java
 functions:
   hello:
-    handler: target/hello-world-1.0.jar
-    annotations:
-      main_class: HelloWorld
+    handler: target/hello-world-1.0.jar:HelloWorld
 plugins:
   - serverless-openwhisk
 ```
@@ -873,7 +871,7 @@ The following optional feed parameters are also supported:
 
 * `max` - Maximum number of triggers to fire. Defaults to infinite.
 * `filter` - Filter function defined on a design document.
-* `query` - Optional query parameters for the filter function. 
+* `query` - Optional query parameters for the filter function.
 
 ```yaml
 # serverless.yaml
@@ -881,10 +879,10 @@ functions:
     index:
         handler: users.main
         events:
-            - cloudant: 
+            - cloudant:
                 ...
-                max: 10000 
-                query: 
+                max: 10000
+                query:
                    status: new
                 filter: mailbox/by_status
 ```
