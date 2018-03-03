@@ -16,10 +16,11 @@ describe('#getWskProps()', () => {
   });
 
   afterEach(() => {
+    ['WSK_CONFIG_FILE', ...Credentials.ENV_PARAMS].forEach(param => process.env[param] = '');
     sandbox.restore();
   });
 
-  it('should instantiate openwhisk resources from properties file', () => {
+  describe('should instantiate openwhisk resources from the properties file', () => {
     const mockObject = {
       apihost: 'openwhisk.ng.bluemix.net',
       auth: 'user:pass',
@@ -27,18 +28,33 @@ describe('#getWskProps()', () => {
       apigw_access_token: 'blahblahblahkey1234',
     };
 
-    const home = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
-    const wskProps = 
+    const wskProps =
       'APIHOST=openwhisk.ng.bluemix.net\nNAMESPACE=blah@provider.com_dev\n'  +
       'AUTH=user:pass\nAPIGW_ACCESS_TOKEN=blahblahblahkey1234\n';
 
-    sandbox.stub(fs, 'readFile', (path, encoding, cb) => {
-      expect(path.match(home).length).to.equal(1);
-      expect(path.match('.wskprops').length).to.equal(1);
-      cb(null, wskProps);
+    it('when the default is used', () => {
+      const home = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+
+      sandbox.stub(fs, 'readFile', (path, encoding, cb) => {
+        expect(path.match(home).length).to.equal(1);
+        expect(path.match('.wskprops').length).to.equal(1);
+        cb(null, wskProps);
+      });
+
+      return expect(Credentials.getWskProps()).to.eventually.deep.equal(mockObject);
     });
 
-    return expect(Credentials.getWskProps()).to.eventually.deep.equal(mockObject);
+    it('when a path is specified', () => {
+      const propsFilePath = '/different/place/file_name';
+      process.env.WSK_CONFIG_FILE = propsFilePath;
+
+      sandbox.stub(fs, 'readFile', (path, encoding, cb) => {
+        expect(path).to.equal(propsFilePath);
+        cb(null, wskProps);
+      });
+
+      return expect(Credentials.getWskProps()).to.eventually.deep.equal(mockObject);
+    });
   });
 
   it('should instantiate openwhisk resources from environment variables', () => {
