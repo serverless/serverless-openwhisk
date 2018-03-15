@@ -11,8 +11,9 @@ user credentials for the OpenWhisk service being used, storing them under
 
 ### User Credentials 
 
-The plugin attempts to parse configuration settings from the `.wskprops` file in the user's home directory. These
-settings can be set manually using the following environment parameters.
+The plugin attempts to parse configuration settings from the `.wskprops` file in the user's home directory,
+or from the file path specified in the `WSK_CONFIG_FILE` environment variable. These  settings can be set
+manually using the following environment parameters.
 
 - **OW_AUTH** - Authentication key for OpenWhisk provider.
 - **OW_APIHOST** - API endpoint for OpenWhisk provider.
