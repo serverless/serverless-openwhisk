@@ -29,6 +29,8 @@ describe('OpenWhiskDeploy', () => {
     });
 
     it('should run "deploy:deploy" promise chain in order', () => {
+      const deployPackagesStub = sinon
+        .stub(openwhiskDeploy, 'deployPackages').returns(BbPromise.resolve());
       const deployFunctionsStub = sinon
         .stub(openwhiskDeploy, 'deployFunctions').returns(BbPromise.resolve());
       const deploySequencesStub = sinon
@@ -43,6 +45,7 @@ describe('OpenWhiskDeploy', () => {
         .stub(openwhiskDeploy, 'deployRoutes').returns(BbPromise.resolve());
 
       return openwhiskDeploy.hooks['deploy:deploy']().then(() => {
+        expect(deployPackagesStub.calledOnce).to.be.equal(true);
         expect(deployFunctionsStub.calledOnce).to.be.equal(true);
         expect(deploySequencesStub.calledOnce).to.be.equal(true);
         expect(deployRoutesStub.calledOnce).to.be.equal(true);

@@ -25,6 +25,7 @@ describe('OpenWhiskRemove', () => {
     it('should run promise chain in order', () => {
       const validateStub = sinon
         .stub(openwhiskRemove, 'validate').returns(BbPromise.resolve());
+      sinon.stub(openwhiskRemove, 'removePackages').returns(BbPromise.resolve());
       sinon.stub(openwhiskRemove, 'removeFunctions').returns(BbPromise.resolve());
       sinon.stub(openwhiskRemove, 'removeTriggers').returns(BbPromise.resolve());
       sinon.stub(openwhiskRemove, 'removeRules').returns(BbPromise.resolve());
@@ -35,6 +36,7 @@ describe('OpenWhiskRemove', () => {
           expect(validateStub.calledOnce).to.be.equal(true);
 
           openwhiskRemove.validate.restore();
+          openwhiskRemove.removePackages.restore();
           openwhiskRemove.removeFunctions.restore();
           openwhiskRemove.removeRoutes.restore();
           openwhiskRemove.removeTriggers.restore();

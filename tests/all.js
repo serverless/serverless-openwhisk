@@ -1,4 +1,5 @@
 // OpenWhisk Plugins Tests
+require('../compile/packages/tests');
 require('../compile/triggers/tests');
 require('../compile/rules/tests');
 require('../compile/apigw/tests');

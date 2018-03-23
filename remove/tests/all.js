@@ -1,6 +1,7 @@
 'use strict';
 
 require('./index');
+require('./removePackages');
 require('./removeFunctions');
 require('./removeTriggers');
 require('./removeRules');

@@ -9,6 +9,7 @@ whole provider implementation.
 const CompileFunctions = require('./compile/functions/index.js');
 const CompileTriggers = require('./compile/triggers/index.js');
 const CompileRules = require('./compile/rules/index.js');
+const CompilePackages = require('./compile/packages/index.js');
 const CompileHttpEvents = require('./compile/apigw/index.js');
 const CompileSchedule = require('./compile/schedule/index.js');
 const CompileMessageHub = require('./compile/message_hub/index.js');
@@ -29,6 +30,7 @@ class Index {
     this.options = options;
 
     this.serverless.pluginManager.addPlugin(OpenwhiskProvider);
+    this.serverless.pluginManager.addPlugin(CompilePackages);
     this.serverless.pluginManager.addPlugin(CompileFunctions);
     this.serverless.pluginManager.addPlugin(CompileHttpEvents);
     this.serverless.pluginManager.addPlugin(CompileRules);

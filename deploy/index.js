@@ -2,6 +2,7 @@
 
 const BbPromise = require('bluebird');
 const initializeResources = require('./lib/initializeResources');
+const deployPackages = require('./lib/deployPackages');
 const deployFunctions = require('./lib/deployFunctions');
 const deployRules = require('./lib/deployRules');
 const deployTriggers = require('./lib/deployTriggers');
@@ -17,6 +18,7 @@ class OpenWhiskDeploy {
     Object.assign(
       this,
       initializeResources,
+      deployPackages,
       deployFunctions,
       deployApiGw,
       deployRules,
@@ -28,6 +30,7 @@ class OpenWhiskDeploy {
       'deploy:initializeResources': () => BbPromise.bind(this).then(this.initializeResources),
 
       'deploy:deploy': () => BbPromise.bind(this)
+        .then(this.deployPackages)
         .then(this.deployFunctions)
         .then(this.deploySequences)
         .then(this.deployRoutes)

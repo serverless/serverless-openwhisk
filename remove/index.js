@@ -2,6 +2,7 @@
 
 const BbPromise = require('bluebird');
 const validate = require('./lib/validate');
+const removePackages = require('./lib/removePackages');
 const removeFunctions = require('./lib/removeFunctions');
 const removeTriggers = require('./lib/removeTriggers');
 const removeRules = require('./lib/removeRules');
@@ -16,7 +17,8 @@ class OpenWhiskRemove {
     this.options = options || {};
     this.provider = this.serverless.getProvider('openwhisk');
 
-    Object.assign(this, validate, setupResources, removeFunctions, removeTriggers, removeRules, removeFeeds, removeRoutes, util);
+    Object.assign(this, validate, setupResources, removePackages, removeFunctions,
+      removeTriggers, removeRules, removeFeeds, removeRoutes, util);
 
     this.hooks = {
       'remove:remove': () => BbPromise.bind(this)
@@ -25,6 +27,7 @@ class OpenWhiskRemove {
           .then(this.removeRoutes)
           .then(this.removeRules)
           .then(this.removeFunctions)
+          .then(this.removePackages)
           .then(this.removeTriggers)
           .then(this.removeFeeds)
           .then(() => this.serverless.cli.log('Resource removal successful!')),

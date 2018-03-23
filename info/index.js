@@ -45,6 +45,7 @@ class OpenWhiskInfo {
 
     return BbPromise.bind(this)
       .then(this.showServiceInfo)
+      .then(this.showPackagesInfo)
       .then(this.showActionsInfo)
       .then(this.showTriggersInfo)
       .then(this.showRulesInfo)
@@ -63,7 +64,11 @@ class OpenWhiskInfo {
     return this.client.actions.list().then(actions => {
       this._actions = actions;
       if (!actions.length) return console.log('**no actions deployed**\n');
-      const names = actions.map(action => action.name).join('    ');
+      const names = actions.map(action => {
+        const pkge = action.namespace.match(/\/(.+)/)
+        if (!pkge) return action.name
+        return `${pkge[1]}/${action.name}`
+      }).join('    ');
       this.consoleLog(names + '\n')
     })
   }
@@ -86,22 +91,25 @@ class OpenWhiskInfo {
     })
   }
 
-  showTriggersInfo () {
-    this.consoleLog(`${chalk.yellow('triggers:')}`);
-    return this.client.triggers.list().then(triggers => {
-      if (!triggers.length) return console.log('**no triggers deployed**\n');
-      const names = triggers.map(trigger => trigger.name).join('    ');
+  showResourcesInfo (resource) {
+    this.consoleLog(`${chalk.yellow(`${resource}:`)}`);
+    return this.client[resource].list().then(resources => {
+      if (!resources.length) return console.log(`**no ${resource} deployed**\n`);
+      const names = resources.map(r => r.name).join('    ');
       this.consoleLog(names + '\n')
     })
   }
 
+  showPackagesInfo () {
+    return this.showResourcesInfo('packages')
+  }
+
+  showTriggersInfo () {
+    return this.showResourcesInfo('triggers')
+  }
+
   showRulesInfo () {
-    this.consoleLog(`${chalk.yellow('rules:')}`);
-    return this.client.rules.list().then(rules => {
-      if (!rules.length) return console.log('**no rules deployed**\n');
-      const names = rules.map(rule => rule.name).join('    ');
-      this.consoleLog(names + '\n')
-    })
+    return this.showResourcesInfo('rules')
   }
 
   showRoutesInfo () {

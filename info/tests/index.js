@@ -25,7 +25,7 @@ describe('OpenWhiskInfo', () => {
     function: 'first'
   };
   const openwhiskInfo = new OpenWhiskInfo(serverless, options);
-  openwhiskInfo.client = { routes: { list: () => {} }, rules: { list: () => {} }, triggers: { list: () => {} }, actions: { list: () => {} } };
+  openwhiskInfo.client = { routes: { list: () => {} }, rules: { list: () => {} }, triggers: { list: () => {} }, packages: { list: () => {} }, actions: { list: () => {} } };
   serverless.service.service = "my_service";
 
   beforeEach(() => {
@@ -60,6 +60,7 @@ describe('OpenWhiskInfo', () => {
       const log = sandbox.stub(openwhiskInfo, 'consoleLog')
       const service = sandbox.stub(openwhiskInfo, 'showServiceInfo')
       const action = sandbox.stub(openwhiskInfo, 'showActionsInfo')
+      const packages = sandbox.stub(openwhiskInfo, 'showPackagesInfo')
       const triggers = sandbox.stub(openwhiskInfo, 'showTriggersInfo')
       const rules = sandbox.stub(openwhiskInfo, 'showRulesInfo')
       const routes = sandbox.stub(openwhiskInfo, 'showRoutesInfo')
@@ -67,6 +68,7 @@ describe('OpenWhiskInfo', () => {
 
       return openwhiskInfo.info().then(() => {
         expect(service.calledOnce).to.be.equal(true);
+        expect(packages.calledOnce).to.be.equal(true);
         expect(action.calledOnce).to.be.equal(true);
         expect(triggers.calledOnce).to.be.equal(true);
         expect(rules.calledOnce).to.be.equal(true);
@@ -93,11 +95,26 @@ describe('OpenWhiskInfo', () => {
     });
   });
 
+  describe('#showPackagesInfo()', () => {
+    it('should show package names returned', () => {
+      const log = sandbox.stub(openwhiskInfo, 'consoleLog')
+      sandbox.stub(openwhiskInfo.client.packages, 'list').returns(BbPromise.resolve([
+        {name: 'first'}, {name: 'second'}, {name: 'third'}
+      ]));
+
+      return expect(openwhiskInfo.showPackagesInfo().then(() => {
+        expect(log.calledTwice).to.be.equal(true);
+        expect(log.args[0][0].match(/packages:/)).to.be.ok;
+        expect(log.args[1][0].match(/first    second    third/)).to.be.ok;
+      }));
+    })
+  })
+
   describe('#showActionsInfo()', () => {
     it('should show action names returned', () => {
       const log = sandbox.stub(openwhiskInfo, 'consoleLog')
       sandbox.stub(openwhiskInfo.client.actions, 'list').returns(BbPromise.resolve([
-        {name: 'first'}, {name: 'second'}, {name: 'third'}
+        {name: 'first', namespace: 't'}, {name: 'second', namespace: "t"}, {name: 'third', namespace: "t"}
       ]));
 
       return expect(openwhiskInfo.showActionsInfo().then(() => {
@@ -106,6 +123,20 @@ describe('OpenWhiskInfo', () => {
         expect(log.args[1][0].match(/first    second    third/)).to.be.ok;
       }));
     })
+
+    it('should show package action names returned', () => {
+      const log = sandbox.stub(openwhiskInfo, 'consoleLog')
+      sandbox.stub(openwhiskInfo.client.actions, 'list').returns(BbPromise.resolve([
+        {name: 'first', namespace: "testing"}, {name: 'second', namespace: 'user@host.com/somePackage'}, {name: 'third', namespace: "testing"}
+      ]));
+
+      return expect(openwhiskInfo.showActionsInfo().then(() => {
+        expect(log.calledTwice).to.be.equal(true);
+        expect(log.args[0][0].match(/actions:/)).to.be.ok;
+        expect(log.args[1][0].match(/first    somePackage\/second    third/)).to.be.ok;
+      }));
+    })
+
   })
 
   describe('#showTriggersInfo()', () => {
