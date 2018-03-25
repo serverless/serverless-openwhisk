@@ -129,21 +129,33 @@ describe('OpenWhiskCompilePackages', () => {
   });
   describe('#compilePackage()', () => {
     it('should define packages without a body', () => {
-      const testing = { name: 'testing', namespace: 'testing', overwrite: true };
+      const testing = { name: 'testing', namespace: 'testing', overwrite: true, package: {} };
       const result = openwhiskCompilePackages.compilePackage('testing', {});
       return expect(result).to.deep.equal(testing);
     });
 
     it('should define packages with manifest params', () => {
-      const params = { overwrite: false, namespace: 'another_ns', parameters: { hello: 'world' } };
+      const params = { overwrite: false, namespace: 'another_ns', parameters: { hello: 'world' }, binding: '/whisk.system/utils' };
       const expected = {
         name: 'testing',
         overwrite: false,
         namespace: 'another_ns',
-        package: { parameters: [{ key: 'hello', value: 'world' }] },
+        package: { 
+          parameters: [{ key: 'hello', value: 'world' }],
+          binding: { namespace: 'whisk.system', name: 'utils' }
+        },
       };
       const result = openwhiskCompilePackages.compilePackage('testing', params);
       return expect(result).to.deep.equal(expected);
+    });
+
+    it('should throw an error for invalid binding identifier', () => {
+      const params = { binding: 'external_ns/external_package' };
+      expect(() => openwhiskCompilePackages.compilePackage('testing', params))
+        .to.throw(Error, /Invalid Package Binding/);
+      params.binding = 'incorrect';
+      expect(() => openwhiskCompilePackages.compilePackage('testing', params))
+        .to.throw(Error, /Invalid Package Binding/);
     });
 
     it('should log packages to console when verbose flag is set', () => {

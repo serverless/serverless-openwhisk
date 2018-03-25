@@ -1,57 +1,66 @@
-# Compile Triggers
+# Compile Packages
 
-This plugins compiles the triggers in `serverless.yaml` to corresponding [OpenWhisk Triggers](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md)
+This plugins compiles the packages in `serverless.yaml` to corresponding [OpenWhisk Packages](https://github.com/openwhisk/openwhisk/blob/master/docs/packages.md)
 definitions.
 
 ## How it works
 
-`Compile Triggers` hooks into the [`package:compileEvents`](/lib/plugins/deploy) lifecycle.
+`Compile Packages` hooks into the [`package:compileEvents`](/lib/plugins/deploy) lifecycle.
 
-It loops over all triggers which are defined in `serverless.yaml`.
+It loops over all packages which are defined in `serverless.yaml`.
 
-### Implicit Trigger Definition
+### Implicit Packages
 
-Triggers referenced from function event configuration don't have to be
-explicitly defined in the `resources` section. The plugin will set up these
-resources for creation without any further configuration.
+Actions can be assigned to packages by setting the function `name` with a package reference.
 
 ```yaml
-# serverless.yaml
 functions:
-    index:
-        handler: users.main
-        events:
-            - triggers: 
-                trigger: "myTriggerName"
+  foo:
+    handler: handler.foo
+    name: "myPackage/foo"
+  bar:
+    handler: handler.bar
+    name: "myPackage/bar"
 ```
 
-This function handler includes a reference to a trigger that will be created
-during deployment.
+In this example, two new actions (`foo` & `bar`) will be created using the `myPackage` package.
 
-### Explicit Trigger Definition
+Packages which do not exist will be automatically created during deployments. When using the `remove` command, any packages referenced in the `serverless.yml` will be deleted.
 
-Specifying triggers in the `resources` section allows users to override default
-parameters used when creating triggers implicitly.
+### Explicit Packages
 
-The trigger will be identified by the `triggers` property identifier, using the
-namespace from service provider defaults (unless set manually using the
-`namespace` property).
-
-Default parameters for each trigger can be set using the `parameters` property.
-
-Connecting triggers to event feeds is supported through the `feed` and
-`feed_parameters` properties, as shown in the example below.
+Packages can also be defined explicitly to set shared configuration parameters. Default package parameters are merged into event parameters for each invocation.
 
 ```yaml
-# serverless.yaml
+functions:
+  foo:
+    handler: handler.foo
+    name: "myPackage/foo"
+    
 resources:
-    triggers:
-        myTrigger:
-            parameters: 
-                hello: world
-            feed: /whisk.system/alarms/alarm
-            feed_parameters: 
-                cron: '*/8 * * * * *'
+  packages:
+    myPackage:
+      parameters:
+        hello: world 
 ```
 
-At the end all OpenWhisk Trigger definitions are merged inside the `serverless.service.triggers` section.
+### Binding Packages
+
+OpenWhisk also supports "binding" external packages into your workspace. Bound packages can have default parameters set for shared actions.
+
+For example, binding the `/whisk.system/cloudant` package into a new package allows you to set default values for the `username`, `password` and `dbname` properties. Actions from this package can then be invoked with having to pass these parameters in.
+
+Define packages explicitly with a `binding` parameter to use this behaviour.
+
+```yaml
+resources:
+  packages:
+    mySamples:
+      binding: /whisk.system/cloudant
+      parameters:
+        username: bernie
+        password: sanders
+        dbname: vermont
+```
+
+For more details on package binding, please see the documentation [here](https://github.com/apache/incubator-openwhisk/blob/master/docs/packages.md#creating-and-using-package-bindings).

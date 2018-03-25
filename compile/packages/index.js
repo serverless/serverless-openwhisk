@@ -56,7 +56,7 @@ class OpenWhiskCompilePackages {
   }
 
   compilePackage(name, params) {
-    const pkge = { name, overwrite: true };
+    const pkge = { name, overwrite: true, package: {} };
 
     pkge.namespace = params.namespace
       || this.serverless.service.provider.namespace;
@@ -68,10 +68,18 @@ class OpenWhiskCompilePackages {
     }
 
     if (params.parameters) {
-      pkge.package = {}
       pkge.package.parameters = Object.keys(params.parameters).map(
         key => ({ key, value: params.parameters[key] })
       );
+    }
+
+    if (params.binding) {
+      // package identifier must be in format: /namespace/package
+      const to_bind = params.binding.match(/^\/(.+)\/(.+)$/)
+      if (!to_bind) {
+        throw new this.serverless.classes.Error(`Invalid Package Binding (${params.binding}). Must be in form: /namespace/package`);
+      }
+      pkge.package.binding = { name: to_bind[2], namespace: to_bind[1] }
     }
 
     if (this.options.verbose) {
