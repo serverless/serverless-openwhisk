@@ -113,12 +113,16 @@ describe('OpenWhiskCompilePackages', () => {
     });
 
     it('should update package definitions from manifest values', () => {
-      const pkge = { overwrite: false, namespace: 'another_ns', parameters: { hello: 'world' } };
+      const pkge = { shared: true, overwrite: false, namespace: 'another_ns', annotations: { foo: 'bar' }, parameters: { hello: 'world' } };
       const expected = {
         name: 'sample',
         overwrite: false,
         namespace: 'another_ns',
-        package: { parameters: [{ key: 'hello', value: 'world' }] },
+        package: {
+          publish: true,
+          parameters: [{ key: 'hello', value: 'world' }],
+          annotations: [{ key: 'foo', value: 'bar' }]
+        },
       };
       openwhiskCompilePackages.serverless.service.resources.packages = { sample: pkge };
       return expect(openwhiskCompilePackages.compilePackages().then(() =>
@@ -135,12 +139,14 @@ describe('OpenWhiskCompilePackages', () => {
     });
 
     it('should define packages with manifest params', () => {
-      const params = { overwrite: false, namespace: 'another_ns', parameters: { hello: 'world' }, binding: '/whisk.system/utils' };
+      const params = { shared: true, overwrite: false, namespace: 'another_ns', annotations: { foo: 'bar' }, parameters: { hello: 'world' }, binding: '/whisk.system/utils' };
       const expected = {
         name: 'testing',
         overwrite: false,
         namespace: 'another_ns',
         package: { 
+          publish: true,
+          annotations: [{ key: 'foo', value: 'bar' }],
           parameters: [{ key: 'hello', value: 'world' }],
           binding: { namespace: 'whisk.system', name: 'utils' }
         },

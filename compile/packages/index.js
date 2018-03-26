@@ -67,9 +67,19 @@ class OpenWhiskCompilePackages {
       pkge.overwrite = params.overwrite;
     }
 
+    if (params.hasOwnProperty('shared')) {
+      pkge.package.publish = params.shared;
+    }
+
     if (params.parameters) {
       pkge.package.parameters = Object.keys(params.parameters).map(
         key => ({ key, value: params.parameters[key] })
+      );
+    }
+
+    if (params.annotations) {
+      pkge.package.annotations = Object.keys(params.annotations).map(
+        key => ({ key, value: params.annotations[key] })
       );
     }
 

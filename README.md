@@ -596,6 +596,8 @@ resources:
         hello: world 
 ```
 
+*Explicit packages support the following properties: `parameters`, `annotations` and `shared`.*
+
 ### Binding Packages
 
 OpenWhisk also supports "binding" external packages into your workspace. Bound packages can have default parameters set for shared actions.
