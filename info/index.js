@@ -84,9 +84,16 @@ class OpenWhiskInfo {
       return Promise.resolve();
     }
 
+    const extractNsAndPkge = id => {
+      let [ns, pkge] = id.split('/')
+      pkge = pkge || 'default'
+      return  { ns, pkge }
+    }
+
     return this.provider.props().then(props => {
       web_actions.forEach(action => {
-        this.consoleLog(`https://${props.apihost}/api/v1/web/${action.namespace}/default/${action.name}`)
+        const nsPkge = extractNsAndPkge(action.namespace)
+        this.consoleLog(`https://${props.apihost}/api/v1/web/${nsPkge.ns}/${nsPkge.pkge}/${action.name}`)
       })
     })
   }

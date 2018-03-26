@@ -295,14 +295,16 @@ describe('OpenWhiskInfo', () => {
         {name: 'second', namespace: 'user_name', annotations: [{key: 'web-export', value: false}]}, 
         {name: 'third'},
         {name: 'fourth', namespace: 'user_name', annotations: [{key: 'web-export', value: true}]}, 
-        {name: 'fifth', annotations: []}
+        {name: 'fifth', annotations: []},
+        {name: 'sixth', namespace: 'user_name/custom_package', annotations: [{key: 'web-export', value: true}]},
       ];
 
       return expect(openwhiskInfo.showWebActionsInfo().then(() => {
-        expect(log.calledThrice).to.be.equal(true);
+        expect(log.callCount).to.be.equal(4);
         expect(log.args[0][0].match(/endpoints \(web actions\):/)).to.be.ok;
         expect(log.args[1][0].match(/https:\/\/openwhisk.ng.bluemix.net\/api\/v1\/web\/user_name\/default\/first/)).to.be.ok;
         expect(log.args[2][0].match(/https:\/\/openwhisk.ng.bluemix.net\/api\/v1\/web\/user_name\/default\/fourth/)).to.be.ok;
+        expect(log.args[3][0].match(/https:\/\/openwhisk.ng.bluemix.net\/api\/v1\/web\/user_name\/custom_package\/sixth/)).to.be.ok;
       }));
     })
   })
