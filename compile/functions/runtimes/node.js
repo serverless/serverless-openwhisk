@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require("fs-extra");
 const BaseRuntime = require('./base')
 
 class Node extends BaseRuntime {
