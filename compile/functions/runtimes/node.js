@@ -1,6 +1,5 @@
 'use strict';
 
-const fs = require("fs-extra");
 const BaseRuntime = require('./base')
 
 class Node extends BaseRuntime {
@@ -24,18 +23,14 @@ class Node extends BaseRuntime {
   //which should still be considered safe enough, or at least shouldn't
   //completely stop the deployment process
   isValidFile(handlerFile) {
-    if (fs.existsSync(handlerFile) || this.isValidTypeScriptFile(handlerFile)) {
-      return true;
-    }
-
-    return false;
+    return super.isValidFile(handlerFile) || this.isValidTypeScriptFile(handlerFile);
   }
 
   //Check for TypeScript version of handler file
   isValidTypeScriptFile(handlerFile) {
     //replaces the last occurance of `.js` with `.ts`, case insensitive
-    const typescriptHandlerFIle = handlerFile.replace(/\.js$/gi, ".ts");
-    return fs.existsSync(typescriptHandlerFIle);
+    const typescriptHandlerFile = handlerFile.replace(/\.js$/gi, ".ts");
+    return super.isValidFile(typescriptHandlerFile);
   }
 }
 
