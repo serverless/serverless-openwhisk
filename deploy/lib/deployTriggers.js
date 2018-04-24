@@ -8,6 +8,12 @@ module.exports = {
       if (this.options.verbose) {
         this.serverless.cli.log(`Deploying Trigger: ${trigger.triggerName}`);
       }
+
+      const feed = this.getFeed(trigger)
+      if (feed) {
+        Object.assign(trigger, { annotations: [{ key: 'feed', value: feed }] });
+      }
+
       return ow.triggers.create(trigger)
        .then(() => {
           if (this.options.verbose) {
@@ -38,5 +44,9 @@ module.exports = {
     const trigger = { feed: undefined };
     return Object.keys(triggers)
       .map(t => Object.assign({}, triggers[t], trigger));
-  }
+  },
+
+  getFeed(trigger) {
+    return trigger.feed;
+  },
 };

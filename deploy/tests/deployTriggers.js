@@ -16,9 +16,16 @@ describe('deployTriggers', () => {
     triggers: {
       myTrigger: {
         triggerName: 'myTrigger',
-        namepspace: 'myNamespace',
+        namespace: 'myNamespace',
         action: 'myAction',
         trigger: 'myTrigger',
+      },
+      feedTrigger: {
+        triggerName: 'myTrigger',
+        namespace: 'myNamespace',
+        action: 'myAction',
+        trigger: 'myTrigger',
+        feed: '/whisk.system/alarms/alarm',
       },
     },
   };
@@ -91,5 +98,17 @@ describe('deployTriggers', () => {
       })
     })
 
+    it('should deploy trigger with feed annotation to openwhisk', () => {
+      sandbox.stub(openwhiskDeploy.provider, 'client', () => {
+        const create = params => {
+          expect(params).to.be.deep.equal(mockTriggerObject.triggers.feedTrigger);
+          return Promise.resolve();
+        };
+
+        return Promise.resolve({ triggers: { create } });
+      });
+      return expect(openwhiskDeploy.deployTrigger(mockTriggerObject.triggers.feedTrigger))
+        .to.eventually.be.fulfilled;
+    });
   });
 });
