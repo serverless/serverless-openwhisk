@@ -32,8 +32,8 @@ describe('deployTriggers', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    const CLI = function () { this.log = function () {};};
-    serverless = {classes: {Error, CLI}, service: {provider: {}, resources: {}, getAllFunctions: () => []}, getProvider: sandbox.spy()};
+    const CLI = function () { this.log = function () {}; };
+    serverless = { classes: { Error, CLI }, service: { provider: {}, resources: {}, getAllFunctions: () => [] }, getProvider: sandbox.spy() };
     const options = {
       stage: 'dev',
       region: 'us-east-1',
@@ -45,7 +45,7 @@ describe('deployTriggers', () => {
       apihost: 'openwhisk.org',
       auth: 'user:pass',
     };
-    openwhiskDeploy.provider = { client: () => {} }
+    openwhiskDeploy.provider = { client: () => {} };
   });
 
   afterEach(() => {
@@ -80,23 +80,21 @@ describe('deployTriggers', () => {
     });
 
     it('should log function deploy information with verbose flag', () => {
-      openwhiskDeploy.options.verbose = true
-      const log = sandbox.stub(openwhiskDeploy.serverless.cli, 'log')
-      const clog = sandbox.stub(openwhiskDeploy.serverless.cli, 'consoleLog')
+      openwhiskDeploy.options.verbose = true;
+      const log = sandbox.stub(openwhiskDeploy.serverless.cli, 'log');
+      const clog = sandbox.stub(openwhiskDeploy.serverless.cli, 'consoleLog');
       sandbox.stub(openwhiskDeploy.provider, 'client', () => {
-        const create = params => {
-          return Promise.resolve();
-        };
+        const create = params => Promise.resolve();
 
         return Promise.resolve({ triggers: { create } });
       });
 
       return openwhiskDeploy.deployTrigger(mockTriggerObject.triggers.myTrigger).then(() => {
-      expect(log.calledTwice).to.be.equal(true);
-      expect(log.args[0][0]).to.be.equal('Deploying Trigger: myTrigger')
-      expect(log.args[1][0]).to.be.equal('Deployed Trigger: myTrigger')
-      })
-    })
+        expect(log.calledTwice).to.be.equal(true);
+        expect(log.args[0][0]).to.be.equal('Deploying Trigger: myTrigger');
+        expect(log.args[1][0]).to.be.equal('Deployed Trigger: myTrigger');
+      });
+    });
 
     it('should deploy trigger with feed annotation to openwhisk', () => {
       sandbox.stub(openwhiskDeploy.provider, 'client', () => {
