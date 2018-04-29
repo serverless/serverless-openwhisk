@@ -7,6 +7,7 @@ require('chai').use(chaiAsPromised);
 
 const sinon = require('sinon');
 const Node = require('../node');
+const BaseRuntime = require('../base');
 const JSZip = require("jszip");
 const fs = require('fs-extra');
 
@@ -94,6 +95,28 @@ describe('Node', () => {
       return expect(node.exec({ handler, image: 'blah', runtime: 'nodejs:6' }))
         .to.eventually.deep.equal(exec);
     })
+  });
+
+  describe('#isValidTypeScriptFile()', () => {
+    it('should report valid file path when a js path is passed that has a ts file instead', () => {
+      //We need to mock the node's `super` call, which is why we're using BaseRuntime
+      sandbox.stub(BaseRuntime.prototype, 'isValidFile', (path) => {
+        expect(path).to.equal('valid_typescript_handler_wrong_extension.ts');
+        return true;
+      });
+      expect(node.isValidTypeScriptFile('valid_typescript_handler_wrong_extension.js')).to.equal(true)
+    });
+  });
+
+  describe('#isValidFile()', () => {
+    it('should still allow a js file to be used for handler', () => {
+      //We need to mock the node's `super` call, which is why we're using BaseRuntime
+      sandbox.stub(BaseRuntime.prototype, 'isValidFile', (path) => {
+        expect(path).to.equal('valid_js_handler.js');
+        return true;
+      });
+      expect(node.isValidFile('valid_js_handler.js')).to.equal(true)
+    });
   });
 
   describe('#generateActionPackage()', () => {
