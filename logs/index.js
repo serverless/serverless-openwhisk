@@ -80,12 +80,19 @@ class OpenWhiskLogs {
       });
   }
 
+  // activation log annotations have a { key: 'path, value: 'namespace/actioname' } member.
+  hasPathAnnotationWithName (annotations, name) {
+    return annotations.filter(an => an.key === 'path')
+      .map(an => an.value.split('/').slice(1).join('/'))
+      .some(value => value === name)
+  }
+
   filterFunctionLogs (logs) {
     const functionObject = this.serverless.service.getFunction(this.options.function);
     const actionName = functionObject.name || `${this.serverless.service.service}_${this.options.function}`
 
     // skip activations for other actions or that we have seen before 
-    const filtered = logs.filter(log => log.name === actionName
+    const filtered = logs.filter(log => this.hasPathAnnotationWithName((log.annotations || []), actionName)
       && !this.previous_activations.has(log.activationId))
 
     // allow regexp filtering of log messages
