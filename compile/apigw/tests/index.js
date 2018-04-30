@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const BbPromise = require('bluebird');
 const expect = require('chai').expect;
 const chaiAsPromised = require('chai-as-promised');
@@ -46,11 +47,29 @@ describe('OpenWhiskCompileHttpEvents', () => {
         c: { events: [ { http: true } ], annotations: { 'web-export': false } },
         d: { events: [ { http: true } ] }
       }
+
+      const auth_string = crypto.randomBytes(64).toString('hex');
+      sandbox.stub(openwhiskCompileHttpEvents, 'generateAuthString', () => auth_string);
+
       return openwhiskCompileHttpEvents.addWebAnnotations().then(() => {
-        expect(openwhiskCompileHttpEvents.serverless.service.functions.a.annotations).to.deep.equal({ 'web-export': true })
-        expect(openwhiskCompileHttpEvents.serverless.service.functions.b.annotations).to.deep.equal({ foo: 'bar', 'web-export': true })
-        expect(openwhiskCompileHttpEvents.serverless.service.functions.c.annotations).to.deep.equal({ 'web-export': true })
-        expect(openwhiskCompileHttpEvents.serverless.service.functions.d.annotations).to.deep.equal({ 'web-export': true })
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.a.annotations).to.deep.equal({ 'web-export': true, 'require-whisk-auth': auth_string })
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.b.annotations).to.deep.equal({ foo: 'bar', 'web-export': true, 'require-whisk-auth': auth_string })
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.c.annotations).to.deep.equal({ 'web-export': true, 'require-whisk-auth': auth_string })
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.d.annotations).to.deep.equal({ 'web-export': true, 'require-whisk-auth': auth_string })
+      })
+    });
+
+    it('should not add auth annotation when annotation already present', () => {
+      openwhiskCompileHttpEvents.serverless.service.functions = {
+        a: { events: [ { http: true } ], annotations: { 'require-whisk-auth': false } },
+        b: { events: [ { http: true } ], annotations: { 'require-whisk-auth': true } },
+        c: { events: [ { http: true } ], annotations: { 'require-whisk-auth': 'some string' } }
+      }
+
+      return openwhiskCompileHttpEvents.addWebAnnotations().then(() => {
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.a.annotations).to.deep.equal({ 'web-export': true, 'require-whisk-auth': false })
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.b.annotations).to.deep.equal({ 'web-export': true, 'require-whisk-auth': true })
+        expect(openwhiskCompileHttpEvents.serverless.service.functions.c.annotations).to.deep.equal({ 'web-export': true, 'require-whisk-auth': 'some string' })
       })
     });
 
@@ -150,6 +169,16 @@ describe('OpenWhiskCompileHttpEvents', () => {
       const http =  {path: "/api/foo/bar", method: "GET"}
       const result = openwhiskCompileHttpEvents.compileHttpEvent('action-name', {}, http);
       return expect(result).to.deep.equal({basepath: '/my-service', relpath: '/api/foo/bar', operation: 'GET', action: '/sample_ns/my-service_action-name', responsetype: 'json'});
+    });
+
+    it('should add secure auth key if present', () => {
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
+      const http =  {path: "/api/foo/bar", method: "GET"}
+      const result = openwhiskCompileHttpEvents.compileHttpEvent('action-name', {
+        annotations: { 'require-whisk-auth': 'auth-token' }
+      }, http);
+      return expect(result).to.deep.equal({basepath: '/my-service', relpath: '/api/foo/bar', operation: 'GET', secure_key: 'auth-token', action: '/sample_ns/my-service_action-name', responsetype: 'json'});
     });
 
     it('should define http events with explicit response type', () => {

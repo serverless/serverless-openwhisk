@@ -1,6 +1,7 @@
 'use strict';
 
 const BbPromise = require('bluebird');
+const crypto = require('crypto');
 
 class OpenWhiskCompileHttpEvents {
   constructor(serverless, options) {
@@ -28,6 +29,10 @@ class OpenWhiskCompileHttpEvents {
     }
   }
 
+  generateAuthString() {
+    return crypto.randomBytes(64).toString('hex')
+  }
+
   // HTTP events need Web Actions enabled for those functions. Add
   // annotation 'web-export' if it is not already present.
   addWebAnnotations() {
@@ -38,6 +43,10 @@ class OpenWhiskCompileHttpEvents {
       if (httpEvents.length) {
         if (!f.annotations) f.annotations = {}
         f.annotations['web-export'] = true
+
+        if (!f.annotations.hasOwnProperty('require-whisk-auth')) {
+          f.annotations['require-whisk-auth'] = this.generateAuthString()
+        }
       }
     })
 
@@ -56,6 +65,11 @@ class OpenWhiskCompileHttpEvents {
       || '_';
   }
 
+  retrieveAuthKey(functionObject) {
+    const annotations = functionObject.annotations || {}
+    return annotations['require-whisk-auth']
+  }
+
   //
   // This method takes the rule definitions, parsed from the user's YAML file,
   // and turns it into the OpenWhisk Rule resource object.
@@ -69,6 +83,12 @@ class OpenWhiskCompileHttpEvents {
     const options = this.parseHttpEvent(http);
     options.action = this.calculateFunctionName(funcName, funcObj);
     options.basepath = `/${this.serverless.service.service}`;
+
+    const secure_key = this.retrieveAuthKey(funcObj)
+    if (secure_key) {
+      options.secure_key = secure_key;
+    }
+
     return options;
   }
 

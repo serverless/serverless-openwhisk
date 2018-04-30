@@ -711,6 +711,8 @@ Date: Mon, 19 Dec 2016 15:47:53 GMT
 }
 ````
 
+Functions exposed through the API Gateway service are automatically converted into Web Actions during deployment. The framework [secures Web Actions for HTTP endpoints](https://github.com/apache/incubator-openwhisk/blob/master/docs/webactions.md#securing-web-actions) using the `require-whisk-auth` annotation. If the `require-whisk-auth` annotation is manually configured, the existing annotation value is used, otherwise a random token is automatically generated.
+
 ## Exporting Web Actions
 
 Functions can be turned into "*web actions*" which return HTTP content without use of an API Gateway. This feature is enabled by setting an annotation (`web-export`) in the configuration file.
