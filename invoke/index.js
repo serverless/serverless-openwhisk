@@ -3,6 +3,8 @@
 const BbPromise = require('bluebird');
 const chalk = require('chalk');
 const path = require('path');
+const stdin = require('get-stdin');
+const fse = require('fs-extra');
 
 const CmdLineParamsOptions = {
   type: ['blocking', 'nonblocking'],
@@ -30,38 +32,57 @@ class OpenWhiskInvoke {
 
     this.serverless.service.getFunction(this.options.function);
 
-    if (this.options.path) {
-      if (!this.serverless.utils
-          .fileExistsSync(path.join(this.serverless.config.servicePath, this.options.path))) {
-        throw new this.serverless.classes.Error('The file path you provided does not exist.');
-      }
+    return new Promise((resolve, reject) => {
+      if (this.options.data) {
+        resolve();
+      } else if (this.options.path) {
+        const absolutePath = path.isAbsolute(this.options.path) ?
+          this.options.path :
+          path.join(this.serverless.config.servicePath, this.options.path);
+        if (!this.serverless.utils.fileExistsSync(absolutePath)) {
+          throw new this.serverless.classes.Error('The file you provided does not exist.');
+        }
+        this.options.data = this.readFileSync(absolutePath);
+        console.log(typeof this.options.data)
 
-      this.options.data = this.serverless.utils
-        .readFileSync(path.join(this.serverless.config.servicePath, this.options.path));
-
-      if (this.options.data == null || typeof this.options.data !== 'object') {
-        throw new this.serverless.classes.Error(
-          'The file path provided must point to a JSON file with a top-level JSON object definition.'
-        );
+        if (this.options.data == null) {
+          throw new this.serverless.classes.Error(
+            'The file path provided must point to a JSON file with a top-level JSON object definition.'
+          );
+        }
+        resolve();
+      } else {
+        return this.getStdin().then(input => {
+          this.options.data = input || '{}';
+          resolve();
+        });
       }
-    } else if (this.options.data) {
+    }).then(() => {
       try {
-        this.options.data = JSON.parse(this.options.data)
-      } catch (e) {
+        this.options.data = JSON.parse(this.options.data);
+        if (this.options.data == null || typeof this.options.data !== 'object') throw new this.serverless.classes.Error('Data parameter must be a JSON object')
+        
+          } catch (exception) {
         throw new this.serverless.classes.Error(
-          'Error parsing data parameter as JSON.'
+          `Error parsing data parameter as JSON: ${exception}`
         );
       }
-      if (this.options.data == null || typeof this.options.data !== 'object') throw new this.serverless.classes.Error('Data parameter must be a JSON object')
-    }
+    }).then(() => {
+      this.validateParamOptions();
 
-    this.validateParamOptions();
-
-    return this.provider.client().then(client => {
-      this.client = client;
+      return this.provider.client().then(client => {
+        this.client = client;
+      });
     });
   }
 
+  readFileSync(path) {
+    return fse.readFileSync(path);
+  }
+
+  getStdin() {
+    return stdin()
+  }
   // ensure command-line parameter values is a valid option.
   validateParamOptions() {
     Object.keys(CmdLineParamsOptions).forEach(key => {

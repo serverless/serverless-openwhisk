@@ -93,15 +93,27 @@ describe('OpenWhiskInvoke', () => {
       });
     });
 
-    it('it should throw if file is not parsed as JSON object', () => {
+    it('it should parse stdin as JSON data without explicit options', () => {
+      const data = '{"hello": "world"}';
+      sinon.stub(openwhiskInvoke, 'getStdin').returns(BbPromise.resolve(data));
+
       serverless.config.servicePath = path.join(os.tmpdir(), (new Date).getTime().toString());
-      const data = {
-        testProp: 'testValue',
-      };
+      return openwhiskInvoke.validate().then(() => {
+        expect(openwhiskInvoke.options.data).to.deep.equal({hello: "world"});
+        openwhiskInvoke.options.data = null;
+      });
+    });
+
+    it('it should throw if file is not parsed as JSON object (invalid)', () => {
+      serverless.config.servicePath = path.join(os.tmpdir(), (new Date).getTime().toString());
       openwhiskInvoke.options.data = '{"hello": "world"';
-      expect(() => openwhiskInvoke.validate()).to.throw(Error);
+      return expect(openwhiskInvoke.validate()).to.eventually.be.rejectedWith('Error parsing')
+    });
+
+    it('it should throw if file is not parsed as JSON object (number)', () => {
+      serverless.config.servicePath = path.join(os.tmpdir(), (new Date).getTime().toString());
       openwhiskInvoke.options.data = '1';
-      expect(() => openwhiskInvoke.validate()).to.throw(Error);
+      return expect(openwhiskInvoke.validate()).to.eventually.be.rejectedWith('Error parsing')
     });
 
     it('it should parse file if file path is provided', () => {
@@ -109,8 +121,10 @@ describe('OpenWhiskInvoke', () => {
       const data = {
         testProp: 'testValue',
       };
-      openwhiskInvoke.serverless.utils = {fileExistsSync: () => true, readFileSync: () => data};
+      openwhiskInvoke.serverless.utils = {fileExistsSync: () => true};
+      openwhiskInvoke.readFileSync = () => JSON.stringify(data);
       openwhiskInvoke.options.path = 'data.json';
+      openwhiskInvoke.options.data = null;
 
       return openwhiskInvoke.validate().then(() => {
         expect(openwhiskInvoke.options.data).to.deep.equal(data);
@@ -121,40 +135,40 @@ describe('OpenWhiskInvoke', () => {
 
     it('it should throw if file is not parsed as JSON object', () => {
       serverless.config.servicePath = path.join(os.tmpdir(), (new Date).getTime().toString());
-      openwhiskInvoke.serverless.utils = {fileExistsSync: () => true, readFileSync: () => 'testing'};
+      openwhiskInvoke.serverless.utils = {fileExistsSync: () => true};
       openwhiskInvoke.options.path = 'data.txt';
+      openwhiskInvoke.readFileSync = () => 'testing';
 
-      expect(() => openwhiskInvoke.validate()).to.throw(Error);
+      return expect(openwhiskInvoke.validate()).to.eventually.be.rejectedWith('Error parsing')
     });
 
     it('it should throw if type parameter is not valid value', () => {
       openwhiskInvoke.options.type = 'random';
       openwhiskInvoke.options.path = null;
       openwhiskInvoke.options.data = null;
-      expect(() => openwhiskInvoke.validate()).to.throw('blocking or nonblocking');
+      return expect(openwhiskInvoke.validate()).to.eventually.be.rejectedWith('blocking or nonblocking')
     });
 
     it('it should throw if log parameter is not valid value', () => {
       openwhiskInvoke.options.type = 'blocking';
       openwhiskInvoke.options.log = 'random';
       openwhiskInvoke.options.path = null;
-      expect(() => openwhiskInvoke.validate()).to.throw('result or response');
+      openwhiskInvoke.options.data = '{}';
+      return expect(openwhiskInvoke.validate()).to.eventually.be.rejectedWith('result or response')
     });
 
     it('it should throw error if service path is not set', () => {
       serverless.config.servicePath = false;
       expect(() => openwhiskInvoke.validate()).to.throw(Error);
-      serverless.config.servicePath = true;
     });
 
     it('it should throw error if file path does not exist', () => {
       serverless.config.servicePath = path.join(os.tmpdir(), (new Date).getTime().toString());
+      openwhiskInvoke.serverless.utils = {fileExistsSync: () => false};
       openwhiskInvoke.options.path = 'some/path';
+      openwhiskInvoke.options.data = null;
 
-      expect(() => openwhiskInvoke.validate()).to.throw(Error);
-
-      openwhiskInvoke.options.path = false;
-      serverless.config.servicePath = true;
+      return expect(openwhiskInvoke.validate()).to.eventually.be.rejectedWith('does not exist')
     });
   });
 
