@@ -59,7 +59,7 @@ describe('OpenwhiskProvider', () => {
       const creds = {apihost: 'some_api', auth: 'user:pass'}
       sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
       return openwhiskProvider.client().then(client => {
-        expect(client.actions.client.options).to.be.deep.equal({apigw_token: undefined, apigw_space_guid: undefined, namespace: undefined, api_key: creds.auth, ignore_certs: false, api: `https://${creds.apihost}/api/v1/`})
+        expect(client.actions.client.options).to.be.deep.equal({apigwToken: undefined, apigwSpaceGuid: undefined, namespace: undefined, apiKey: creds.auth, ignoreCerts: false, api: `https://${creds.apihost}/api/v1/`})
         expect(typeof openwhiskProvider._client).to.not.equal('undefined');
       })
     })
@@ -70,7 +70,7 @@ describe('OpenwhiskProvider', () => {
       sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
       openwhiskProvider.serverless.service.provider.ignore_certs = true
       return openwhiskProvider.client().then(client => {
-        expect(client.actions.client.options).to.be.deep.equal({apigw_token: undefined, apigw_space_guid: undefined, namespace: undefined, api_key: creds.auth, ignore_certs: true, api: `https://${creds.apihost}/api/v1/`})
+        expect(client.actions.client.options).to.be.deep.equal({apigwToken: undefined, apigwSpaceGuid: undefined, namespace: undefined, apiKey: creds.auth, ignoreCerts: true, api: `https://${creds.apihost}/api/v1/`})
         expect(typeof openwhiskProvider._client).to.not.equal('undefined');
       })
     })
@@ -80,7 +80,7 @@ describe('OpenwhiskProvider', () => {
       const creds = {apihost: 'some_api', auth: 'user:pass', apigw_access_token: 'token'}
       sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
       return openwhiskProvider.client().then(client => {
-        expect(client.actions.client.options).to.be.deep.equal({apigw_token: 'token', apigw_space_guid: 'user', namespace: undefined, api_key: creds.auth, ignore_certs: false, api: `https://${creds.apihost}/api/v1/`})
+        expect(client.actions.client.options).to.be.deep.equal({apigwToken: 'token', apigwSpaceGuid: 'user', namespace: undefined, apiKey: creds.auth, ignoreCerts: false, api: `https://${creds.apihost}/api/v1/`})
         expect(typeof openwhiskProvider._client).to.not.equal('undefined');
       })
     })
