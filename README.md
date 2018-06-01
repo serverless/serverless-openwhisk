@@ -11,7 +11,7 @@ This plugin enables support for the [OpenWhisk platform](http://openwhisk.org/) 
 Before you can deploy your service to OpenWhisk, you need to have an account registered with the platform.
 
 - *Want to run the platform locally?* Please read the project's [*Quick Start*](https://github.com/openwhisk/openwhisk#quick-start) guide for deploying it locally.
-- *Want to use a hosted provider?* Please sign up for an account with [IBM Bluemix](https://console.ng.bluemix.net/) and then follow the instructions for getting access to [OpenWhisk on Bluemix](https://console.ng.bluemix.net/openwhisk/).
+- *Want to use a hosted provider?* Please sign up for a free account with [IBM CLoud](https://console.ng.bluemix.net/) and then follow the instructions for getting access to [OpenWhisk on Bluemix](https://console.ng.bluemix.net/openwhisk/).
 
 ### Set up account credentials
 
@@ -25,12 +25,10 @@ Account credentials for OpenWhisk can be provided through a configuration file o
 - *OW_AUTH* - Authentication key, e.g. `xxxxxx:yyyyy`
 - *OW_APIGW_ACCESS_TOKEN* - API gateway access token (optional)
 
-### Install Framework & Dependencies
-
-*Due to an [outstanding issue](https://github.com/serverless/serverless/issues/2895) with provider plugins, the [OpenWhisk provider](https://github.com/serverless/serverless-openwhisk) must be installed as a global module.*
+### Install Serverless Framework
 
 ```shell
-$ npm install --global serverless serverless-openwhisk
+$ npm install --global serverless
 ```
 
 **_This framework plugin requires Node.js runtime version 6.0 or above._**
