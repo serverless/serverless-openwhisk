@@ -111,6 +111,16 @@ $ serverless invoke --function hello --data '{"name": "OpenWhisk"}'
 }
 ```
 
+*Add the `-v` or `--verbose` flag to show more [invocation details](https://github.com/apache/incubator-openwhisk/blob/master/docs/annotations.md#annotations-specific-to-activations), e.g. activation id and duration details.*
+
+```shell
+$ serverless invoke --function hello -v
+=> action (<ACTION_NAME>) activation (<ID>) duration: 96ms (init: 83ms, wait: 35ms)
+{
+    "payload": "Hello, OpenWhisk!"
+}
+```
+
 ## Writing Functions - Node.js
 
 Here's an `index.js` file containing an example handler function.

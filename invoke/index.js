@@ -140,6 +140,10 @@ class OpenWhiskInvoke {
   }
 
   log(invocationReply) {
+    if (this.options.verbose || this.options.v) {
+      this.logDetails(invocationReply)
+    }
+
     let color = 'white';
 
     // error response indicated in-blocking call boolean parameter, success.
@@ -156,6 +160,23 @@ class OpenWhiskInvoke {
 
     this.consoleLog(chalk[color](JSON.stringify(result, null, 4)));
     return BbPromise.resolve();
+  }
+
+  logDetails(invocationReply) {
+    const id = `/${invocationReply.namespace}/${invocationReply.name}`
+    const actv = invocationReply.activationId
+
+    const find_time = (annotations, key) => (annotations.find(el => el.key === key) || {value: 0}).value
+    const annotations = invocationReply.annotations || []
+    const waitTime = find_time(annotations, 'waitTime')
+    const initTime = find_time(annotations, 'initTime')
+
+    const field = (name, label) => `${chalk.blue(name)} (${chalk.yellow(label)})`
+    const time = (name, value, color = 'blue') => `${chalk[color](name)}: ${chalk.green(value + 'ms')}`
+
+    const duration = (duration, init = 0, wait) => `${time('duration', duration)} (${time('init', init, 'magenta')}, ${time('wait', wait, 'magenta')})`
+
+    this.consoleLog(`${chalk.green('=>')} ${field('action', id)} ${field('activation', actv)} ${duration(invocationReply.duration, initTime, waitTime)}`)
   }
 
   consoleLog(msg) {

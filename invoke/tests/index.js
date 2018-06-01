@@ -1,5 +1,6 @@
 'use strict';
 
+const chalk = require('chalk');
 const expect = require('chai').expect;
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
@@ -216,5 +217,85 @@ describe('OpenWhiskInvoke', () => {
       invokeStub = sinon.stub(openwhiskInvoke.client.actions, 'invoke').returns(BbPromise.reject());
       return expect(openwhiskInvoke.invoke()).to.be.eventually.rejected;
     });
+  });
+
+  describe('#log()', () => {
+    it('should log activation response result', () => {
+      const log = sandbox.stub(openwhiskInvoke, 'consoleLog');
+      openwhiskInvoke.options.log = 'result'
+      openwhiskInvoke.options.type = 'blocking'
+
+      const result = {success: true, result: { hello: "world"} };
+      return openwhiskInvoke.log({response: result}).then(() => {
+        expect(log.calledOnce).to.be.equal(true);
+        const msg = chalk.white(JSON.stringify(result.result, null, 4));
+        console.log(msg)
+        expect(log.args[0][0]).to.be.equal(msg);
+      });
+    });
+
+    it('should log verbose activation response result', () => {
+      const log = sandbox.stub(openwhiskInvoke, 'consoleLog');
+      openwhiskInvoke.options.log = 'result'
+      openwhiskInvoke.options.type = 'blocking'
+      openwhiskInvoke.options.v = true
+
+      const input = {
+        activationId: 12345,
+        name: 'blah',
+        namespace: 'workspace',
+        duration: 100,
+        annotations: [ { key: "waitTime", value: 33 } ],
+        response: { success: true, result: { hello: "world"} }
+      };
+      return openwhiskInvoke.log(input).then(() => {
+        expect(log.calledTwice).to.be.equal(true);
+        const msg = chalk.white(JSON.stringify(input.response.result, null, 4));
+
+        const field = (name, label) => `${chalk.blue(name)} (${chalk.yellow(label)})`
+        const time = (name, value, color = 'blue') => `${chalk[color](name)}: ${chalk.green(value + 'ms')}`
+      const duration = (duration, init = 0, wait) => `${time('duration', duration)} (${time('init', init, 'magenta')}, ${time('wait', wait, 'magenta')})`
+
+        const output = `${chalk.green('=>')} ${field('action', '/workspace/blah')} ${field('activation', 12345)} ${duration(100, undefined, 33)}`
+
+        expect(log.args[0][0]).to.be.equal(output);
+        expect(log.args[1][0]).to.be.equal(msg);
+      });
+    });
+
+    it('should log verbose activation coldstart response result', () => {
+      const log = sandbox.stub(openwhiskInvoke, 'consoleLog');
+      openwhiskInvoke.options.log = 'result'
+      openwhiskInvoke.options.type = 'blocking'
+      openwhiskInvoke.options.v = true
+
+      const input = {
+        activationId: 12345,
+        name: 'blah',
+        namespace: 'workspace',
+        duration: 100,
+        annotations: [ 
+          { key: "waitTime", value: 33 },
+          { key: "initTime", value: 63 }
+        ],
+        response: { success: true, result: { hello: "world"} }
+      };
+      return openwhiskInvoke.log(input).then(() => {
+        expect(log.calledTwice).to.be.equal(true);
+        const msg = chalk.white(JSON.stringify(input.response.result, null, 4));
+
+        const field = (name, label) => `${chalk.blue(name)} (${chalk.yellow(label)})`
+        const time = (name, value, color = 'blue') => `${chalk[color](name)}: ${chalk.green(value + 'ms')}`
+      const duration = (duration, init = 0, wait) => `${time('duration', duration)} (${time('init', init, 'magenta')}, ${time('wait', wait, 'magenta')})`
+
+        const output = `${chalk.green('=>')} ${field('action', '/workspace/blah')} ${field('activation', 12345)} ${duration(100, 63, 33)}`
+
+        expect(log.args[0][0]).to.be.equal(output);
+        expect(log.args[1][0]).to.be.equal(msg);
+      });
+    });
+
+
+
   });
 });
