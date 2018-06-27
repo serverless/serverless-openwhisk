@@ -1,4 +1,5 @@
 // OpenWhisk Plugins Tests
+require('../compile/servicebindings/tests');
 require('../compile/packages/tests');
 require('../compile/triggers/tests');
 require('../compile/rules/tests');

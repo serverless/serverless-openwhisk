@@ -8,6 +8,7 @@ const deployRules = require('./lib/deployRules');
 const deployTriggers = require('./lib/deployTriggers');
 const deployFeeds = require('./lib/deployFeeds');
 const deployApiGw = require('./lib/deployApiGw');
+const deployServiceBindings = require('./lib/deployServiceBindings');
 
 class OpenWhiskDeploy {
   constructor(serverless, options) {
@@ -23,7 +24,8 @@ class OpenWhiskDeploy {
       deployApiGw,
       deployRules,
       deployTriggers,
-      deployFeeds
+      deployFeeds,
+      deployServiceBindings
     );
 
     this.hooks = {
@@ -37,6 +39,7 @@ class OpenWhiskDeploy {
         .then(this.deployTriggers)
         .then(this.deployFeeds)
         .then(this.deployRules)
+        .then(this.configureServiceBindings)
         .then(() => this.serverless.cli.log('Deployment successful!')),
     };
   }

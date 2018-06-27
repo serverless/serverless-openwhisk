@@ -8,4 +8,5 @@ require('./deployPackages');
 require('./deployTriggers');
 require('./deployFeeds');
 require('./deployApiGw');
+require('./deployServiceBindings');
 require('./index');
