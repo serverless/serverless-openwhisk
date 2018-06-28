@@ -47,7 +47,7 @@ describe('OpenWhiskCompileServiceBindings', () => {
     it('should return array with single service binding property', () => {
       const action = 'fnName'
       const service = { name: 'my-service', instance: 'my-instance', key: 'mykey' }
-      const response = { action: `serviceName_fnName`, name: 'my-service', instance: 'my-instance', key: 'mykey' }
+      const response = { action: `fnName`, name: 'my-service', instance: 'my-instance', key: 'mykey' }
       const result = openwhiskCompileServiceBindings.parseServiceBindings(action, {bind: [{ service }]})
       expect(result).to.deep.equal([response])
     })
@@ -93,13 +93,13 @@ describe('OpenWhiskCompileServiceBindings', () => {
       service.getFunction = name => fns[name]
 
       const services = [
-        { action: 'serviceName_a', name: 'service-name-a' },
-        { action: 'serviceName_b', name: 'service-name-b', instance: 'instance-name' },
-        { action: 'serviceName_c', name: 'service-name-a' },
-        { action: 'serviceName_c', name: 'service-name-b' }
+        [{ action: 'serviceName_a', name: 'service-name-a' }],
+        [{ action: 'serviceName_b', name: 'service-name-b', instance: 'instance-name' }],
+        [{ action: 'serviceName_c', name: 'service-name-a' }, { action: 'serviceName_c', name: 'service-name-b' }]
       ]
       return openwhiskCompileServiceBindings.compileServiceBindings().then(result => {
-        expect(service.bindings).to.deep.equal(services)
+        expect(service.bindings.fns).to.deep.equal(services)
+        expect(service.bindings.packages).to.deep.equal([])
       })
     })
 
@@ -112,9 +112,10 @@ describe('OpenWhiskCompileServiceBindings', () => {
       service.getAllFunctions = () => Object.keys(fns)
       service.getFunction = name => fns[name]
 
-      const services = [ { action: 'some_name', name: 'service-name-a' } ]
+      const services = [ [{ action: 'some_name', name: 'service-name-a' }] ]
       return openwhiskCompileServiceBindings.compileServiceBindings().then(result => {
-        expect(service.bindings).to.deep.equal(services)
+        expect(service.bindings.fns).to.deep.equal(services)
+        expect(service.bindings.packages).to.deep.equal([])
       })
     })
 
@@ -129,14 +130,14 @@ describe('OpenWhiskCompileServiceBindings', () => {
       }
 
       const services = [
-        { action: 'serviceName_a', name: 'service-name-a' },
-        { action: 'serviceName_b', name: 'service-name-b', instance: 'instance-name' },
-        { action: 'serviceName_c', name: 'service-name-a' },
-        { action: 'serviceName_c', name: 'service-name-b' }
+        [{ action: 'a', name: 'service-name-a' }],
+        [{ action: 'b', name: 'service-name-b', instance: 'instance-name' }],
+        [{ action: 'c', name: 'service-name-a' }, { action: 'c', name: 'service-name-b' }]
       ]
 
       return openwhiskCompileServiceBindings.compileServiceBindings().then(() => {
-        expect(service.bindings).to.deep.equal(services);
+        expect(service.bindings.packages).to.deep.equal(services);
+        expect(service.bindings.fns).to.deep.equal([]);
       });
     });
 
@@ -153,10 +154,10 @@ describe('OpenWhiskCompileServiceBindings', () => {
       service.getAllFunctions = () => Object.keys(fns)
       service.getFunction = name => fns[name]
 
-      const services = [
-        { action: 'serviceName_a', name: 'service-name-a' },
-        { action: 'serviceName_b', name: 'service-name-b', instance: 'instance-name' }
-      ]
+      const services = {
+        packages: [[{ action: 'a', name: 'service-name-a' }]],
+        fns: [[{ action: 'serviceName_b', name: 'service-name-b', instance: 'instance-name' }]]
+      }
 
       return openwhiskCompileServiceBindings.compileServiceBindings().then(() => {
         expect(service.bindings).to.deep.equal(services);

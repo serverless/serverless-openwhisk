@@ -6,7 +6,7 @@ const { spawn } = require('child_process');
 module.exports = {
   configureServiceBinding(binding) {
     if (this.options.verbose) {
-      this.serverless.cli.log(`Configuring Service Binding: ${binding}`);
+      this.serverless.cli.log(`Configuring Service Binding: ${JSON.stringify(binding)}`);
     }
 
     return new Promise((resolve, reject) => {
@@ -56,7 +56,7 @@ module.exports = {
           return reject(err)
         }
         if (this.options.verbose) {
-          this.serverless.cli.log(`Configured Service Binding: ${binding}`);
+          this.serverless.cli.log(`Configured Service Binding: ${JSON.stringify(binding)}`);
         }
         resolve()
       });
@@ -66,16 +66,18 @@ module.exports = {
   configureServiceBindings() {
     const bindings = this.getServiceBindings();
 
-    if (bindings.length) {
+    if (bindings.fns.length || bindings.packages.length) {
       this.serverless.cli.log('Configuring Service Bindings...');
     }
 
     return BbPromise.all(
-      bindings.map(sb => this.configureServiceBinding(sb))
-    );
+      bindings.packages.map(sbs => BbPromise.mapSeries(sbs, sb => this.configureServiceBinding(sb)))
+    ).then(() => BbPromise.all(
+      bindings.fns.map(sbs => BbPromise.mapSeries(sbs, sb => this.configureServiceBinding(sb)))
+    ));
   },
 
   getServiceBindings() {
-    return this.serverless.service.bindings || [];
+    return this.serverless.service.bindings || { fns: [], packages: [] } ;
   }
 };

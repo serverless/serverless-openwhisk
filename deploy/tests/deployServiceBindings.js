@@ -45,8 +45,8 @@ describe('deployServiceBindings', () => {
 
   describe('#configureServiceBindings()', () => {
     it('should call binding command for each binding and return when all finish', () => {
-      const bindings = [{name: 'a'}, {name: 'a'}, {name: 'a'}]
-      openwhiskDeploy.serverless.service.bindings = bindings
+      const bindings = [[{name: 'a'}, {name: 'a'}, {name: 'a'}]]
+      openwhiskDeploy.serverless.service.bindings = { fns: bindings, packages: bindings }
       sandbox.stub(openwhiskDeploy, 'configureServiceBinding', () => {
         return Promise.resolve();
       });
@@ -56,8 +56,8 @@ describe('deployServiceBindings', () => {
     });
 
     it('should reject when function handler fails to deploy with error message', () => {
-      const bindings = [{name: 'a'}, {name: 'a'}, {name: 'a'}]
-      openwhiskDeploy.serverless.service.bindings = bindings
+      const bindings = [[{name: 'a'}, {name: 'a'}, {name: 'a'}]]
+      openwhiskDeploy.serverless.service.bindings = { fns: bindings, packages: bindings }
       const err = { message: 'some reason' };
       sandbox.stub(openwhiskDeploy, 'configureServiceBinding', () => {
         return Promise.reject(err);

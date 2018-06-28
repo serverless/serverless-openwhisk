@@ -17,11 +17,10 @@ class OpenWhiskCompileServiceBindings {
     return props.name || `${this.serverless.service.service}_${name}`;
   }
 
-  parseServiceBindings(action, properties) {
-    const name = { action: this.calculateFunctionName(action, properties) }
+  parseServiceBindings(name, properties) {
     const bindings = properties.bind || []
     const servicebindings = bindings.filter(b => b.service)
-      .map(b => Object.assign(b.service, name))
+      .map(b => Object.assign(b.service, { action: name } ))
 
     const serviceNames = new Set()
 
@@ -42,14 +41,21 @@ class OpenWhiskCompileServiceBindings {
 
   compileFnServiceBindings() {
     return this.serverless.service.getAllFunctions()
-      .map(name => this.parseServiceBindings(name, this.serverless.service.getFunction(name)))
+      .map(name => {
+        const fnObj = this.serverless.service.getFunction(name)
+        const fnName = this.calculateFunctionName(name, fnObj)
+        return this.parseServiceBindings(fnName, fnObj)
+      })
+      .filter(sbs => sbs.length > 0)
   }
 
   compilePkgServiceBindings() {
     const manifestResources = this.serverless.service.resources || {}
     const packages = manifestResources.packages || {}
 
-    return Object.keys(packages).map(name => this.parseServiceBindings(name, packages[name]))
+    return Object.keys(packages)
+      .map(name => this.parseServiceBindings(name, packages[name]))
+      .filter(sbs => sbs.length > 0)
   }
 
   compileServiceBindings() {
@@ -58,7 +64,11 @@ class OpenWhiskCompileServiceBindings {
     const fnServiceBindings = this.compileFnServiceBindings()
     const pkgServiceBindings = this.compilePkgServiceBindings()
 
-    this.serverless.service.bindings = [].concat(...pkgServiceBindings, ...fnServiceBindings)
+    this.serverless.service.bindings = {
+      fns: fnServiceBindings,
+      packages: pkgServiceBindings
+    }
+
     return BbPromise.resolve();
   }
 }

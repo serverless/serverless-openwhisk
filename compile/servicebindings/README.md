@@ -1,66 +1,49 @@
-# Compile Packages
+# Service Bindings
 
-This plugins compiles the packages in `serverless.yaml` to corresponding [OpenWhisk Packages](https://github.com/openwhisk/openwhisk/blob/master/docs/packages.md)
-definitions.
+This plugin binds IBM Cloud platform service credentials to actions and packages in `serverless.yaml`.
 
 ## How it works
 
-`Compile Packages` hooks into the [`package:compileEvents`](/lib/plugins/deploy) lifecycle.
+`Compile Service Bindings` hooks into the [`package:compileEvents`](/lib/plugins/deploy) lifecycle.
 
-It loops over all packages which are defined in `serverless.yaml`.
+***This feature requires the [IBM Cloud CLI](https://console.bluemix.net/docs/cli/reference/bluemix_cli/download_cli.html#download_install) and [IBM Cloud Functions plugin](https://console.bluemix.net/openwhisk/learn/cli) to be installed.***
 
-### Implicit Packages
+IBM Cloud Functions supports [automatic binding of service credentials](https://console.bluemix.net/docs/openwhisk/binding_services.html#binding_services) to actions using the CLI.
 
-Actions can be assigned to packages by setting the function `name` with a package reference.
+Bound service credentials will be passed as the `__bx_creds` parameter in the invocation parameters.
 
-```yaml
-functions:
-  foo:
-    handler: handler.foo
-    name: "myPackage/foo"
-  bar:
-    handler: handler.bar
-    name: "myPackage/bar"
-```
-
-In this example, two new actions (`foo` & `bar`) will be created using the `myPackage` package.
-
-Packages which do not exist will be automatically created during deployments. When using the `remove` command, any packages referenced in the `serverless.yml` will be deleted.
-
-### Explicit Packages
-
-Packages can also be defined explicitly to set shared configuration parameters. Default package parameters are merged into event parameters for each invocation.
+This feature is also available through the `serverless.yaml` file using the `bind` property for each function.
 
 ```yaml
 functions:
-  foo:
-    handler: handler.foo
-    name: "myPackage/foo"
-    
-resources:
-  packages:
-    myPackage:
-      parameters:
-        hello: world 
+  my_function:
+    handler: file_name.handler    
+    bind:
+      - service:
+          name: cloud-object-storage
+          instance: my-cos-storage
 ```
 
-### Binding Packages
+The `service` configuration supports the following properties.
 
-OpenWhisk also supports "binding" external packages into your workspace. Bound packages can have default parameters set for shared actions.
+- `name`: identifier for the cloud service
+- `instance`: instance name for service (*optional*) 
+- `key`: key name for instance and service (*optional*) 
 
-For example, binding the `/whisk.system/cloudant` package into a new package allows you to set default values for the `username`, `password` and `dbname` properties. Actions from this package can then be invoked with having to pass these parameters in.
+*If the `instance` or `key` properties are missing, the first available instance and key found will be used.*
 
-Define packages explicitly with a `binding` parameter to use this behaviour.
+Binding services removes the need to manually create default parameters for service keys from platform services.
+
+More details on binding service credentials to actions can be found in the [official documentation](https://console.bluemix.net/docs/openwhisk/binding_services.html#binding_services) and [this blog post](http://jamesthom.as/blog/2018/06/05/binding-iam-services-to-ibm-cloud-functions/).
+
+Packages defined in the `resources` section can bind services using the same configuration properties.
 
 ```yaml
 resources:
   packages:
-    mySamples:
-      binding: /whisk.system/cloudant
-      parameters:
-        username: bernie
-        password: sanders
-        dbname: vermont
+    myPackage:
+      bind:
+        - service:
+            name: cloud-object-storage
+            instance: my-cos-storage
 ```
-
-For more details on package binding, please see the documentation [here](https://github.com/apache/incubator-openwhisk/blob/master/docs/packages.md#creating-and-using-package-bindings).
