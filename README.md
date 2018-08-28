@@ -11,7 +11,7 @@ This plugin enables support for the [OpenWhisk platform](http://openwhisk.org/) 
 Before you can deploy your service to OpenWhisk, you need to have an account registered with the platform.
 
 - *Want to run the platform locally?* Please read the project's [*Quick Start*](https://github.com/openwhisk/openwhisk#quick-start) guide for deploying it locally.
-- *Want to use a hosted provider?* Please sign up for a free account with [IBM CLoud](https://console.ng.bluemix.net/) and then follow the instructions for getting access to [OpenWhisk on Bluemix](https://console.ng.bluemix.net/openwhisk/).
+- *Want to use a hosted provider?* Please sign up for a free account with [IBM Cloud](https://console.ng.bluemix.net/) and then follow the instructions for getting access to [OpenWhisk on Bluemix](https://console.ng.bluemix.net/openwhisk/).
 
 ### Set up account credentials
 
@@ -567,7 +567,7 @@ OpenWhisk provides a concept called "packages" to manage related actions. Packag
 
 *Packages are identified using the following format:* `/namespaceName/packageName/actionName`.
 
-***Rules and triggers can not be created within packages.*** 
+***Rules and triggers can not be created within packages.***
 
 ### Implicit Packages
 
@@ -596,12 +596,12 @@ functions:
   foo:
     handler: handler.foo
     name: "myPackage/foo"
-    
+
 resources:
   packages:
     myPackage:
       parameters:
-        hello: world 
+        hello: world
 ```
 
 *Explicit packages support the following properties: `parameters`, `annotations`, `services` and `shared`.*
@@ -650,8 +650,8 @@ functions:
 The `service` configuration supports the following properties.
 
 - `name`: identifier for the cloud service
-- `instance`: instance name for service (*optional*) 
-- `key`: key name for instance and service (*optional*) 
+- `instance`: instance name for service (*optional*)
+- `key`: key name for instance and service (*optional*)
 
 *If the `instance` or `key` properties are missing, the first available instance and key found will be used.*
 
