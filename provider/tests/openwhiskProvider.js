@@ -55,38 +55,38 @@ describe('OpenwhiskProvider', () => {
 
   describe('#client()', () => {
     it('should return pre-configured openwhisk client', () => {
-      openwhiskProvider._client = null 
+      openwhiskProvider._client = null
       const creds = {apihost: 'some_api', auth: 'user:pass'}
       sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
       return openwhiskProvider.client().then(client => {
-        expect(client.actions.client.options).to.be.deep.equal({apigwToken: undefined, apigwSpaceGuid: undefined, namespace: undefined, apiKey: creds.auth, ignoreCerts: false, api: `https://${creds.apihost}/api/v1/`})
+        expect(client.actions.client.options).to.be.deep.equal({apigwToken: undefined, apigwSpaceGuid: undefined, namespace: undefined, apiKey: creds.auth, ignoreCerts: false, api: `https://${creds.apihost}/api/v1/`, authHandler: undefined, noUserAgent: undefined})
         expect(typeof openwhiskProvider._client).to.not.equal('undefined');
       })
     })
 
     it('should allow ignore_certs options for openwhisk client', () => {
-      openwhiskProvider._client = null 
+      openwhiskProvider._client = null
       const creds = {apihost: 'some_api', auth: 'user:pass'}
       sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
       openwhiskProvider.serverless.service.provider.ignore_certs = true
       return openwhiskProvider.client().then(client => {
-        expect(client.actions.client.options).to.be.deep.equal({apigwToken: undefined, apigwSpaceGuid: undefined, namespace: undefined, apiKey: creds.auth, ignoreCerts: true, api: `https://${creds.apihost}/api/v1/`})
+        expect(client.actions.client.options).to.be.deep.equal({apigwToken: undefined, apigwSpaceGuid: undefined, namespace: undefined, apiKey: creds.auth, ignoreCerts: true, api: `https://${creds.apihost}/api/v1/`, authHandler: undefined, noUserAgent: undefined})
         expect(typeof openwhiskProvider._client).to.not.equal('undefined');
       })
     })
 
-    it('should allow apigw_access_toekn option for openwhisk client', () => {
-      openwhiskProvider._client = null 
+    it('should allow apigw_access_token option for openwhisk client', () => {
+      openwhiskProvider._client = null
       const creds = {apihost: 'some_api', auth: 'user:pass', apigw_access_token: 'token'}
       sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
       return openwhiskProvider.client().then(client => {
-        expect(client.actions.client.options).to.be.deep.equal({apigwToken: 'token', apigwSpaceGuid: 'user', namespace: undefined, apiKey: creds.auth, ignoreCerts: false, api: `https://${creds.apihost}/api/v1/`})
+        expect(client.actions.client.options).to.be.deep.equal({apigwToken: 'token', apigwSpaceGuid: 'user', namespace: undefined, apiKey: creds.auth, ignoreCerts: false, api: `https://${creds.apihost}/api/v1/`, authHandler: undefined, noUserAgent: undefined})
         expect(typeof openwhiskProvider._client).to.not.equal('undefined');
       })
     })
 
     it('should cache client instance', () => {
-      openwhiskProvider._client = {} 
+      openwhiskProvider._client = {}
       return openwhiskProvider.client().then(client => {
         expect(client).to.be.equal(openwhiskProvider._client)
       })
@@ -95,7 +95,7 @@ describe('OpenwhiskProvider', () => {
 
   describe('#props()', () => {
     it('should return promise that resolves with provider credentials', () => {
-      openwhiskProvider._props = null 
+      openwhiskProvider._props = null
       const creds = {apihost: 'some_api', auth: 'user:pass', namespace: 'namespace'}
       sandbox.stub(Credentials, "getWskProps").returns(BbPromise.resolve(creds))
       return openwhiskProvider.props().then(props => {
@@ -105,7 +105,7 @@ describe('OpenwhiskProvider', () => {
     });
 
     it('should return cached provider credentials', () => {
-      openwhiskProvider._props = {} 
+      openwhiskProvider._props = {}
       const stub = sandbox.stub(Credentials, "getWskProps")
       return openwhiskProvider.props().then(props => {
         expect(props).to.be.equal(openwhiskProvider._props)
@@ -136,4 +136,4 @@ describe('OpenwhiskProvider', () => {
       return expect(() => openwhiskProvider.hasValidCreds(mockObject)).to.throw(/OW_APIHOST/);
     });
   })
-}) 
+})
