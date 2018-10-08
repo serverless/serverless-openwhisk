@@ -34,13 +34,7 @@ class Java extends BaseRuntime {
   // Ensure zip package used to deploy action has the correct artifacts for the runtime by only
   // including the deployable JAR file.
   processActionPackage(handlerFile, zip) {
-    return zip
-      .file(handlerFile)
-      .async('nodebuffer')
-      .then(data => {
-        const readFile = BbPromise.promisify(fs.readFile);
-        return readFile(handlerFile).then(zipBuffer => JSZip.loadAsync(zipBuffer));
-      });
+    return zip;
   }
 }
 
