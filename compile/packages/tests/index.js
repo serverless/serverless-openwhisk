@@ -68,6 +68,16 @@ describe('OpenWhiskCompilePackages', () => {
     })
   })
 
+  describe('#calculatePackageName()', () => {
+    it('should return package name from object key', () => {
+      expect(openwhiskCompilePackages.calculatePackageName('a', { parameters: 'p' })).to.equal('a');
+    })
+
+    it('should return package name from name property', () => {
+      expect(openwhiskCompilePackages.calculatePackageName('a', { name: 'b' })).to.equal('b');
+    })
+  })
+
   describe('#mergeActionPackages()', () => {
     it('should set up packages from action names', () => {
       openwhiskCompilePackages.serverless.service.resources = {};
@@ -176,6 +186,21 @@ describe('OpenWhiskCompilePackages', () => {
       const result = openwhiskCompilePackages.compilePackage('myPackage', params);
       expect(log.calledOnce).to.be.equal(true);
       expect(log.args[0][0]).to.be.equal(`Compiled Package (myPackage): ${JSON.stringify(result)}`);
+    });
+
+    it('should rename packages when name parameter is present', () => {
+      const params = { name: 'customname', shared: true, overwrite: false, namespace: 'another_ns', parameters: { hello: 'world' } };
+      const expected = {
+        name: 'customname',
+        overwrite: false,
+        namespace: 'another_ns',
+        package: {
+          publish: true,
+          parameters: [{ key: 'hello', value: 'world' }]
+        },
+      };
+      const result = openwhiskCompilePackages.compilePackage('testing', params);
+      return expect(result).to.deep.equal(expected);
     });
   });
 });

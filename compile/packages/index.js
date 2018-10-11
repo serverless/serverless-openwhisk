@@ -55,8 +55,13 @@ class OpenWhiskCompilePackages {
     return [...actionPackages];
   }
 
+  calculatePackageName(packageName, packageObject) {
+    return packageObject.name || packageName;
+  }
+
   compilePackage(name, params) {
-    const pkge = { name, overwrite: true, package: {} };
+    const effectiveName = this.calculatePackageName(name, params);
+    const pkge = { name: effectiveName, overwrite: true, package: {} };
 
     pkge.namespace = params.namespace
       || this.serverless.service.provider.namespace;
