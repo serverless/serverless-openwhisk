@@ -10,3 +10,4 @@ require('./php');
 require('./binary');
 require('./sequence');
 require('./java');
+require('./ruby');

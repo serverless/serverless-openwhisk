@@ -302,6 +302,51 @@ def endpoint(params):
 
 If you want to return an error message, return an object with an `error` property with the message.
 
+## Writing Functions - Ruby
+
+Here's an `hello.rb` file containing an example handler function.
+
+```ruby
+def main(args)
+  name = args["name"] || "stranger"
+  greeting = "Hello #{name}!"
+  puts greeting
+  { "greeting" => greeting }
+end
+```
+
+In the `serverless.yaml` file, the `handler` property is used to denote the source file and function name of the serverless function.
+
+```yaml
+functions:
+  my_function:
+    handler: hello.main
+    runtime: ruby
+```
+
+### Request Properties
+
+OpenWhisk executes the handler function for each request. This function is called with a single argument, which is a hash [containing the request properties](https://github.com/openwhisk/openwhisk/blob/master/docs/actions.md#passing-parameters-to-an-action).
+
+```ruby
+def main(args)
+  name = args["name"] || "stranger"
+  ...
+```
+
+### Function Return Values
+
+The handler must return a hash from the function call.
+
+```ruby
+def main(args)
+  ...
+  { "greeting" => greeting }
+end
+```
+
+If you want to return an error message, return an `error` property string in the return hash.
+
 ## Writing Functions - Swift
 
 Here's an `index.swift` file containing an example handler function.

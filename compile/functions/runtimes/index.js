@@ -8,6 +8,7 @@ const Swift = require('./swift')
 const Php = require('./php')
 const Sequence = require('./sequence')
 const Java = require('./java')
+const Ruby = require('./ruby')
 
 class Runtimes {
   constructor(serverless) {
@@ -20,7 +21,8 @@ class Runtimes {
       new Swift(serverless),
       new Php(serverless),
       new Sequence(serverless),
-      new Java(serverless)
+      new Java(serverless),
+      new Ruby(serverless)
     ];
   }
  
