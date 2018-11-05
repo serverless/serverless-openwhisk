@@ -16,6 +16,7 @@ class OpenWhiskInvokeLocal {
     this.hooks = {
       'invoke:local:invoke': () => BbPromise.bind(this)
         .then(this.validate)
+        .then(this.mergePackageParams)
         .then(this.loadEnvVars)
         .then(this.invokeLocal),
     };
@@ -61,6 +62,21 @@ class OpenWhiskInvokeLocal {
 
       this.options.data = Object.assign(params, data);
     });
+  }
+
+  mergePackageParams() {
+    const functionObj = this.serverless.service.getFunction(this.options.function) || {}
+    const name = functionObj.name || ''
+    const id = name.match(/^(.+)\/.+$/)
+    if (id) {
+      const pgke = id[1]
+      const manifestPackages = this.serverless.service.resources.packages || {};
+      const packageDetails = manifestPackages[pgke] || {}
+      const packageParams = packageDetails.parameters || {}
+      this.options.data = Object.assign(packageParams, this.options.data);
+    }
+
+    return BbPromise.resolve();
   }
 
   loadEnvVars() {

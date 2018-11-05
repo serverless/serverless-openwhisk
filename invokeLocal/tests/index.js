@@ -250,6 +250,41 @@ describe('OpenWhiskInvokeLocal', () => {
     );
   });
 
+  describe('#mergePackageParams()', () => {
+    beforeEach(() => {
+      serverless.config.servicePath = true;
+      serverless.service.provider = {
+        namespace: 'testing_ns',
+        environment: {
+          providerVar: 'providerValue',
+        },
+      };
+
+      serverless.service.functions.first.name = 'mypackage/first'
+      serverless.service.functions.first.parameters = {
+        foo: 'bar', nums: 1, arr: ['foo', 'bar']
+      }
+      openwhiskInvokeLocal.options = { data: { foo: 'bar', nums: 1, arr: ['foo', 'bar'] }};
+    });
+
+
+    it('it should ignore implicit packages without parameters', () => openwhiskInvokeLocal
+      .mergePackageParams().then(() => {
+        expect(openwhiskInvokeLocal.options.data).to.deep.equal(serverless.service.functions.first.parameters);
+      })
+    );
+
+    it('it should merge implicit packages with parameters', () => { 
+      serverless.service.resources.packages = {
+        mypackage: { parameters: { hello: 'world', foo: 'baz' } }
+      }
+      return openwhiskInvokeLocal.mergePackageParams().then(() => {
+        const merged = Object.assign(serverless.service.resources.packages.mypackage.parameters, openwhiskInvokeLocal.options.data)
+        expect(openwhiskInvokeLocal.options.data).to.deep.equal(merged);
+      })
+    });
+  });
+
   describe('#invokeLocal()', () => {
     let invokeLocalNodeJsStub, invokeLocalPythonStub;
 
