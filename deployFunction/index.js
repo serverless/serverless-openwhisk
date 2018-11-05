@@ -68,7 +68,7 @@ class OpenWhiskDeployFunction {
         this.serverless.cli.log(`Successfully deployed function: ${this.options.function}`);
       }).catch(err => {
         throw new this.serverless.classes.Error(
-          `Failed to deploy function (${functionHandler.actionName}) due to error: ${err.message}`
+          `Failed to deploy function (${this.options.function}) due to error: ${err.message}`
         );
       })
     );
