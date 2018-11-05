@@ -105,13 +105,27 @@ class OpenWhiskCompileFunctions {
         .map(key => ({ key, value: functionObject.parameters[key] }));
       
       // optional action annotations 
-      const Annotations = Object.keys(functionObject.annotations || {})
-        .map(key => ({ key, value: functionObject.annotations[key] }));
+      const Annotations = this.constructAnnotations(functionObject.annotations);
 
       return this.compileFunctionAction(
         { FunctionName, NameSpace, Overwrite, Exec, Timeout, MemorySize, Parameters, Annotations }
       );
     });
+  }
+
+  constructAnnotations (annotations) {
+    if (!annotations) return []
+
+    // finalise action parameters when exposing as external HTTP endpoint.
+    // mirrors behaviour from OpenWhisk CLI.
+    if (annotations['web-export']) {
+      annotations['final'] = true
+    }
+
+    const converted = Object.keys(annotations)
+      .map(key => ({ key, value: annotations[key] }));
+
+    return converted
   }
 
   logCompiledFunction (name, fn) {

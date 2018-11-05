@@ -71,6 +71,35 @@ describe('OpenWhiskCompileFunctions', () => {
     });
   });
 
+  describe('#constructAnnotations()', () => {
+    it('should handle missing annotations', () => {
+      expect(openwhiskCompileFunctions.constructAnnotations())
+        .to.deep.equal([]);
+    })
+    it('should handle empty annotations', () => {
+      expect(openwhiskCompileFunctions.constructAnnotations({}))
+        .to.deep.equal([]);
+    })
+    it('should handle annotations present', () => {
+      expect(openwhiskCompileFunctions.constructAnnotations({
+        hello: 'world', foo: 'bar'
+      })).to.deep.equal([
+        { key: 'hello', value: 'world' },
+        { key: 'foo', value: 'bar' }
+      ]);
+    })
+    it('should add final annotations if web-export is present', () => {
+      expect(openwhiskCompileFunctions.constructAnnotations({
+        hello: 'world', foo: 'bar', "web-export": true
+      })).to.deep.equal([
+        { key: 'hello', value: 'world' },
+        { key: 'foo', value: 'bar' },
+        { key: 'web-export', value: true },
+        { key: 'final', value: true }
+      ]);
+    })
+  })
+
   describe('#calculateFunctionNameSpace()', () => {
     it('should return namespace from function object', () => {
       expect(openwhiskCompileFunctions
