@@ -36,6 +36,25 @@ describe('OpenWhiskCompilePackages', () => {
     sandbox.restore();
   });
 
+  describe('#renameManifestPackages()', () => {
+    it('should rename packages with explicit names', () => {
+      openwhiskCompilePackages.serverless.service.resources.packages = {
+        'first' : { name: 'firstchanged', parameters: { hello: 'world first' } },
+        'second' : { parameters: { hello: 'world second' } }
+      };
+
+      const expected = {
+        'firstchanged' : { name: 'firstchanged', parameters: { hello: 'world first' } },
+        'second' : { parameters: { hello: 'world second' } }
+      };
+
+      openwhiskCompilePackages.renameManifestPackages();
+      expect(openwhiskCompilePackages.serverless.service.resources.packages)
+        .to.deep.equal(expected);
+
+    })
+  })
+
   describe('#getActionPackages()', () => {
     it('should return no package names for functions without name property', () => {
       const service = openwhiskCompilePackages.serverless.service;
@@ -139,6 +158,46 @@ describe('OpenWhiskCompilePackages', () => {
         expect(openwhiskCompilePackages.serverless.service.packages)
           .to.deep.equal({ sample: expected })
       )).to.eventually.be.fulfilled;
+    });
+
+    it('should merge packages with explicit names', () => {
+      openwhiskCompilePackages.serverless.service.resources.packages = {
+        'first' : { name: 'firstchanged', parameters: { hello: 'world first' } },
+        'second' : { parameters: { hello: 'world second' } }
+      };
+
+      sandbox.stub(openwhiskCompilePackages, 'getActionPackages', () => ['firstchanged', 'second', 'third']);
+
+      const expected = {
+        firstchanged: {
+          name: 'firstchanged',
+          overwrite: true,
+          package: { parameters: [{ key: 'hello', value: 'world first' }] },
+          namespace: 'testing'
+        },
+        second: {
+          name: 'second',
+          overwrite: true,
+          package: { parameters: [{ key: 'hello', value: 'world second' }] },
+          namespace: 'testing'
+        },
+        third: {
+          name: 'third',
+          overwrite: true,
+          package: {},
+          namespace: 'testing'
+        }
+      };
+
+      // Simulate hooks
+      openwhiskCompilePackages.setup();
+      openwhiskCompilePackages.renameManifestPackages();
+      openwhiskCompilePackages.mergeActionPackages();
+
+      return expect(openwhiskCompilePackages.compilePackages().then(() => {
+        expect(openwhiskCompilePackages.serverless.service.packages)
+          .to.deep.equal(expected)
+      })).to.eventually.be.fulfilled;
     });
   });
   describe('#compilePackage()', () => {

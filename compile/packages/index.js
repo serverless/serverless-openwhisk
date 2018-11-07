@@ -11,6 +11,7 @@ class OpenWhiskCompilePackages {
     this.hooks = {
       'before:package:compileEvents': () => BbPromise.bind(this)
         .then(this.setup)
+        .then(this.renameManifestPackages)
         .then(this.mergeActionPackages),
       'package:compileEvents': this.compilePackages.bind(this),
     };
@@ -22,9 +23,25 @@ class OpenWhiskCompilePackages {
     this.serverless.service.packages = {};
   }
 
+  renameManifestPackages() {
+    if (!this.serverless.service.resources.packages) return;
+
+    const manifestPackages = this.serverless.service.resources.packages;
+
+    Object.keys(manifestPackages).forEach(packageKey => {
+      const pack = manifestPackages[packageKey];
+
+      if (pack.name && pack.name !== packageKey) {
+        // move the package under the new name
+        manifestPackages[pack.name] = pack;
+        delete manifestPackages[packageKey];
+      }
+    })
+  }
+
   mergeActionPackages() {
-    const packages = this.getActionPackages();
-    if (!packages.length) return;
+    const actionPackages = this.getActionPackages();
+    if (!actionPackages.length) return;
 
     if (!this.serverless.service.resources) {
       this.serverless.service.resources = {};
@@ -34,9 +51,9 @@ class OpenWhiskCompilePackages {
       this.serverless.service.resources.packages = {};
     }
 
-    const manifestPackages = this.serverless.service.resources.packages || {};
+    const manifestPackages = this.serverless.service.resources.packages;
 
-    packages.forEach(pkge => {
+    actionPackages.forEach(pkge => {
       manifestPackages[pkge] = manifestPackages[pkge] || {}
     })
   }
