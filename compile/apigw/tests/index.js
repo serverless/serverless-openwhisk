@@ -189,6 +189,14 @@ describe('OpenWhiskCompileHttpEvents', () => {
       return expect(result).to.deep.equal({basepath: '/my-service', relpath: '/api/foo/bar', operation: 'GET', action: '/sample_ns/my-service_action-name', responsetype: 'http'});
     });
 
+    it('should define http events with explicit base path', () => {
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
+      const http =  {path: "/api/foo/bar", method: "GET", resp: 'http', basepath: '/custompath'}
+      const result = openwhiskCompileHttpEvents.compileHttpEvent('action-name', {}, http);
+      return expect(result).to.deep.equal({basepath: '/custompath', relpath: '/api/foo/bar', operation: 'GET', action: '/sample_ns/my-service_action-name', responsetype: 'http'});
+    });
+
     it('should throw if http event value invalid', () => {
       expect(() => openwhiskCompileHttpEvents.compileHttpEvent('', {}, 'OPERATION'))
         .to.throw(Error, /Incorrect HTTP event/);

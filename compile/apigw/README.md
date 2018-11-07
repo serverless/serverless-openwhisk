@@ -10,7 +10,7 @@ definitions.
 
 It loops over all functions which are defined in `serverless.yaml` looking for
 the defined events. For each `http` event defined for the function, the
-corresponding API gateway endpoint definitoin will be created.
+corresponding API gateway endpoint definition will be created.
 
 ## Examples
 
@@ -37,6 +37,7 @@ functions:
         events:
             - http: 
                 method: GET 
+                basepath: /mypath
                 path: /api/greeting
                 resp: json
 ```
