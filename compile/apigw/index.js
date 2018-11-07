@@ -65,6 +65,10 @@ class OpenWhiskCompileHttpEvents {
       || '_';
   }
 
+  calculateBasePath(httpEvent) {
+    return httpEvent.basepath || `/${this.serverless.service.service}`;
+  }
+
   retrieveAuthKey(functionObject) {
     const annotations = functionObject.annotations || {}
     return annotations['require-whisk-auth']
@@ -82,7 +86,7 @@ class OpenWhiskCompileHttpEvents {
   compileHttpEvent(funcName, funcObj, http) {
     const options = this.parseHttpEvent(http);
     options.action = this.calculateFunctionName(funcName, funcObj);
-    options.basepath = `/${this.serverless.service.service}`;
+    options.basepath = this.calculateBasePath(http);
 
     const secure_key = this.retrieveAuthKey(funcObj)
     if (secure_key) {
