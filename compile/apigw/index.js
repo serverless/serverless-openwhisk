@@ -92,6 +92,17 @@ class OpenWhiskCompileHttpEvents {
     return options;
   }
 
+    /**
+  parseOptionalConfigParams (httpEvent) {
+    const options = {} 
+    if (httpEvent.hasOwnProperty('cors')) {
+      options.cors = httpEvent.cors
+    }
+
+    return options
+  }
+  */
+
   parseHttpEvent(httpEvent) {
     if (httpEvent.path && httpEvent.method) {
       return { relpath: httpEvent.path, operation: httpEvent.method, responsetype: httpEvent.resp || 'json' };

@@ -837,6 +837,16 @@ This feature comes with the following restrictions:
 - *Path parameters are only supported when `resp` is configured as`http`.*
 - *Individual path parameter values are not included as separate event parameters. Users have to manually parse values from the full `__ow_path` value.*
 
+### CORS Support
+
+API Gateway endpoints automatically include CORS headers for all endpoints under the service base path. This property can be disabled by manually configuring the `resources.apigw.cors` property.
+
+```yaml
+resources:
+    apigw:
+        cors: false
+```
+
 ## Exporting Web Actions
 
 Functions can be turned into "*web actions*" which return HTTP content without use of an API Gateway. This feature is enabled by setting an annotation (`web-export`) in the configuration file.

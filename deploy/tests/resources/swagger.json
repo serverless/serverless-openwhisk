@@ -1,0 +1,66 @@
+{
+    "swagger": "2.0",
+    "basePath": "/testing",
+    "info": {
+        "title": "testing",
+        "version": "1.0"
+    },
+    "paths": {
+        "/testing": {
+            "get": {
+                "operationId": "getTesting",
+                "responses": {
+                    "200": {
+                        "description": "A successful invocation response"
+                    }
+                },
+                "x-openwhisk": {
+                    "action": "hello",
+                    "namespace": "user@host.com_dev",
+                    "package": "default",
+                    "url": "https://openwhisk/api/v1/web/user@host.com_dev/default/hello.json"
+                }
+            }
+        }
+    },
+    "x-ibm-configuration": {
+        "assembly": {
+            "execute": [
+                {
+                    "operation-switch": {
+                        "case": [
+                            {
+                                "execute": [
+                                    {
+                                        "set-variable": {
+                                            "actions": [
+                                                {
+                                                    "set": "message.headers.X-Require-Whisk-Auth",
+                                                    "value": "3b08f67e-c7fa-4998-9096-ffa355932a3d"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "invoke": {
+                                            "target-url": "https://openwhisk/api/v1/web/user@host.com_dev/default/hello.json",
+                                            "verb": "keep"
+                                        }
+                                    }
+                                ],
+                                "operations": [
+                                    "getTesting"
+                                ]
+                            }
+                        ],
+                        "otherwise": [],
+                        "title": "whisk-invoke"
+                    }
+                }
+            ]
+        },
+        "cors": {
+            "enabled": true
+        }
+    }
+}

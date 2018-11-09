@@ -3,6 +3,7 @@ const expect = require('chai').expect;
 const OpenWhiskDeploy = require('../index');
 const sinon = require('sinon');
 const chaiAsPromised = require('chai-as-promised');
+const fs = require('fs');
 
 require('chai').use(chaiAsPromised);
 
@@ -34,6 +35,32 @@ describe('deployHttpEvents', () => {
     sandbox.restore();
   });
 
+  describe('#deployOptionalRoutesConfig()', () => {
+    it('should not call API GW unless config present', () => {
+      sandbox.stub(openwhiskDeploy.provider, 'client', () => Promise.reject('No config present!'))
+      return expect(openwhiskDeploy.deployOptionalRoutesConfig())
+        .to.eventually.be.fulfilled;
+    })
+
+    it('should call API GW when config present', () => {
+      let called = false
+      sandbox.stub(openwhiskDeploy, 'updateRoutesConfig', (basepath, config) => {
+        called = true
+        expect(basepath).to.be.equal('/my-service')
+        expect(config).to.be.deep.equal(openwhiskDeploy.serverless.service.resources.apigw)
+        return Promise.resolve({})
+      });
+
+      openwhiskDeploy.serverless.service.resources = {
+        apigw: { cors: true }
+      }
+      const result = openwhiskDeploy.deployOptionalRoutesConfig()
+
+      result.then(() => expect(called).to.be.equal(true))
+      return expect(result).to.eventually.be.fulfilled;
+    })
+  })
+
   describe('#unbindAllRoutes()', () => {
     it('should deploy api gw route handler to openwhisk', () => {
       sandbox.stub(openwhiskDeploy.provider, 'client', () => {
@@ -60,7 +87,62 @@ describe('deployHttpEvents', () => {
     });
 
   });
-  
+
+  describe('#configRouteSwagger()', () => {
+    it('should update swagger with CORS config parameter', () => {
+      const source = fs.readFileSync('./deploy/tests/resources/swagger.json', 'utf-8')
+      const swagger = JSON.parse(source)
+      const options = { cors: false }
+      let result = openwhiskDeploy.configRouteSwagger(swagger, options)
+      expect(result['x-ibm-configuration'].cors.enabled).to.be.equal(false)
+
+      swagger['x-ibm-configuration'].cors.enabled = false
+      options.cors = true
+      result = openwhiskDeploy.configRouteSwagger(swagger, options)
+      expect(result['x-ibm-configuration'].cors.enabled).to.be.equal(true)
+    })
+
+    it('should maintain existing swagger config parameters', () => {
+      const source = fs.readFileSync('./deploy/tests/resources/swagger.json', 'utf-8')
+      const swagger = JSON.parse(source)
+      swagger['x-ibm-configuration'].test = 'value'
+      const options = { cors: false }
+      let result = openwhiskDeploy.configRouteSwagger(swagger, options)
+      expect(result['x-ibm-configuration'].test).to.be.equal('value')
+    })
+
+    it('should leave swagger the same without config parameters', () => {
+      const source = fs.readFileSync('./deploy/tests/resources/swagger.json', 'utf-8')
+      const swagger = JSON.parse(source)
+      const options = { }
+      const result = openwhiskDeploy.configRouteSwagger(swagger, options)
+      expect(result).to.be.deep.equal(swagger)
+    })
+  })
+
+  describe('#updateRouteConfig()', () => {
+    it('should retrieve and deploy updated api gw route swagger to openwhisk', () => {
+      const source = fs.readFileSync('./deploy/tests/resources/swagger.json', 'utf-8')
+      const swagger = JSON.parse(source)
+
+      sandbox.stub(openwhiskDeploy.provider, 'client', () => {
+        const get = params => {
+          expect(params).to.be.deep.equal({basepath: '/my-service'});
+          return Promise.resolve({ apis: [{value: {apidoc:swagger}}]});
+        };
+
+        const create = params => {
+          expect(params.swagger).to.be.deep.equal(swagger);
+          return Promise.resolve({});
+        };
+
+        return Promise.resolve({ routes: { get: get, create: create } });
+      });
+      return expect(openwhiskDeploy.updateRoutesConfig('/my-service', {random: false}))
+        .to.eventually.be.fulfilled;
+    });
+  });
+ 
   describe('#deploySequentialRoutes()', () => {
     it('should deploy each route in sequential order', () => {
       let inflight = 0
