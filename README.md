@@ -777,6 +777,7 @@ functions:
 HTTP event configuration also supports using explicit parameters.
 
 - `method` - HTTP method (mandatory).
+- `basepath` - base path of the API in which the event is added (optional, defaults to service name)
 - `path` - URI path for API gateway (mandatory).
 - `resp` - controls [web action content type](https://github.com/apache/incubator-openwhisk/blob/master/docs/webactions.md#additional-features), values include: `json`, `html`, `http`, `svg`or `text` (optional, defaults to `json`).
 
@@ -787,6 +788,7 @@ functions:
     events:
       - http:
           method: GET
+          basepath: /mybasepath
           path: /api/http
           resp: http
 ```
