@@ -24,7 +24,7 @@ class OpenWhiskCompilePackages {
   }
 
   renameManifestPackages() {
-    if (!this.serverless.service.resources.packages) return;
+    if (!this.serverless.service.resources) return;
 
     const manifestPackages = this.serverless.service.resources.packages;
 
