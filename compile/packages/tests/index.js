@@ -37,6 +37,15 @@ describe('OpenWhiskCompilePackages', () => {
   });
 
   describe('#renameManifestPackages()', () => {
+    it('should handle config without resource packages', () => {
+      openwhiskCompilePackages.serverless.service.resources = null
+      openwhiskCompilePackages.renameManifestPackages();
+      openwhiskCompilePackages.serverless.service.resources = {}
+      openwhiskCompilePackages.renameManifestPackages();
+      openwhiskCompilePackages.serverless.service.resources.packages = {}
+      openwhiskCompilePackages.renameManifestPackages();
+    })
+
     it('should rename packages with explicit names', () => {
       openwhiskCompilePackages.serverless.service.resources.packages = {
         'first' : { name: 'firstchanged', parameters: { hello: 'world first' } },

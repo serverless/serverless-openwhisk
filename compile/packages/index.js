@@ -24,9 +24,10 @@ class OpenWhiskCompilePackages {
   }
 
   renameManifestPackages() {
-    if (!this.serverless.service.resources.packages) return;
+    const resources = this.serverless.service.resources
+    if (!resources || !resources.packages) return;
 
-    const manifestPackages = this.serverless.service.resources.packages;
+    const manifestPackages = resources.packages;
 
     Object.keys(manifestPackages).forEach(packageKey => {
       const pack = manifestPackages[packageKey];
