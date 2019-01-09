@@ -54,6 +54,10 @@ class OpenWhiskCompileFunctions {
     return functionObject.memory || this.serverless.service.provider.memory || 256;
   }
 
+  calculateConcurrency(functionObject) {
+    return functionObject.concurrency || this.serverless.service.provider.concurrency || 1;
+  }
+
   calculateTimeout(functionObject) {
     return functionObject.timeout || this.serverless.service.provider.timeout || 60;
   }
@@ -77,7 +81,11 @@ class OpenWhiskCompileFunctions {
       overwrite: params.Overwrite,
       action: {
         exec: params.Exec,
-        limits: { timeout: params.Timeout * 1000, memory: params.MemorySize },
+        limits: {
+          timeout: params.Timeout * 1000,
+          memory: params.MemorySize,
+          concurrency: params.Concurrency,
+        },
         parameters: params.Parameters,
         annotations: params.Annotations
       },
@@ -99,6 +107,7 @@ class OpenWhiskCompileFunctions {
       const MemorySize = this.calculateMemorySize(functionObject);
       const Timeout = this.calculateTimeout(functionObject);
       const Overwrite = this.calculateOverwrite(functionObject);
+      const Concurrency = this.calculateConcurrency(functionObject);
 
       // optional action parameters
       const Parameters = Object.keys(functionObject.parameters || {})
@@ -108,7 +117,7 @@ class OpenWhiskCompileFunctions {
       const Annotations = this.constructAnnotations(functionObject.annotations);
 
       return this.compileFunctionAction(
-        { FunctionName, NameSpace, Overwrite, Exec, Timeout, MemorySize, Parameters, Annotations }
+        { FunctionName, NameSpace, Overwrite, Exec, Timeout, MemorySize, Concurrency, Parameters, Annotations }
       );
     });
   }
