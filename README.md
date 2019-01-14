@@ -731,6 +731,7 @@ functions:
     namespace: "..." // defaults to user-provided credentials
     memory: 256 // 128 to 512 (MB).
     timeout: 60 // 0.1 to 600 (seconds)
+    concurrency: 1 // 1 to 500, default is 1
     parameters:
       foo: bar // default parameters
     annotations:
