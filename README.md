@@ -777,7 +777,6 @@ functions:
 HTTP event configuration also supports using explicit parameters.
 
 - `method` - HTTP method (mandatory).
-- `basepath` - base path of the API in which the event is added (optional, defaults to service name)
 - `path` - URI path for API gateway (mandatory).
 - `resp` - controls [web action content type](https://github.com/apache/incubator-openwhisk/blob/master/docs/webactions.md#additional-features), values include: `json`, `html`, `http`, `svg`or `text` (optional, defaults to `json`).
 
@@ -788,8 +787,7 @@ functions:
     events:
       - http:
           method: GET
-          basepath: /mybasepath
-          path: /api/http
+          path: /api/greeting
           resp: http
 ```
 
@@ -799,7 +797,7 @@ API Gateway hosts serving the API endpoints will be shown during deployment.
 $ serverless deploy
 ...
 endpoints:
-GET https://xxx-gws.api-gw.mybluemix.net/service_name/api/path --> service_name-dev-my_function
+GET https://xxx-gws.api-gw.mybluemix.net/service_name/api/greeting --> service_name-dev-my_function
 ```
 
 Calling the configured API endpoints will execute the deployed functions.
@@ -847,6 +845,99 @@ API Gateway endpoints automatically include CORS headers for all endpoints under
 resources:
     apigw:
         cors: false
+```
+
+### Application Authentication
+
+API endpoints can be protected by API keys with a secret or API keys alone.
+
+Setting the HTTP headers used to pass keys and secrets automatically enables API Gateway authentication.
+
+This parameter configures the HTTP header containing the API key. Without the additional secret header, authentication uses an API key alone.
+
+```yaml
+resources:
+    apigw:
+        auth:
+            key: API-Key-Header
+```
+
+Adding the secret header parameter enables authentication using keys with secrets.
+
+```yaml
+resources:
+    apigw:
+        auth:
+            key: API-Key-Header
+            secret: API-Key-Secret-Header
+```
+
+*See the API Gateway [configuration panel](https://cloud.ibm.com/openwhisk/apimanagement) to manage API keys and secrets after authentication is enabled.* 
+
+### Application Authentication with OAuth
+
+API endpoints can also be protected by an external OAuth providers. 
+
+OAuth tokens must be included as the Authorization header of each API request. Token will be validated with the specified token provider. If the token is invalid, requests are rejected with response code 401.
+
+The following OAuth providers are supported: *[IBM Cloud App ID](https://cloud.ibm.com/catalog/services/app-id), Google, Facebook and Github.*
+
+```yaml
+resources:
+  apigw:
+    oauth:
+      provider: app-id || google || facebook || github
+```
+
+If the `app-id` provider is selected, the tenant identifier must be provided as an additional configuration token. This can be retrieved from the `tenantId` property of provisioned service credentials for the instance
+
+```yaml
+resources:
+  apigw:
+    oauth:
+      provider: app-id
+      tenant: uuid
+```
+
+*Application Authentication with keys (and secrets) and OAuth support are mutually exclusive configuration options.*
+
+### Rate Limiting
+
+API Gateways endpoints support rate limiting to reject excess traffic. When rate limiting is enabled,  API calls falling outside of the limit will be rejected and response code 429 will be returned.
+
+**Rate limiting is on a per-key basis and application authentication (without oauth) must be enabled.**
+
+The  leaky bucket algorithm is used to prevent sudden bursts of invocations of APIs. If the limit is set as 10 calls per minute, users will be restricted to 1 call every 6 seconds (60/10 = 6).
+
+```yaml
+resources:
+  apigw:
+    rate_limit:
+      rate: 100
+      unit: minute || second || hour || day
+```
+
+- `rate`: number of API calls per unit of time.
+- `unit`: unit of time (*minute, second, hour, day*) used to threshold API calls with rate.
+
+### Base Path
+
+All API Gateway endpoints defined as HTTP events in the `serverless.yml` are deployed under the default base path (`/`). This basepath can be configured explicitly using the following parameter.
+
+```yaml
+resources:
+  apigw:
+    basepath: /api
+```
+
+### API Name
+
+The service name is used as the API identifier in the API Gateway swagger files. This can be configured explicitly using the following parameter.
+
+```yaml
+resources:
+  apigw:
+    name: my-api-name
 ```
 
 ## Exporting Web Actions

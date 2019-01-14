@@ -12,6 +12,12 @@ module.exports = {
       })
   },
 
+  basePath() {
+    const resources = this.serverless.service.resources || {}
+    const options = resources.apigw || {}
+    return options.basepath || "/"
+  },
+
   removeRoutes() {
     if (!this.hasRoutes()) {
       return Promise.resolve();
@@ -19,7 +25,7 @@ module.exports = {
 
     this.serverless.cli.log('Removing API Gateway definitions...');
 
-    const basepath = `/${this.serverless.service.service}`;
+    const basepath = this.basePath()
     const onProvider = ow => ow.routes.delete({ basepath });
     const errMsgTemplate = `Failed to unbind API Gateway routes (${basepath}) due to error:`;
 

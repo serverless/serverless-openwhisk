@@ -35,59 +35,45 @@ describe('deployHttpEvents', () => {
     sandbox.restore();
   });
 
-  describe('#deployOptionalRoutesConfig()', () => {
-    it('should not call API GW unless config present', () => {
-      sandbox.stub(openwhiskDeploy.provider, 'client', () => Promise.reject('No config present!'))
-      return expect(openwhiskDeploy.deployOptionalRoutesConfig())
-        .to.eventually.be.fulfilled;
-    })
+  describe('#replaceDefaultNamespace()', async () => {
+    it('should return same swagger doc without default namespace', async () => {
+      const source = fs.readFileSync('./deploy/tests/resources/swagger.json', 'utf-8')
+      const swagger = JSON.parse(source)
 
-    it('should call API GW when config present', () => {
-      let called = false
-      sandbox.stub(openwhiskDeploy, 'updateRoutesConfig', (basepath, config) => {
-        called = true
-        expect(basepath).to.be.equal('/my-service')
-        expect(config).to.be.deep.equal(openwhiskDeploy.serverless.service.resources.apigw)
-        return Promise.resolve({})
-      });
-
-      openwhiskDeploy.serverless.service.resources = {
-        apigw: { cors: true }
-      }
-      const result = openwhiskDeploy.deployOptionalRoutesConfig()
-
-      result.then(() => expect(called).to.be.equal(true))
-      return expect(result).to.eventually.be.fulfilled;
-    })
-  })
-
-  describe('#unbindAllRoutes()', () => {
-    it('should deploy api gw route handler to openwhisk', () => {
       sandbox.stub(openwhiskDeploy.provider, 'client', () => {
-        const del = params => {
-          expect(params).to.be.deep.equal({basepath: '/my-service'});
+        const list = params => {
           return Promise.resolve();
         };
 
-        return Promise.resolve({ routes: { delete: del } });
+        return Promise.resolve({ actions: { list } });
       });
-      return expect(openwhiskDeploy.unbindAllRoutes())
-        .to.eventually.be.fulfilled;
-    });
 
-    it('should ignore errors unbinding routes to openwhisk', () => {
+      let result = await openwhiskDeploy.replaceDefaultNamespace(swagger)
+      expect(result).to.be.deep.equal(swagger)
+    })
+
+    it('should replace default namespace in swagger doc', async () => {
+      const without_default_ns = fs.readFileSync('./deploy/tests/resources/swagger.json', 'utf-8')
+      const with_default_ns = fs.readFileSync('./deploy/tests/resources/swagger_default_ns.json', 'utf-8')
+      const source = JSON.parse(with_default_ns)
+      const converted = JSON.parse(without_default_ns)
+
+      const actions = [{"name":"hello","namespace":"user@host.com_dev"}]
 
       sandbox.stub(openwhiskDeploy.provider, 'client', () => {
-        const del = () => Promise.reject(err);
+        const list = params => {
+          return Promise.resolve(actions);
+        };
 
-        return Promise.resolve({ routes: { delete: del } });
+        return Promise.resolve({ actions: { list } });
       });
-      return expect(openwhiskDeploy.unbindAllRoutes())
-        .to.eventually.be.fulfilled;
-    });
 
-  });
+      let result = await openwhiskDeploy.replaceDefaultNamespace(source)
+      expect(result).to.be.deep.equal(converted)
+    })
+  })
 
+  /**
   describe('#configRouteSwagger()', () => {
     it('should update swagger with CORS config parameter', () => {
       const source = fs.readFileSync('./deploy/tests/resources/swagger.json', 'utf-8')
@@ -119,7 +105,9 @@ describe('deployHttpEvents', () => {
       expect(result).to.be.deep.equal(swagger)
     })
   })
+  */
 
+/**
   describe('#updateRouteConfig()', () => {
     it('should retrieve and deploy updated api gw route swagger to openwhisk', () => {
       const source = fs.readFileSync('./deploy/tests/resources/swagger.json', 'utf-8')
@@ -142,34 +130,9 @@ describe('deployHttpEvents', () => {
         .to.eventually.be.fulfilled;
     });
   });
+  */
  
-  describe('#deploySequentialRoutes()', () => {
-    it('should deploy each route in sequential order', () => {
-      let inflight = 0
-      let count = 0
-      const routes = [
-        {order: 0}, {order: 1}, {order: 2} 
-      ];
-      sandbox.stub(openwhiskDeploy, 'deployRoute', r => {
-        expect(inflight).to.equal(0)
-        expect(count).to.equal(r.order)
-        inflight += 1
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            inflight -= 1
-            count++
-            expect(inflight).to.equal(0)
-            resolve()
-          }, 10)
-        })
-      });
-      return openwhiskDeploy.deploySequentialRoutes(routes).then(() => {
-        expect(count).to.equal(routes.length)
-      })
-    });
-  });
-
-  describe('#deployRoute()', () => {
+  describe('#deployRouteSwagger()', () => {
     it('should deploy api gw route handler to openwhisk', () => {
       sandbox.stub(openwhiskDeploy.provider, 'client', () => {
         const create = params => {
@@ -179,7 +142,7 @@ describe('deployHttpEvents', () => {
 
         return Promise.resolve({ routes: { create } });
       });
-      return expect(openwhiskDeploy.deployRoute({foo: 'bar'}))
+      return expect(openwhiskDeploy.deployRouteSwagger({foo: 'bar'}))
         .to.eventually.be.fulfilled;
     });
 
@@ -190,9 +153,9 @@ describe('deployHttpEvents', () => {
 
         return Promise.resolve({ routes: { create } });
       });
-      return expect(openwhiskDeploy.deployRoute({relpath: '/foo/bar'}))
+      return expect(openwhiskDeploy.deployRouteSwagger({relpath: '/foo/bar'}))
         .to.eventually.be.rejectedWith(
-          new RegExp(`/foo/bar.*${err.message}`)
+          new RegExp(`${err.message}`)
         );
     });
 
@@ -208,12 +171,11 @@ describe('deployHttpEvents', () => {
         return Promise.resolve({ routes: { create } });
       });
 
-      return openwhiskDeploy.deployRoute({foo: 'bar'}).then(() => {
+      return openwhiskDeploy.deployRouteSwagger({foo: 'bar'}).then(() => {
       expect(log.calledTwice).to.be.equal(true);
       expect(log.args[0][0]).to.be.equal('Deploying API Gateway Route: ' + JSON.stringify({foo: 'bar'}))
       expect(log.args[1][0]).to.be.equal('Deployed API Gateway Route: ' + JSON.stringify({foo: 'bar'}))
       })
     });
-
   });
 });

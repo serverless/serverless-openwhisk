@@ -143,6 +143,11 @@ class OpenWhiskInfo {
     if (!path.startsWith('/')) {
       path = `/${path}`
     }
+
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.slice(0, baseUrl.length - 1)
+    }
+
     this.consoleLog(`${method.toUpperCase()} ${baseUrl}${path} --> ${actionName}`)
   }
 

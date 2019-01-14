@@ -75,7 +75,7 @@ describe('OpenWhiskRemove', () => {
       const result = openwhiskRemove.removeRoutes().then(() => {
         expect(stub.called).to.be.equal(true);
         expect(stub.args[0][0]).to.be.deep.equal({
-          basepath: '/helloworld'
+          basepath: '/'
         });
       })
       return expect(result).to.eventually.be.fulfilled;
@@ -99,7 +99,7 @@ describe('OpenWhiskRemove', () => {
       const log = sandbox.stub(openwhiskRemove.serverless.cli, "log");
       const result = openwhiskRemove.removeRoutes().then(() => {
         expect(log.called).to.be.equal(true);
-        expect(log.args[1][0].match(/Failed to unbind API Gateway routes \(\/helloworld\)/)).to.be.ok;
+        expect(log.args[1][0].match(/Failed to unbind API Gateway routes \(\/\)/)).to.be.ok;
       })
       return expect(result).to.eventually.be.fulfilled;
     });
