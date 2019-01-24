@@ -82,15 +82,32 @@ describe('OpenWhiskCompileCloudant', () => {
         .to.throw(Error, 'Cloudant event property (db) missing on function: testing');
     })
 
-    it('should throw errors for missing mandatory parameters without package', () => {
-      const config = { db: 'dbname', username: 'user', password: 'password', host: 'hostname' }
+    it('should throw errors for missing host parameters without package', () => {
+      const config = { db: 'dbname', username: 'user', password: 'password' }
 
-      Object.keys(config).forEach(key => {
-        const cloned = Object.assign({}, config)
-        cloned[key] = ''
-        expect(() => openwhiskCompileCloudant.compileCloudantTrigger('testing', cloned))
-          .to.throw(Error, `Cloudant event property (${key}) missing on function: testing`);
-      })
+      expect(() => openwhiskCompileCloudant.compileCloudantTrigger('testing', config))
+        .to.throw(Error, `Cloudant event property (host) missing on function: testing`);
+    })
+
+    it('should throw errors for missing username parameter without package', () => {
+      const config = { db: 'dbname', host: 'host.com', password: 'password' }
+
+      expect(() => openwhiskCompileCloudant.compileCloudantTrigger('testing', config))
+        .to.throw(Error, `Cloudant event authentication property (username & password or iam_api_key) missing on function: testing`);
+    })
+
+    it('should throw errors for missing password parameter without package', () => {
+      const config = { db: 'dbname', host: 'host.com', username: 'username' }
+
+      expect(() => openwhiskCompileCloudant.compileCloudantTrigger('testing', config))
+        .to.throw(Error, `Cloudant event authentication property (username & password or iam_api_key) missing on function: testing`);
+    })
+
+    it('should throw errors for missing authentication parameters without package', () => {
+      const config = { db: 'dbname', host: 'host.com' }
+
+      expect(() => openwhiskCompileCloudant.compileCloudantTrigger('testing', config))
+        .to.throw(Error, `Cloudant event authentication property (username & password or iam_api_key) missing on function: testing`);
     })
 
     it('should return trigger for cloudant provider using package.', () => {
@@ -107,7 +124,7 @@ describe('OpenWhiskCompileCloudant', () => {
       })
     })
 
-    it('should return trigger for cloudant provider with manual configuration.', () => {
+    it('should return trigger for cloudant provider with manual username & password configuration.', () => {
       const config = { db: 'dbname', username: 'user', password: 'password', host: 'hostname' }
       const trigger = openwhiskCompileCloudant.compileCloudantTrigger('testing', config) 
       expect(trigger).to.be.deep.equal({
@@ -117,6 +134,22 @@ describe('OpenWhiskCompileCloudant', () => {
           feed_parameters: {
             username: config.username,
             password: config.password,
+            host: config.host,
+            dbname: config.db
+          }
+        }
+      })
+    })
+
+    it('should return trigger for cloudant provider with manual iam api key configuration.', () => {
+      const config = { db: 'dbname', iam_api_key: 'api_key', host: 'hostname' }
+      const trigger = openwhiskCompileCloudant.compileCloudantTrigger('testing', config) 
+      expect(trigger).to.be.deep.equal({
+        name: `${serverless.service.service}_testing_cloudant_${config.db}`,
+        content: {
+          feed: `/whisk.system/cloudant/changes`,
+          feed_parameters: {
+            iamApiKey: config.iam_api_key,
             host: config.host,
             dbname: config.db
           }

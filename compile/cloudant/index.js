@@ -2,8 +2,6 @@
 
 const BbPromise = require('bluebird');
 
-const config_properties = ['db', 'password', 'username', 'host']
-
 class OpenWhiskCompileCloudant {
   constructor(serverless, options) {
     this.serverless = serverless;
@@ -40,13 +38,28 @@ class OpenWhiskCompileCloudant {
     }
 
     if (!config.package) {
-      config_properties.forEach(prop => {
-        if (!config[prop]) {
-          throw new this.serverless.classes.Error(
-            `Cloudant event property (${prop}) missing on function: ${fnName}`
-          )
-        }
-      })
+      const config_properties = ['db', 'password', 'username', 'host']
+
+      if (!config.db) {
+        throw new this.serverless.classes.Error(
+          `Cloudant event property (db) missing on function: ${fnName}`
+        )
+      }
+
+      if (!config.host) {
+        throw new this.serverless.classes.Error(
+          `Cloudant event property (host) missing on function: ${fnName}`
+        )
+      }
+
+      const has_manual_auth = !!config.username && !!config.password
+      const has_iam_auth = !!config.iam_api_key
+      if (!has_manual_auth && !has_iam_auth) {
+        throw new this.serverless.classes.Error(
+          `Cloudant event authentication property (username & password or iam_api_key) missing on function: ${fnName}`
+        )
+      }
+
     }
   }
 
@@ -60,8 +73,12 @@ class OpenWhiskCompileCloudant {
     }
 
     if (!config.package) {
-      feed_parameters.username = config.username
-      feed_parameters.password = config.password
+      if (config.iam_api_key) {
+        feed_parameters.iamApiKey = config.iam_api_key
+      } else {
+        feed_parameters.username = config.username
+        feed_parameters.password = config.password
+      }
       feed_parameters.host = config.host
     }
 

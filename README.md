@@ -1153,12 +1153,18 @@ functions:
     index:
         handler: users.main
         events:
-            - cloudant:
+            - cloudant: // basic auth example
                 host: xxx-yyy-zzz-bluemix.cloudant.com
                 username: USERNAME
                 password: PASSWORD
                 db: db_name
+			- cloudant: // iam auth example
+                host: xxx-yyy-zzz-bluemix.cloudant.com
+                iam_api_key: IAM_API_KEY
+                db: db_name
 ```
+
+ `username` and `password` or `iam_api_key` parameters can be used for authentication.
 
 ### Adding Optional Parameters
 
