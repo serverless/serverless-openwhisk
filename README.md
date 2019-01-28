@@ -23,6 +23,7 @@ Account credentials for OpenWhisk can be provided through a configuration file o
 
 - *OW_APIHOST* - Platform endpoint, e.g. `openwhisk.ng.bluemix.net`
 - *OW_AUTH* - Authentication key, e.g. `xxxxxx:yyyyy`
+- *OW_NAMESPACE* - Namespace, defaults to user-provided credentials
 - *OW_APIGW_ACCESS_TOKEN* - API gateway access token (optional)
 
 ### Install Serverless Framework
