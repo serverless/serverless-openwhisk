@@ -56,30 +56,39 @@ describe('Swift', () => {
   });
 
   describe('#exec()', () => {
-    it('should return swift exec definition', () => {
+    it('should return swift exec with source file handler', () => {
       const fileContents = 'some file contents';
       const handler = 'handler.some_func';
-
-      const exec = { main: 'some_func', kind: 'swift:default', code: new Buffer(fileContents) };
-      sandbox.stub(node, 'generateActionPackage', (functionObj) => {
-        expect(functionObj.handler).to.equal(handler);
-        return Promise.resolve(new Buffer(fileContents));
+      node.isValidFile = () => true
+      sandbox.stub(fs, 'readFileSync', (path) => {
+        expect(path).to.equal('handler.swift');
+        return Buffer.from(fileContents)
       });
+
+      const exec = { main: 'some_func', binary: false, kind: 'swift:default', code: fileContents };
       return expect(node.exec({ handler, runtime: 'swift'}))
         .to.eventually.deep.equal(exec);
     })
 
-    it('should return swift exec definition with custom image', () => {
-      const fileContents = 'some file contents';
-      const handler = 'handler.some_func';
+    it('should return swift exec with zip file handler', () => {
+      const handler = 'my_file.zip';
+      node.isValidFile = () => true
 
-      const exec = { main: 'some_func', kind: 'blackbox', image: 'foo', code: new Buffer(fileContents) };
-      sandbox.stub(node, 'generateActionPackage', (functionObj) => {
-        expect(functionObj.handler).to.equal(handler);
-        return Promise.resolve(new Buffer(fileContents));
-      });
-      return expect(node.exec({ handler, runtime: 'swift', image: 'foo' }))
+      const zip = new JSZip();
+      const source = 'binary file contents' 
+      zip.file("exec", source);
+
+      return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
+        sandbox.stub(fs, 'readFileSync', (path) => {
+          expect(path).to.equal(handler);
+          return zipped
+        });
+
+      const b64 = zipped.toString('base64')
+      const exec = { main: 'main', binary: true, kind: 'swift:default', code: b64 };
+      return expect(node.exec({ handler, runtime: 'swift'}))
         .to.eventually.deep.equal(exec);
+      })
     })
   });
 
@@ -88,84 +97,8 @@ describe('Swift', () => {
       expect(node.convertHandlerToPath('file.func')).to.be.equal('file.swift')
     })
 
-    it('should return file path for build binaries', () => {
-      expect(node.convertHandlerToPath('.build/release/Action')).to.be.equal('.build/release/Action')
+    it('should return file path for zip files', () => {
+      expect(node.convertHandlerToPath('my_file.zip')).to.be.equal('my_file.zip')
     })
-  })
-
-  describe('#generateActionPackage()', () => {
-    it('should throw error for missing handler file', () => {
-      expect(() => node.generateActionPackage({handler: 'does_not_exist.main'}))
-        .to.throw(Error, 'Function handler (does_not_exist.swift) does not exist.');
-    })
-
-    it('should read service artifact and add package.json for handler', () => {
-      node.serverless.service.package = {artifact: '/path/to/zip_file.zip'};
-      node.isValidFile = () => true
-      const source = 'func main(args: [String:Any]) -> [String:Any] {\nreturn ["hello": "world"]\n}' 
-      const zip = new JSZip();
-      zip.file("handler.swift", source);
-      return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
-        sandbox.stub(fs, 'readFile', (path, cb) => {
-          expect(path).to.equal('/path/to/zip_file.zip');
-          cb(null, zipped);
-        });
-        return node.generateActionPackage({handler: 'handler.main'}).then(data => {
-          return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
-            expect(zip.file("handler.swift")).to.be.equal(null)
-            return zip.file("main.swift").async("string").then(code => {
-              expect(code).to.be.equal(source)
-            })
-          })
-        })
-      });
-    })
-
-    it('should handle service artifact for individual function handler', () => {
-      const functionObj = {handler: 'handler.main', package: { artifact: '/path/to/zip_file.zip'}}
-      node.serverless.service.package = {individually: true};
-      node.isValidFile = () => true
-
-      const zip = new JSZip();
-      const source = 'func main(args: [String:Any]) -> [String:Any] {\nreturn ["hello": "world"]\n}' 
-      zip.file("handler.swift", source);
-      return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
-        sandbox.stub(fs, 'readFile', (path, cb) => {
-          expect(path).to.equal('/path/to/zip_file.zip');
-          cb(null, zipped);
-        });
-        return node.generateActionPackage(functionObj).then(data => {
-          return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
-            expect(zip.file("handler.swift")).to.be.equal(null)
-            return zip.file("main.swift").async("string").then(code => {
-              expect(code).to.be.equal(source)
-            })
-          })
-        })
-      });
-    })
-
-    it('should create zip file with binary action', () => {
-      node.serverless.service.package = {artifact: '/path/to/zip_file.zip'};
-      node.isValidFile = () => true
-      const zip = new JSZip();
-      const source = 'binary file contents' 
-      zip.file(".build/release/foo/bar", source);
-      return zip.generateAsync({type:"nodebuffer"}).then(zipped => {
-        sandbox.stub(fs, 'readFile', (path, cb) => {
-          expect(path).to.equal('/path/to/zip_file.zip');
-          cb(null, zipped);
-        });
-        return node.generateActionPackage({handler: '.build/release/foo/bar'}).then(data => {
-          return JSZip.loadAsync(new Buffer(data, 'base64')).then(zip => {
-            return zip.file(".build/release/Action").async("string").then(contents => {
-              expect(contents).to.be.equal(source)
-            })
-          })
-        })
-      });
-    })
-
-
   })
 });

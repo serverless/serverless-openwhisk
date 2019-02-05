@@ -393,40 +393,44 @@ func main(args: [String:Any]) -> [String:Any] {
 
 If you want to return an error message, return an object with an `error` property with the message.
 
-## Writing Functions - Pre-Compiled Swift Binaries
+### Codable Support
+
+Swift 4 runtimes support [Codable types](https://developer.apple.com/documentation/swift/codable) to handle the converting between JSON input parameters and response types to native Swift types.
+
+```swift
+struct Employee: Codable {
+  let id: Int?
+  let name: String?
+}
+// codable main function
+func main(input: Employee, respondWith: (Employee?, Error?) -> Void) -> Void {
+    // For simplicity, just passing same Employee instance forward
+    respondWith(input, nil)
+}
+```
+
+### Pre-Compiled Swift Binaries
 
 OpenWhisk supports creating Swift actions from a pre-compiled binary. This reduces startup time for Swift actions by removing the need for a dynamic compilation step.
 
-In the `serverless.yaml` file, the `handler` property can refer to the compiled binary file produced by the build.
+In the `serverless.yaml` file, the `handler` property can refer to the zip file containing a binary file produced by the build.
 
 ```yaml
 functions:
   hello:
-    handler: .build/release/Hello
+    handler: action.zip
 ```
 
-This configuration will generate the deployment package for that function containing only this binary file. It will not include other local files, e.g. Swift source files.
-
-Pre-compiled Swift actions must be compatible with the platform runtime and architecture. There is an [open-source Swift package](https://packagecatalog.com/package/jthomas/OpenWhiskAction) (`OpenWhiskAction`) that handles wrapping functions within a shim to support runtime execution.
+Compiling a single Swift file to a binary can be handled using this Docker command with the OpenWhisk Swift runtime image. `main.swift` is the file containing the swift code and `action.zip` is the zip archive produced.
 
 ```
-import OpenWhiskAction
-
-func hello(args: [String:Any]) -> [String:Any] {
-    if let name = args["name"] as? String {
-      return [ "greeting" : "Hello \(name)!" ]
-    } else {
-      return [ "greeting" : "Hello stranger!" ]
-    }
-}
-
-OpenWhiskAction(main: hello)
+docker run -i openwhisk/action-swift-v4.2 -compile main < main.swift > action.zip
 ```
 
-Binaries produced by the Swift build process must be generated for the correct platform architecture. This Docker command will compile Swift sources files using the relevant Swift environment.
+Swift packages containing multiple source files with a package descriptor (`Package.swift` ) can be built using the following command.
 
 ```
-docker run --rm -it -v $(pwd):/swift-package openwhisk/action-swift-v3.1.1 bash -e -c "cd /swift-package && swift build -v -c release"
+zip - -r * | docker run -i openwhisk/action-swift-v4.2 -compile main > action.zip
 ```
 
 ## Writing Functions - Java
