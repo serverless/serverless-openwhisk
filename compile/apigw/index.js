@@ -249,6 +249,7 @@ class OpenWhiskCompileHttpEvents {
 
   compileSwaggerPath(httpEvent, host) {
     const operationId = this.operationId(httpEvent)
+    const pathParameters = this.parsePathParameters(httpEvent.relpath)
     const responses = { "200": { description: "A successful invocation response" } }
     const webaction_url = this.webActionUrl(httpEvent, host)
 
@@ -258,7 +259,6 @@ class OpenWhiskCompileHttpEvents {
     }
     
     const swaggerPath = { operationId, responses, "x-openwhisk": x_ow }
-    const pathParameters = this.parsePathParameters(httpEvent.relpath)
 
     if (pathParameters.length) {
       swaggerPath.parameters = pathParameters.map(this.createPathParameter)
@@ -293,7 +293,8 @@ class OpenWhiskCompileHttpEvents {
   }
 
   compileSwaggerCaseSwitch(httpEvent, host) {
-    const webaction_url = this.webActionUrl(httpEvent, host)
+    const pathParameters = this.parsePathParameters(httpEvent.relpath)
+    const webaction_url = this.webActionUrl(httpEvent, host, !!pathParameters.length)
     const operationId = this.operationId(httpEvent)
 
     const header = {
@@ -311,8 +312,10 @@ class OpenWhiskCompileHttpEvents {
     return swaggerCaseSwitch
   }
 
-  webActionUrl(httpEvent, host) {
-    return `https://${host}/api/v1/web/${httpEvent.namespace}/${httpEvent.pkge}/${httpEvent.action}.${httpEvent.responsetype}`
+  webActionUrl(httpEvent, host, has_path_params) {
+    const url = `https://${host}/api/v1/web/${httpEvent.namespace}/${httpEvent.pkge}/${httpEvent.action}.${httpEvent.responsetype}${has_path_params ? '$(request.path)': ''}`
+
+    return url
   }
 
   operationId(httpEvent) {

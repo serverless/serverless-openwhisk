@@ -40,7 +40,8 @@ module.exports = {
               const id = operation.operationId
               const stmts = swagger["x-ibm-configuration"].assembly.execute[0]['operation-switch'].case
               const stmt = stmts.find(stmt => stmt.operations[0] === id)
-              stmt.execute[stmt.execute.length -1].invoke['target-url'] = swaggerAction.url
+              const invoke = stmt.execute[stmt.execute.length -1].invoke
+              invoke['target-url'] = invoke['target-url'].replace(/web\/_/, `web/${action.namespace}`)
             }
           }
         }
