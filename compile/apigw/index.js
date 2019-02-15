@@ -256,9 +256,40 @@ class OpenWhiskCompileHttpEvents {
       action: httpEvent.action, namespace: httpEvent.namespace,
       package: httpEvent.pkge, url: webaction_url
     }
-
+    
     const swaggerPath = { operationId, responses, "x-openwhisk": x_ow }
+    const pathParameters = this.parsePathParameters(httpEvent.relpath)
+
+    if (pathParameters.length) {
+      swaggerPath.parameters = pathParameters.map(this.createPathParameter)
+    }
+
     return swaggerPath
+  }
+
+  parsePathParameters (path) {
+    const regex = /{([^}]+)\}/g
+    const findAllParams = p => {
+      const ids = []
+      let id = regex.exec(p)
+      while (id) {
+        ids.push(id[1])
+        id = regex.exec(p)
+      }
+      return ids
+    }
+
+    return path.split('/')
+      .map(findAllParams)
+      .reduce((sum, el) => sum.concat(el), [])
+  }
+
+  createPathParameter (name) {
+    return {
+      name: name, in: 'path',
+      description: `Default description for '${name}'`,
+      required: true, type: 'string'
+    }
   }
 
   compileSwaggerCaseSwitch(httpEvent, host) {

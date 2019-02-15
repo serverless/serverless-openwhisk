@@ -253,6 +253,40 @@ describe('OpenWhiskCompileHttpEvents', () => {
 
       return expect(result).to.deep.equal(expectedResult)
     });
+
+    it('should define swagger definition with path parameters', () => {
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
+
+      const httpEvent = {
+        relpath: '/api/foo/{id}', operation: 'GET', secure_key: 'auth-token',
+        action: 'action-name', namespace: 'user@host.com_space', pkge: 'default', responsetype: 'json'
+      }
+
+      const host = 'openwhisk.somewhere.com'
+      const result = openwhiskCompileHttpEvents.compileSwaggerPath(httpEvent, host);
+
+      const expectedResult = {
+        operationId: "get-/api/foo/{id}",
+        parameters: [{
+          name: "id", in: "path",
+          description: "Default description for 'id'",
+          required: true, type: "string"
+        }],
+        responses: {
+          "200": { description: "A successful invocation response" }
+        },
+        "x-openwhisk": {
+          action: "action-name",
+          namespace: "user@host.com_space",
+          package: "default",
+          url: "https://openwhisk.somewhere.com/api/v1/web/user@host.com_space/default/action-name.json"
+        }
+      }
+
+      return expect(result).to.deep.equal(expectedResult)
+    });
+ 
   });
 
   describe('#compileSwaggerCaseSwitch()', () => {
