@@ -1054,6 +1054,12 @@ IBM Message Hub instances can be provisioned through the IBM Bluemix platform. O
 /${BLUEMIX_ORG}_${BLUEMIX_SPACE}/Bluemix_${SERVICE_NAME}_Credentials-1
 ```
 
+^ Note: My impression from reading this part was that this package name can be used as is and that the credentials this is referring to are somehow auto-generated, so I tried to put this into my yml as is expecting it to work out-of-the-box.
+
+General note: It might be helpful if this topic at least hinted at you having to bind the message hub (event streams / kafka) service to your function. When people scroll straight to this topic without reading the whole documentation, they probably don't know that this step is required. I know I did.
+
+---
+
 Rather than having to manually define all the properties needed by the Message Hub trigger feed, you can reference a package to use instead. Credentials from the referenced package will be used when executing the trigger feed.
 
 Developers only need to add the topic to listen to for each trigger.
