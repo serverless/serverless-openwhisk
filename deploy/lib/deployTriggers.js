@@ -9,26 +9,21 @@ module.exports = {
         this.serverless.cli.log(`Deploying Trigger: ${trigger.triggerName}`);
       }
 
-      const feed = this.getFeed(trigger)
-      if (feed) {
-        Object.assign(trigger, { annotations: [{ key: 'feed', value: feed }] });
-      }
-
       return ow.triggers.create(trigger)
-       .then(() => {
+        .then(() => {
           if (this.options.verbose) {
             this.serverless.cli.log(`Deployed Trigger: ${trigger.triggerName}`);
           }
         }).catch(err => {
-        throw new this.serverless.classes.Error(
-          `Failed to deploy trigger (${trigger.triggerName}) due to error: ${err.message}`
-        );
-      })
+          throw new this.serverless.classes.Error(
+            `Failed to deploy trigger (${trigger.triggerName}) due to error: ${err.message}`
+          );
+        });
     });
   },
 
   deployTriggers() {
-    const triggers = this.getTriggers();
+    const triggers = this.getTriggers(this.serverless.service.triggers);
 
     if(triggers.length) {
       this.serverless.cli.log('Deploying Triggers...');
@@ -39,14 +34,22 @@ module.exports = {
     );
   },
 
-  getTriggers() {
-    const triggers = this.serverless.service.triggers;
-    const trigger = { feed: undefined };
+  getTriggers(triggers) {
+    const feedMask = { feed: undefined };
     return Object.keys(triggers)
-      .map(t => Object.assign({}, triggers[t], trigger));
-  },
-
-  getFeed(trigger) {
-    return trigger.feed;
+      .map(t => {
+        const trigger = triggers[t];
+        if (trigger.feed) {
+          Object.assign(trigger, {
+            trigger: {
+              annotations: [{
+                key: 'feed',
+                value: `/${trigger.feed.namespace}/${trigger.feed.feedName}`,
+              }],
+            },
+          });
+        }
+        return Object.assign(trigger, feedMask);
+      });
   },
 };
