@@ -17,17 +17,59 @@ describe('deployTriggers', () => {
       myTrigger: {
         triggerName: 'myTrigger',
         namespace: 'myNamespace',
-        action: 'myAction',
-        trigger: 'myTrigger',
       },
       feedTrigger: {
-        triggerName: 'myTrigger',
-        namespace: 'myNamespace',
-        action: 'myAction',
-        trigger: 'myTrigger',
-        feed: '/whisk.system/alarms/alarm',
+        triggerName: 'feedTrigger',
+        namespace: 'feedNamespace',
+        trigger: {
+          annotations: [
+            {
+              key: 'feed',
+              value: '/whisk.system/alarms/alarm'
+            }
+          ]
+        },
       },
     },
+    serviceTriggers: {
+      myTrigger: {
+        triggerName: 'myTrigger',
+        namespace: 'myNamespace',
+      },
+      feedTrigger: {
+        triggerName: 'feedTrigger',
+        namespace: 'feedNamespace',
+        feed: {
+          trigger : '/feedNamespace/feedTrigger',
+          feedName: 'alarms/alarm',
+          namespace: 'whisk.system',
+          params: {
+            cron: '* * * * *',
+            trigger_payload: {}
+          }
+        }
+      },
+    },
+    owTriggers: [
+      {
+        triggerName: 'myTrigger',
+        namespace: 'myNamespace',
+        feed: undefined
+      },
+      {
+        triggerName: 'feedTrigger',
+        namespace: 'feedNamespace',
+        trigger: {
+          annotations: [
+            {
+              key: 'feed',
+              value: '/whisk.system/alarms/alarm'
+            }
+          ],
+        },
+        feed: undefined
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -107,6 +149,11 @@ describe('deployTriggers', () => {
       });
       return expect(openwhiskDeploy.deployTrigger(mockTriggerObject.triggers.feedTrigger))
         .to.eventually.be.fulfilled;
+    });
+
+    it('should change the trigger format to match the ow.', () => {
+      expect(openwhiskDeploy.getTriggers(mockTriggerObject.serviceTriggers))
+        .to.be.deep.equal(mockTriggerObject.owTriggers)
     });
   });
 });
