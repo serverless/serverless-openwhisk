@@ -1,6 +1,6 @@
 {
   "name": "serverless-openwhisk",
-  "version": "0.18.3",
+  "version": "0.18.4",
   "description": "OpenWhisk support for the Serverless Framework",
   "main": "index.js",
   "directories": {
