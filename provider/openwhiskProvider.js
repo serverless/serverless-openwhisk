@@ -27,8 +27,22 @@ class OpenwhiskProvider {
 
     const ignore_certs = this.serverless.service.provider.ignore_certs || false
     return this.props().then(this.hasValidCreds).then(wskProps => {
-      this._client = openwhisk({ apihost: wskProps.apihost, api_key: wskProps.auth, namespace: wskProps.namespace, ignore_certs, apigw_token: wskProps.apigw_access_token });
-      return this._client
+      // Configure SLS for IAM support via env variable, use this until sls get's support
+      //  https://github.com/serverless/serverless-openwhisk/issues/169
+      if (process.env['IBMCLOUD_API_KEY'] && process.env['IBMCLOUD_FN_NAMESPACE_ID']) {
+        return this.props().then(wskProps => {
+        const iam = new tokenManager({
+          "iamApikey": process.env['IBMCLOUD_API_KEY']
+        });
+        this._client = openwhisk({ apihost: wskProps.apihost, auth_handler: iam, namespace: process.env['IBMCLOUD_FN_NAMESPACE_ID'], ignore_certs });
+        return this._client
+        })
+      } else {
+        return this.props().then(this.hasValidCreds).then(wskProps => {
+          this._client = openwhisk({ apihost: wskProps.apihost, api_key: wskProps.auth, namespace: wskProps.namespace, ignore_certs, apigw_token: wskProps.apigw_access_token });
+          return this._client
+        })
+      }
     })
   }
 
