@@ -157,7 +157,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
 
   describe('#compileHttpEvent()', () => {
     it('should define http events from string property', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
       const http =  "GET /api/foo/bar"
       const result = openwhiskCompileHttpEvents.compileHttpEvent('action-name', {}, http);
@@ -172,7 +172,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should define http events from string property with explicit package', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
       const http =  "GET /api/foo/bar"
       const fnObj = { name: 'somePackage/actionName' }
@@ -188,7 +188,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should define http events from object property', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
       const http =  {path: "/api/foo/bar", method: "GET"}
       const result = openwhiskCompileHttpEvents.compileHttpEvent('action-name', {}, http);
@@ -196,7 +196,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should add secure auth key if present', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
       const http =  {path: "/api/foo/bar", method: "GET"}
       const result = openwhiskCompileHttpEvents.compileHttpEvent('action-name', {
@@ -227,7 +227,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
 
   describe('#compileSwaggerPath()', () => {
     it('should define swagger definition from http events', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -254,8 +254,36 @@ describe('OpenWhiskCompileHttpEvents', () => {
       return expect(result).to.deep.equal(expectedResult)
     });
 
+    it('should define swagger definition from http events and respect specified protocol on api host', () => {
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
+      openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
+
+      const httpEvent = {
+        relpath: '/api/foo/bar', operation: 'GET', secure_key: 'auth-token',
+        action: 'action-name', namespace: 'user@host.com_space', pkge: 'default', responsetype: 'json'
+      }
+
+      const host = 'http://openwhisk.somewhere.com'
+      const result = openwhiskCompileHttpEvents.compileSwaggerPath(httpEvent, host);
+
+      const expectedResult = {
+        operationId: "get-/api/foo/bar",
+        responses: {
+          "200": { description: "A successful invocation response" }
+        },
+        "x-openwhisk": {
+          action: "action-name",
+          namespace: "user@host.com_space",
+          package: "default",
+          url: "http://openwhisk.somewhere.com/api/v1/web/user@host.com_space/default/action-name.json"
+        }
+      }
+
+      return expect(result).to.deep.equal(expectedResult)
+    });
+
     it('should define swagger definition with path parameters', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -291,7 +319,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
 
   describe('#compileSwaggerCaseSwitch()', () => {
     it('should define swagger case statement from http events', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -325,7 +353,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should define swagger case statement from http events with path parameters', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -361,7 +389,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
 
   describe('#generateSwagger()', () => {
     it('should generate APIGW swagger with paths and case statements from http event', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -387,7 +415,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should generate APIGW swagger with multiple http events on same path', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const gethttpEvent = {
@@ -421,7 +449,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
     
     it('should generate APIGW swagger with multiple http events on different paths', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const gethttpEvent = {
@@ -455,7 +483,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should generate APIGW swagger with default API gateway options', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -472,7 +500,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should generate APIGW swagger with custom CORS API gateway options', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -489,7 +517,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should generate APIGW swagger with custom basepath API gateway option', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -506,7 +534,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should generate APIGW swagger with custom API name option', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -524,7 +552,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
 
 
     it('should generate APIGW swagger with custom auth key API gateway options', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -542,7 +570,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should generate APIGW swagger with custom auth key and secret API gateway options', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -561,7 +589,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
     
     it('should generate APIGW swagger with AppID OAuth provider API gateway options', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -585,7 +613,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should generate APIGW swagger with Google OAuth provider API gateway options', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -607,7 +635,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should generate APIGW swagger with Facebook OAuth provider API gateway options', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -629,7 +657,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should generate APIGW swagger with Github OAuth provider API gateway options', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -651,7 +679,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should generate APIGW swagger with rate limiting API gateway options', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {
@@ -668,7 +696,7 @@ describe('OpenWhiskCompileHttpEvents', () => {
     });
 
     it('should throw if API GW auth options are invalid', () => {
-      openwhiskCompileHttpEvents.serverless.service.service = 'my-service' 
+      openwhiskCompileHttpEvents.serverless.service.service = 'my-service'
       openwhiskCompileHttpEvents.serverless.service.provider = {namespace: "sample_ns"};
 
       const httpEvent = {

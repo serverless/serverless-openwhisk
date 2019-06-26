@@ -2,6 +2,7 @@
 
 const BbPromise = require('bluebird');
 const chalk = require('chalk');
+const { formatApiHost } = require('../utils');
 
 class OpenWhiskInfo {
   constructor(serverless, options) {
@@ -171,15 +172,6 @@ class OpenWhiskInfo {
 
   consoleLog (message) {
     console.log(message)
-  }
-}
-
-function formatApiHost(apihost) {
-  if (apihost && !(apihost.startsWith('http://') || apihost.startsWith('https://'))) {
-    // assume https unless explicitly declared
-    return `https://${apihost}`;
-  } else {
-    return apihost;
   }
 }
 

@@ -2,6 +2,7 @@
 
 const BbPromise = require('bluebird');
 const crypto = require('crypto');
+const { formatApiHost } = require('../../utils');
 
 class OpenWhiskCompileHttpEvents {
   constructor(serverless, options) {
@@ -313,7 +314,7 @@ class OpenWhiskCompileHttpEvents {
   }
 
   webActionUrl(httpEvent, host, has_path_params) {
-    const url = `https://${host}/api/v1/web/${httpEvent.namespace}/${httpEvent.pkge}/${httpEvent.action}.${httpEvent.responsetype}${has_path_params ? '$(request.path)': ''}`
+    const url = `${formatApiHost(host)}/api/v1/web/${httpEvent.namespace}/${httpEvent.pkge}/${httpEvent.action}.${httpEvent.responsetype}${has_path_params ? '$(request.path)': ''}`
 
     return url
   }
