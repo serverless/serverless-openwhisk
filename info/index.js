@@ -34,6 +34,7 @@ class OpenWhiskInfo {
 
     return this.provider.props().then(props => {
       this.props = props;
+      this.props.apihost = formatApiHost(props.apihost);
       return this.provider.client();
     }).then(client => {
       this.client = client;
@@ -93,7 +94,7 @@ class OpenWhiskInfo {
     return this.provider.props().then(props => {
       web_actions.forEach(action => {
         const nsPkge = extractNsAndPkge(action.namespace)
-        this.consoleLog(`https://${props.apihost}/api/v1/web/${nsPkge.ns}/${nsPkge.pkge}/${action.name}`)
+        this.consoleLog(`${formatApiHost(props.apihost)}/api/v1/web/${nsPkge.ns}/${nsPkge.pkge}/${action.name}`)
       })
     })
   }
@@ -170,6 +171,15 @@ class OpenWhiskInfo {
 
   consoleLog (message) {
     console.log(message)
+  }
+}
+
+function formatApiHost(apihost) {
+  if (apihost && !(apihost.startsWith('http://') || apihost.startsWith('https://'))) {
+    // assume https unless explicitly declared
+    return `https://${apihost}`;
+  } else {
+    return apihost;
   }
 }
 
