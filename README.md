@@ -1,8 +1,8 @@
-# Serverless OpenWhisk Plugin
+# Serverless Apache OpenWhisk Plugin
 [![Build Status](https://travis-ci.org/serverless/serverless-openwhisk.svg?branch=master)](https://travis-ci.org/serverless/serverless-openwhisk)
 [![codecov](https://codecov.io/gh/serverless/serverless-openwhisk/branch/master/graph/badge.svg)](https://codecov.io/gh/serverless/serverless-openwhisk)
 
-This plugin enables support for the [OpenWhisk platform](http://openwhisk.org/) within the Serverless Framework.
+This plugin enables support for the [Apache OpenWhisk platform](https://openwhisk.apache.org/) within the Serverless Framework.
 
 ## Getting Started
 
