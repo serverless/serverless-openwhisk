@@ -307,5 +307,27 @@ describe('OpenWhiskInfo', () => {
         expect(log.args[3][0].match(/https:\/\/openwhisk.ng.bluemix.net\/api\/v1\/web\/user_name\/custom_package\/sixth/)).to.be.ok;
       }));
     })
+
+    it('should show web action routes returned with apihost that include a protocol', () => {
+      const apihost = 'http://localhost'
+      openwhiskInfo.provider = { props: () => Promise.resolve({ apihost }) }
+      const log = sandbox.stub(openwhiskInfo, 'consoleLog')
+      openwhiskInfo._actions = [
+        {name: 'first', namespace: 'user_name', annotations: [{key: 'web-export', value: true}, {key: 'a', value: 'b'}]},
+        {name: 'second', namespace: 'user_name', annotations: [{key: 'web-export', value: false}]},
+        {name: 'third'},
+        {name: 'fourth', namespace: 'user_name', annotations: [{key: 'web-export', value: true}]},
+        {name: 'fifth', annotations: []},
+        {name: 'sixth', namespace: 'user_name/custom_package', annotations: [{key: 'web-export', value: true}]},
+      ];
+
+      return expect(openwhiskInfo.showWebActionsInfo().then(() => {
+        expect(log.callCount).to.be.equal(4);
+        expect(log.args[0][0].match(/endpoints \(web actions\):/)).to.be.ok;
+        expect(log.args[1][0].match(/http:\/\/localhost\/api\/v1\/web\/user_name\/default\/first/)).to.be.ok;
+        expect(log.args[2][0].match(/http:\/\/localhost\/api\/v1\/web\/user_name\/default\/fourth/)).to.be.ok;
+        expect(log.args[3][0].match(/http:\/\/localhost\/api\/v1\/web\/user_name\/custom_package\/sixth/)).to.be.ok;
+      }));
+    })
   })
 });
