@@ -91,6 +91,20 @@ describe('OpenwhiskProvider', () => {
         expect(client).to.be.equal(openwhiskProvider._client)
       })
     })
+
+    it('should support client auth using IBM Cloud IAM API key', () => {
+      openwhiskProvider._client = null
+      const API_KEY = 'some-key-value';
+      const creds = {iam_namespace_api_key: API_KEY, apihost: 'some_api', namespace: 'a34dd39e-e3de-4160-bbab-59ac345678ed'}
+      sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
+
+      return openwhiskProvider.client().then(client => {
+        expect(client.actions.client.options.namespace).to.be.deep.equal(creds.namespace)
+        expect(client.actions.client.options.api).to.be.deep.equal(`https://${creds.apihost}/api/v1/`)
+        expect(typeof client.actions.client.options.authHandler).to.not.equal('undefined')
+        expect(client.actions.client.options.authHandler.iamApikey).to.be.deep.equal(API_KEY)
+      })
+    })
   })
 
   describe('#props()', () => {

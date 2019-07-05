@@ -2,6 +2,7 @@
 
 const BbPromise = require('bluebird');
 const openwhisk = require('openwhisk')
+const IamTokenManager = require('@ibm-functions/iam-token-manager')
 const Credentials = require('./credentials');
 
 const constants = {
@@ -26,8 +27,15 @@ class OpenwhiskProvider {
     if (this._client) return BbPromise.resolve(this._client)
 
     const ignore_certs = this.serverless.service.provider.ignore_certs || false
-    return this.props().then(this.hasValidCreds).then(wskProps => {
-      this._client = openwhisk({ apihost: wskProps.apihost, api_key: wskProps.auth, namespace: wskProps.namespace, ignore_certs, apigw_token: wskProps.apigw_access_token });
+    return this.props().then(props => {
+      if (props.hasOwnProperty('iam_namespace_api_key')) {
+        const auth_handler = new IamTokenManager({ iamApikey: props.iam_namespace_api_key });
+        this._client = openwhisk({ apihost: props.apihost, auth_handler, namespace: props.namespace, ignore_certs });
+      } else {
+        this.hasValidCreds(props)
+        this._client = openwhisk({ apihost: props.apihost, api_key: props.auth, namespace: props.namespace, ignore_certs, apigw_token: props.apigw_access_token });
+      }
+
       return this._client
     })
   }

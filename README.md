@@ -6,12 +6,12 @@ This plugin enables support for the [Apache OpenWhisk platform](https://openwhis
 
 ## Getting Started
 
-### Register account with OpenWhisk
+### Register account with Apache OpenWhisk
 
-Before you can deploy your service to OpenWhisk, you need to have an account registered with the platform.
+Before you can deploy your service to Apache OpenWhisk, you need to have an account registered with the platform.
 
 - *Want to run the platform locally?* Please read the project's [*Quick Start*](https://github.com/openwhisk/openwhisk#quick-start) guide for deploying it locally.
-- *Want to use a hosted provider?* Please sign up for a free account with [IBM Cloud](https://console.ng.bluemix.net/) and then follow the instructions for getting access to [OpenWhisk on Bluemix](https://console.ng.bluemix.net/openwhisk/).
+- *Want to use a hosted provider?* Please [sign up](https://cloud.ibm.com/registration) for a free account with [IBM Cloud](https://cloud.ibm.com/) and then follow the instructions for getting access to [IBM Cloud Functions (Apache OpenWhisk)](https://cloud.ibm.com/openwhisk).
 
 ### Set up account credentials
 
@@ -25,6 +25,7 @@ Account credentials for OpenWhisk can be provided through a configuration file o
 - *OW_AUTH* - Authentication key, e.g. `xxxxxx:yyyyy`
 - *OW_NAMESPACE* - Namespace, defaults to user-provided credentials
 - *OW_APIGW_ACCESS_TOKEN* - API gateway access token (optional)
+- *OW_IAM_NAMESPACE_API_KEY* - IBM Cloud IAM API key (optional & overrides `auth`).
 
 ### Install Serverless Framework
 

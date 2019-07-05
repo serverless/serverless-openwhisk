@@ -26,11 +26,12 @@ describe('#getWskProps()', () => {
       auth: 'user:pass',
       namespace: 'blah@provider.com_dev',
       apigw_access_token: 'blahblahblahkey1234',
+      iam_namespace_api_key: 'some-api-key-value',
     };
 
     const wskProps =
       'APIHOST=openwhisk.ng.bluemix.net\nNAMESPACE=blah@provider.com_dev\n'  +
-      'AUTH=user:pass\nAPIGW_ACCESS_TOKEN=blahblahblahkey1234\n';
+      'AUTH=user:pass\nAPIGW_ACCESS_TOKEN=blahblahblahkey1234\nIAM_NAMESPACE_API_KEY=some-api-key-value';
 
     it('when the default is used', () => {
       const home = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -62,7 +63,8 @@ describe('#getWskProps()', () => {
       apihost: 'blah.blah.com',
       auth: 'another_user:another_pass',
       namespace: 'user@user.com',
-      apigw_access_token: 'some_access_token'
+      apigw_access_token: 'some_access_token',
+      iam_namespace_api_key: 'some_api_key'
     };
 
     sandbox.stub(fs, 'readFile', (path, encoding, cb) => {
@@ -73,6 +75,7 @@ describe('#getWskProps()', () => {
     process.env.OW_AUTH = 'another_user:another_pass';
     process.env.OW_NAMESPACE = 'user@user.com';
     process.env.OW_APIGW_ACCESS_TOKEN = 'some_access_token';
+    process.env.OW_IAM_NAMESPACE_API_KEY = 'some_api_key';
 
     return expect(Credentials.getWskProps()).to.eventually.deep.equal(mockObject);
   });
@@ -82,11 +85,12 @@ describe('#getWskProps()', () => {
       apihost: 'blah.blah.com',
       auth: 'another_user:another_pass',
       namespace: 'user@user.com',
-      apigw_access_token: 'some_access_token'
+      apigw_access_token: 'some_access_token',
+      iam_namespace_api_key: 'some_api_key'
     };
 
     const wskProps =
-      'APIHOST=openwhisk.ng.bluemix.net\nNAMESPACE=blah@provider.com_dev\nAUTH=user:pass\nAPIGW_ACCESS_TOKEN=hello\n';
+      'APIHOST=openwhisk.ng.bluemix.net\nNAMESPACE=blah@provider.com_dev\nAUTH=user:pass\nAPIGW_ACCESS_TOKEN=hello\nIAM_NAMESPACE_API_KEY=old_key';
 
     sandbox.stub(fs, 'readFile', (path, encoding, cb) => {
       cb(null, wskProps);
@@ -96,6 +100,7 @@ describe('#getWskProps()', () => {
     process.env.OW_AUTH = 'another_user:another_pass';
     process.env.OW_NAMESPACE = 'user@user.com';
     process.env.OW_APIGW_ACCESS_TOKEN = 'some_access_token';
+    process.env.OW_IAM_NAMESPACE_API_KEY = 'some_api_key';
 
     return expect(Credentials.getWskProps()).to.eventually.deep.equal(mockObject);
   });
