@@ -10,6 +10,7 @@ require('chai').use(chaiAsPromised);
 
 const OpenwhiskProvider = require('../openwhiskProvider');
 const Credentials = require('../credentials');
+const CliTokenManager = require('../cliTokenManager.js');
 
 describe('OpenwhiskProvider', () => {
   let openwhiskProvider;
@@ -103,6 +104,19 @@ describe('OpenwhiskProvider', () => {
         expect(client.actions.client.options.api).to.be.deep.equal(`https://${creds.apihost}/api/v1/`)
         expect(typeof client.actions.client.options.authHandler).to.not.equal('undefined')
         expect(client.actions.client.options.authHandler.iamApikey).to.be.deep.equal(API_KEY)
+      })
+    })
+
+    it('should support client auth using IBM Cloud CLI configuration file', () => {
+      openwhiskProvider._client = null
+      const API_KEY = 'some-key-value';
+      const creds = {apihost: 'region.functions.cloud.ibm.com', namespace: 'a34dd39e-e3de-4160-bbab-59ac345678ed'}
+      sandbox.stub(openwhiskProvider, "props").returns(BbPromise.resolve(creds))
+
+      return openwhiskProvider.client().then(client => {
+        expect(client.actions.client.options.namespace).to.be.deep.equal(creds.namespace)
+        expect(client.actions.client.options.api).to.be.deep.equal(`https://${creds.apihost}/api/v1/`)
+        expect(client.actions.client.options.authHandler instanceof CliTokenManager).to.be.equal(true)
       })
     })
   })

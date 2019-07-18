@@ -2,3 +2,4 @@
 
 require('./openwhiskProvider');
 require('./credentials');
+require('./cliTokenManager');
