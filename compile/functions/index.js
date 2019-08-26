@@ -82,7 +82,7 @@ class OpenWhiskCompileFunctions {
       action: {
         exec: params.Exec,
         limits: {
-          timeout: params.Timeout * 1000,
+          timeout: params.Timeout ? (params.Timeout * 1000) : undefined,
           memory: params.MemorySize,
           concurrency: params.Concurrency,
         },
