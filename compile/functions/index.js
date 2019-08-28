@@ -51,15 +51,15 @@ class OpenWhiskCompileFunctions {
   }
 
   calculateMemorySize(functionObject) {
-    return functionObject.memory || this.serverless.service.provider.memory || 256;
+    return functionObject.memory || this.serverless.service.provider.memory;
   }
 
   calculateConcurrency(functionObject) {
-    return functionObject.concurrency || this.serverless.service.provider.concurrency || 1;
+    return functionObject.concurrency || this.serverless.service.provider.concurrency;
   }
 
   calculateTimeout(functionObject) {
-    return functionObject.timeout || this.serverless.service.provider.timeout || 60;
+    return functionObject.timeout || this.serverless.service.provider.timeout;
   }
 
   calculateOverwrite(functionObject) {
@@ -82,7 +82,7 @@ class OpenWhiskCompileFunctions {
       action: {
         exec: params.Exec,
         limits: {
-          timeout: params.Timeout * 1000,
+          timeout: params.Timeout ? (params.Timeout * 1000) : undefined,
           memory: params.MemorySize,
           concurrency: params.Concurrency,
         },

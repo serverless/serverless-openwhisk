@@ -139,6 +139,70 @@ describe('OpenWhiskCompileFunctions', () => {
   });
 
   describe('#compileFunctions()', () => {
+    it('should create action function with parsed parameters', () => {
+      let functionObject = {
+        handler: "foo.js",
+        name: "name",
+        namespace: "namespace",
+        overwrite: "overwrite",
+        memory: 123,
+        concurrency: 456,
+        timeout: 789,
+        parameters: {
+          hello: "world",
+          foo: "bar"
+        },
+        annotations: {
+          hello: "world",
+          foo: "bar"
+        }
+      };
+
+      openwhiskCompileFunctions.serverless.service.getAllFunctions = () => ['service_name'];
+      openwhiskCompileFunctions.serverless.service.getFunction = () => functionObject;
+      sandbox.stub(openwhiskCompileFunctions, 'runtimes', {
+        exec: () => Promise.resolve()
+      });
+
+      return openwhiskCompileFunctions.compileFunctions().then(functionActions => {
+        let functionAction = functionActions[0];
+        expect(functionAction.actionName).to.be.equal(functionObject.name);
+        expect(functionAction.namespace).to.be.equal(functionObject.namespace);
+        expect(functionAction.overwrite).to.be.equal(functionObject.overwrite);
+        expect(functionAction.action.limits.memory).to.be.equal(functionObject.memory);
+        expect(functionAction.action.limits.concurrency).to.be.equal(functionObject.concurrency);
+        expect(functionAction.action.limits.timeout).to.be.equal(functionObject.timeout * 1000);
+
+        let paramsAndAnnotations = [
+          { key: 'hello', value: 'world' },
+          { key: 'foo', value: 'bar' }
+        ];
+        expect(functionAction.action.parameters).to.deep.equal(paramsAndAnnotations);
+        expect(functionAction.action.annotations).to.deep.equal(paramsAndAnnotations);
+      });
+    });
+
+    it('should not add implicit limits parameters', () => {
+      let functionObject = {
+        handler: "foo.js",
+        name: "name"
+      };
+
+      openwhiskCompileFunctions.serverless.service.getAllFunctions = () => ['service_name'];
+      openwhiskCompileFunctions.serverless.service.getFunction = () => functionObject;
+      sandbox.stub(openwhiskCompileFunctions, 'runtimes', {
+        exec: () => Promise.resolve()
+      });
+
+      return openwhiskCompileFunctions.compileFunctions().then(functionActions => {
+        let functionAction = functionActions[0];
+        expect(functionAction.actionName).to.be.equal(functionObject.name);
+        expect(functionAction.action.limits.memory).to.be.undefined;
+        expect(functionAction.action.limits.concurrency).to.be.undefined;
+        expect(functionAction.action.limits.timeout).to.be.undefined;
+      });
+    });
+
     it('should throw an error if the resource section is not available', () => {
       openwhiskCompileFunctions.serverless.service.actions = null;
       expect(() => openwhiskCompileFunctions.compileFunctions())
