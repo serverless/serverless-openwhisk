@@ -25,7 +25,7 @@ module.exports = {
   deployTriggers() {
     const triggers = this.getTriggers(this.serverless.service.triggers);
 
-    if(triggers.length) {
+    if (triggers.length) {
       this.serverless.cli.log('Deploying Triggers...');
     }
 
@@ -35,7 +35,7 @@ module.exports = {
   },
 
   getTriggers(triggers) {
-    const feedMask = { feed: undefined };
+
     return Object.keys(triggers)
       .map(t => {
         const trigger = triggers[t];
@@ -49,7 +49,7 @@ module.exports = {
             },
           });
         }
-        return Object.assign(trigger, feedMask);
+        return trigger;
       });
   },
 };
