@@ -279,7 +279,7 @@ In the `serverless.yaml` file, the `handler` property is used to denote the sour
 functions:
   my_function:
     handler: index.endpoint
-    runtime: python
+    runtime: python:3
 ```
 
 ### Request Properties
