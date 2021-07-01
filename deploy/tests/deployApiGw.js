@@ -72,6 +72,26 @@ describe('deployHttpEvents', () => {
       expect(result).to.be.deep.equal(converted)
     })
 
+    it('should replace default namespace in swagger doc when namespace is with package', async () => {
+      const without_default_ns = fs.readFileSync('./deploy/tests/resources/swagger.json', 'utf-8')
+      const with_default_ns = fs.readFileSync('./deploy/tests/resources/swagger_default_ns.json', 'utf-8')
+      const source = JSON.parse(with_default_ns)
+      const converted = JSON.parse(without_default_ns)
+
+      const actions = [{"name":"hello","namespace":"user@host.com_dev/default"}]
+
+      sandbox.stub(openwhiskDeploy.provider, 'client', () => {
+        const list = params => {
+          return Promise.resolve(actions);
+        };
+
+        return Promise.resolve({ actions: { list } });
+      });
+
+      let result = await openwhiskDeploy.replaceDefaultNamespace(source)
+      expect(result).to.be.deep.equal(converted)
+    })
+
     it('should return same swagger doc including path params', async () => {
       const without_default_ns = fs.readFileSync('./deploy/tests/resources/swagger_ns_paths.json', 'utf-8')
       const with_default_ns = fs.readFileSync('./deploy/tests/resources/swagger_paths.json', 'utf-8')

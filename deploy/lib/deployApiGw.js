@@ -34,14 +34,15 @@ module.exports = {
               const swaggerAction = operation['x-openwhisk']
 
               const action = allActions.find(item => item.name === swaggerAction.action)
-              swaggerAction.namespace = action.namespace
-              swaggerAction.url = swaggerAction.url.replace(/web\/_/, `web/${action.namespace}`)
+              const namespace = `${action.namespace}`.replace(/\/.*/, '')
+              swaggerAction.namespace = namespace
+              swaggerAction.url = swaggerAction.url.replace(/web\/_/, `web/${namespace}`)
 
               const id = operation.operationId
               const stmts = swagger["x-ibm-configuration"].assembly.execute[0]['operation-switch'].case
               const stmt = stmts.find(stmt => stmt.operations[0] === id)
               const invoke = stmt.execute[stmt.execute.length -1].invoke
-              invoke['target-url'] = invoke['target-url'].replace(/web\/_/, `web/${action.namespace}`)
+              invoke['target-url'] = invoke['target-url'].replace(/web\/_/, `web/${namespace}`)
             }
           }
         }
