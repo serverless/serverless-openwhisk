@@ -54,11 +54,19 @@ describe('deployTriggers', () => {
       {
         triggerName: 'myTrigger',
         namespace: 'myNamespace',
-        feed: undefined
       },
       {
         triggerName: 'feedTrigger',
         namespace: 'feedNamespace',
+        feed: {
+          feedName: "alarms/alarm",
+          namespace: "whisk.system",
+          params: {
+            "cron": "* * * * *",
+            "trigger_payload": {}
+          },
+          trigger: "/feedNamespace/feedTrigger"
+        },
         trigger: {
           annotations: [
             {
@@ -67,7 +75,6 @@ describe('deployTriggers', () => {
             }
           ],
         },
-        feed: undefined
       },
     ],
   };
