@@ -24,11 +24,14 @@ class OpenWhiskConfigCredentials {
                 usage: 'OpenWhisk platform API hostname.',
                 shortcut: 'h',
                 required: true,
+                type: 'string',
+                
               },
               auth: {
                 usage: 'User authentication credentials for the provider',
                 shortcut: 'a',
                 required: true,
+                type: 'string',
               }
             },
           },
