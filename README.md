@@ -1,3 +1,8 @@
+**📦 Archived - This repository is archived and preserved for reference only. No updates, issues, or pull requests will be accepted. If you have questions, please reach out to our support team.**
+
+---
+
+
 # Serverless Apache OpenWhisk Plugin
 [![Build Status](https://travis-ci.org/serverless/serverless-openwhisk.svg?branch=master)](https://travis-ci.org/serverless/serverless-openwhisk)
 [![codecov](https://codecov.io/gh/serverless/serverless-openwhisk/branch/master/graph/badge.svg)](https://codecov.io/gh/serverless/serverless-openwhisk)
